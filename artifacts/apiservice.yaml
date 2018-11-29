@@ -1,0 +1,27 @@
+apiVersion: apiregistration.k8s.io/v1beta1
+kind: APIService
+metadata:
+  name: v1beta1.compose.docker.com
+spec:
+  insecureSkipTLSVerify: true
+  group: compose.docker.com
+  groupPriorityMinimum: 1000
+  versionPriority: 15
+  service:
+    name: compose-api
+    namespace: docker
+  version: v1beta1
+---
+apiVersion: apiregistration.k8s.io/v1beta1
+kind: APIService
+metadata:
+  name: v1beta2.compose.docker.com
+spec:
+  insecureSkipTLSVerify: true
+  group: compose.docker.com
+  groupPriorityMinimum: 1000
+  versionPriority: 15
+  service:
+    name: compose-api
+    namespace: docker
+  version: v1beta2

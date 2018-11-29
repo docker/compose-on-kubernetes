@@ -1,0 +1,8 @@
+#!/usr/bin/env bash
+set -e
+
+# Run dep ensure and prune
+./scripts/dep-refresh
+
+# Validate that nothing changed
+./scripts/check-git-diff vendor

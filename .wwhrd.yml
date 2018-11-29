@@ -1,0 +1,28 @@
+---
+blacklist:
+  - GPL-2.0
+
+whitelist:
+  - Apache-2.0
+  - FreeBSD
+  - LGPL-3.0
+  - MIT
+  - MPL-2.0
+  - NewBSD
+
+exceptions:
+  - bitbucket.org/ww/goautoneg # Unknown
+  - github.com/BurntSushi/toml # MIT
+  - github.com/davecgh/go-spew/spew # ISC
+  - github.com/howeyc/gopass # ISC
+  - github.com/opencontainers/go-digest # Apache-2.0
+  - github.com/xeipuuv/gojsonpointer # Apache-2.0
+  - github.com/xeipuuv/gojsonreference # Apache-2.0
+  - github.com/xeipuuv/gojsonschema # Apache-2.0
+  - k8s.io/metrics/pkg/apis/metrics # Unknown
+  - k8s.io/metrics/pkg/apis/metrics/v1alpha1 # Unknown
+  - k8s.io/metrics/pkg/apis/metrics/v1beta1 # Unknown
+  - k8s.io/metrics/pkg/client/clientset_generated/clientset # Unknown
+  - k8s.io/metrics/pkg/client/clientset_generated/clientset/scheme # Unknown
+  - k8s.io/metrics/pkg/client/clientset_generated/clientset/typed/metrics/v1alpha1 # Unknown
+  - k8s.io/metrics/pkg/client/clientset_generated/clientset/typed/metrics/v1beta1 # Unknown
