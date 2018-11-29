@@ -153,26 +153,30 @@ func allRunning(pods []corev1types.Pod) (bool, error) {
 func IsRunning(config *rest.Config) (bool, error) {
 	client, err := kubernetes.NewForConfig(config)
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to create kubernetes clientset: %s", err)
 	}
 
 	groups, err := client.Discovery().ServerGroups()
 	if err != nil {
-		return false, err
+		return false, fmt.Errorf("unable to discover server groups: %s", err)
 	}
 
 	for _, group := range groups.Groups {
 		if group.Name == apiv1beta2.SchemeGroupVersion.Group {
 			stackClient, err := kubeapiclientset.NewForConfig(config)
 			if err != nil {
-				return false, err
+				return false, fmt.Errorf("unable to create compose clientset: %s", err)
 			}
 			err = wait.For(10, func() (bool, error) {
 				_, err := stackClient.ComposeV1beta2().Stacks("e2e").List(metav1.ListOptions{})
 				if err != nil {
+					log.Debugf("unable to list composev1beta2 stack: %s", err)
 					return false, nil
 				}
 				_, err = stackClient.ComposeV1beta1().Stacks("e2e").List(metav1.ListOptions{})
+				if err != nil {
+					log.Debugf("unable to list composev1beta1 stack: %s", err)
+				}
 				return err == nil, nil
 			})
 			return err == nil, err
