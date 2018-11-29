@@ -1,0 +1,638 @@
+{
+    "Stack": {
+        "metadata": {
+            "name": "test",
+            "namespace": "default",
+            "selfLink": "/apis/compose.docker.com/v1beta2/namespaces/default/stacks/test",
+            "uid": "9a6d003a-b73f-11e8-9495-00155d0027be",
+            "resourceVersion": "365106",
+            "creationTimestamp": "2018-09-13T10:27:23Z"
+        },
+        "spec": {
+            "services": [
+                {
+                    "name": "db",
+                    "deploy": {
+                        "resources": {},
+                        "placement": {}
+                    },
+                    "image": "dockerdemos/lab-db"
+                },
+                {
+                    "name": "web",
+                    "deploy": {
+                        "resources": {},
+                        "placement": {}
+                    },
+                    "image": "dockerdemos/lab-web",
+                    "ports": [
+                        {
+                            "mode": "ingress",
+                            "target": 80,
+                            "published": 80,
+                            "protocol": "tcp"
+                        }
+                    ]
+                },
+                {
+                    "name": "words",
+                    "deploy": {
+                        "replicas": 5,
+                        "resources": {},
+                        "placement": {}
+                    },
+                    "image": "dockerdemos/lab-words"
+                }
+            ]
+        },
+        "status": {
+            "phase": "Progressing",
+            "message": "Stack is starting"
+        }
+    },
+    "Children": {
+        "Deployments": {
+            "default/db": {
+                "metadata": {
+                    "name": "db",
+                    "namespace": "default",
+                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/db",
+                    "uid": "9a8e9f38-b73f-11e8-86fa-00155d0027be",
+                    "resourceVersion": "494101",
+                    "generation": 5,
+                    "creationTimestamp": "2018-09-13T10:27:23Z",
+                    "labels": {
+                        "com.docker.service.id": "test-db",
+                        "com.docker.service.name": "db",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "annotations": {
+                        "deployment.kubernetes.io/revision": "3"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test",
+                            "uid": "9a6d003a-b73f-11e8-9495-00155d0027be",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "replicas": 1,
+                    "selector": {
+                        "matchLabels": {
+                            "com.docker.service.id": "test-db",
+                            "com.docker.service.name": "db",
+                            "com.docker.stack.namespace": "test"
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "creationTimestamp": null,
+                            "labels": {
+                                "com.docker.service.id": "test-db",
+                                "com.docker.service.name": "db",
+                                "com.docker.stack.namespace": "test"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "db",
+                                    "image": "dockerdemos/lab-db",
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File",
+                                    "imagePullPolicy": "IfNotPresent"
+                                }
+                            ],
+                            "restartPolicy": "Always",
+                            "terminationGracePeriodSeconds": 30,
+                            "dnsPolicy": "ClusterFirst",
+                            "securityContext": {},
+                            "affinity": {
+                                "nodeAffinity": {
+                                  "requiredDuringSchedulingIgnoredDuringExecution": {
+                                    "nodeSelectorTerms": [
+                                      {
+                                        "matchExpressions": [
+                                          {
+                                            "key": "beta.kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                              "linux"
+                                            ]
+                                          },
+                                          {
+                                            "key": "beta.kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                              "amd64"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                            "schedulerName": "default-scheduler"
+                        }
+                    },
+                    "strategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxUnavailable": "25%",
+                            "maxSurge": "25%"
+                        }
+                    },
+                    "revisionHistoryLimit": 3,
+                    "progressDeadlineSeconds": 600
+                },
+                "status": {
+                    "observedGeneration": 5,
+                    "replicas": 1,
+                    "updatedReplicas": 1,
+                    "readyReplicas": 1,
+                    "availableReplicas": 1,
+                    "conditions": [
+                        {
+                            "type": "Available",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-13T11:59:33Z",
+                            "lastTransitionTime": "2018-09-13T11:59:33Z",
+                            "reason": "MinimumReplicasAvailable",
+                            "message": "Deployment has minimum availability."
+                        },
+                        {
+                            "type": "Progressing",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-13T12:36:07Z",
+                            "lastTransitionTime": "2018-09-13T10:27:23Z",
+                            "reason": "NewReplicaSetAvailable",
+                            "message": "ReplicaSet \"db-7ff448c9f7\" has successfully progressed."
+                        }
+                    ]
+                }
+            },
+            "default/web": {
+                "metadata": {
+                    "name": "web",
+                    "namespace": "default",
+                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/web",
+                    "uid": "9a92e39c-b73f-11e8-86fa-00155d0027be",
+                    "resourceVersion": "494099",
+                    "generation": 5,
+                    "creationTimestamp": "2018-09-13T10:27:23Z",
+                    "labels": {
+                        "com.docker.service.id": "test-web",
+                        "com.docker.service.name": "web",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "annotations": {
+                        "deployment.kubernetes.io/revision": "3"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test",
+                            "uid": "9a6d003a-b73f-11e8-9495-00155d0027be",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "replicas": 1,
+                    "selector": {
+                        "matchLabels": {
+                            "com.docker.service.id": "test-web",
+                            "com.docker.service.name": "web",
+                            "com.docker.stack.namespace": "test"
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "creationTimestamp": null,
+                            "labels": {
+                                "com.docker.service.id": "test-web",
+                                "com.docker.service.name": "web",
+                                "com.docker.stack.namespace": "test"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "web",
+                                    "image": "dockerdemos/lab-web",
+                                    "ports": [
+                                        {
+                                            "containerPort": 80,
+                                            "protocol": "TCP"
+                                        }
+                                    ],
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File",
+                                    "imagePullPolicy": "IfNotPresent"
+                                }
+                            ],
+                            "restartPolicy": "Always",
+                            "terminationGracePeriodSeconds": 30,
+                            "dnsPolicy": "ClusterFirst",
+                            "securityContext": {},
+                            "affinity": {
+                                "nodeAffinity": {
+                                  "requiredDuringSchedulingIgnoredDuringExecution": {
+                                    "nodeSelectorTerms": [
+                                      {
+                                        "matchExpressions": [
+                                          {
+                                            "key": "beta.kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                              "linux"
+                                            ]
+                                          },
+                                          {
+                                            "key": "beta.kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                              "amd64"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                            "schedulerName": "default-scheduler"
+                        }
+                    },
+                    "strategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxUnavailable": "25%",
+                            "maxSurge": "25%"
+                        }
+                    },
+                    "revisionHistoryLimit": 3,
+                    "progressDeadlineSeconds": 600
+                },
+                "status": {
+                    "observedGeneration": 5,
+                    "replicas": 1,
+                    "updatedReplicas": 1,
+                    "readyReplicas": 1,
+                    "availableReplicas": 1,
+                    "conditions": [
+                        {
+                            "type": "Available",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-13T11:59:33Z",
+                            "lastTransitionTime": "2018-09-13T11:59:33Z",
+                            "reason": "MinimumReplicasAvailable",
+                            "message": "Deployment has minimum availability."
+                        },
+                        {
+                            "type": "Progressing",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-13T12:36:08Z",
+                            "lastTransitionTime": "2018-09-13T10:27:23Z",
+                            "reason": "NewReplicaSetAvailable",
+                            "message": "ReplicaSet \"web-695b556b4\" has successfully progressed."
+                        }
+                    ]
+                }
+            },
+            "default/words": {
+                "metadata": {
+                    "name": "words",
+                    "namespace": "default",
+                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/words",
+                    "uid": "9a96b59a-b73f-11e8-86fa-00155d0027be",
+                    "resourceVersion": "494100",
+                    "generation": 5,
+                    "creationTimestamp": "2018-09-13T10:27:23Z",
+                    "labels": {
+                        "com.docker.service.id": "test-words",
+                        "com.docker.service.name": "words",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "annotations": {
+                        "deployment.kubernetes.io/revision": "3"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test",
+                            "uid": "9a6d003a-b73f-11e8-9495-00155d0027be",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "replicas": 5,
+                    "selector": {
+                        "matchLabels": {
+                            "com.docker.service.id": "test-words",
+                            "com.docker.service.name": "words",
+                            "com.docker.stack.namespace": "test"
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "creationTimestamp": null,
+                            "labels": {
+                                "com.docker.service.id": "test-words",
+                                "com.docker.service.name": "words",
+                                "com.docker.stack.namespace": "test"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "words",
+                                    "image": "dockerdemos/lab-words",
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File",
+                                    "imagePullPolicy": "IfNotPresent"
+                                }
+                            ],
+                            "restartPolicy": "Always",
+                            "terminationGracePeriodSeconds": 30,
+                            "dnsPolicy": "ClusterFirst",
+                            "securityContext": {},
+                            "affinity": {
+                                "nodeAffinity": {
+                                  "requiredDuringSchedulingIgnoredDuringExecution": {
+                                    "nodeSelectorTerms": [
+                                      {
+                                        "matchExpressions": [
+                                          {
+                                            "key": "beta.kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                              "linux"
+                                            ]
+                                          },
+                                          {
+                                            "key": "beta.kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                              "amd64"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                            "schedulerName": "default-scheduler"
+                        }
+                    },
+                    "strategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxUnavailable": "25%",
+                            "maxSurge": "25%"
+                        }
+                    },
+                    "revisionHistoryLimit": 3,
+                    "progressDeadlineSeconds": 600
+                },
+                "status": {
+                    "observedGeneration": 5,
+                    "replicas": 5,
+                    "updatedReplicas": 5,
+                    "readyReplicas": 4,
+                    "availableReplicas": 4,
+                    "unavailableReplicas": 1,
+                    "conditions": [
+                        {
+                            "type": "Available",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-13T11:59:33Z",
+                            "lastTransitionTime": "2018-09-13T11:59:33Z",
+                            "reason": "MinimumReplicasAvailable",
+                            "message": "Deployment has minimum availability."
+                        },
+                        {
+                            "type": "Progressing",
+                            "status": "False",
+                            "lastUpdateTime": "2018-09-13T12:46:09Z",
+                            "lastTransitionTime": "2018-09-13T12:46:09Z",
+                            "reason": "ProgressDeadlineExceeded",
+                            "message": "ReplicaSet \"words-85956ddc87\" has timed out progressing."
+                        }
+                    ]
+                }
+            }
+        },
+        "Statefulsets": {},
+        "Daemonsets": {},
+        "Services": {
+            "default/db": {
+                "metadata": {
+                    "name": "db",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/db",
+                    "uid": "9a9db00a-b73f-11e8-86fa-00155d0027be",
+                    "resourceVersion": "358381",
+                    "creationTimestamp": "2018-09-13T10:27:23Z",
+                    "labels": {
+                        "com.docker.service.id": "test-db",
+                        "com.docker.service.name": "db",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test",
+                            "uid": "9a6d003a-b73f-11e8-9495-00155d0027be",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "headless",
+                            "protocol": "TCP",
+                            "port": 55555,
+                            "targetPort": 55555
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-db",
+                        "com.docker.service.name": "db",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "clusterIP": "None",
+                    "type": "ClusterIP",
+                    "sessionAffinity": "None"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/web": {
+                "metadata": {
+                    "name": "web",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/web",
+                    "uid": "9aa482b2-b73f-11e8-86fa-00155d0027be",
+                    "resourceVersion": "358386",
+                    "creationTimestamp": "2018-09-13T10:27:24Z",
+                    "labels": {
+                        "com.docker.service.id": "test-web",
+                        "com.docker.service.name": "web",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test",
+                            "uid": "9a6d003a-b73f-11e8-9495-00155d0027be",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "headless",
+                            "protocol": "TCP",
+                            "port": 55555,
+                            "targetPort": 55555
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-web",
+                        "com.docker.service.name": "web",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "clusterIP": "None",
+                    "type": "ClusterIP",
+                    "sessionAffinity": "None"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/web-published": {
+                "metadata": {
+                    "name": "web-published",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/web-published",
+                    "uid": "9ab85f5e-b73f-11e8-86fa-00155d0027be",
+                    "resourceVersion": "358406",
+                    "creationTimestamp": "2018-09-13T10:27:24Z",
+                    "labels": {
+                        "com.docker.service.id": "test-web",
+                        "com.docker.service.name": "web",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test",
+                            "uid": "9a6d003a-b73f-11e8-9495-00155d0027be",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "80-tcp",
+                            "protocol": "TCP",
+                            "port": 80,
+                            "targetPort": 80,
+                            "nodePort": 30856
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-web",
+                        "com.docker.service.name": "web",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "clusterIP": "10.42.135.60",
+                    "type": "LoadBalancer",
+                    "sessionAffinity": "None",
+                    "externalTrafficPolicy": "Cluster"
+                },
+                "status": {
+                    "loadBalancer": {
+                        "ingress": [
+                            {
+                                "hostname": "localhost"
+                            }
+                        ]
+                    }
+                }
+            },
+            "default/words": {
+                "metadata": {
+                    "name": "words",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/words",
+                    "uid": "9ac18f54-b73f-11e8-86fa-00155d0027be",
+                    "resourceVersion": "358412",
+                    "creationTimestamp": "2018-09-13T10:27:24Z",
+                    "labels": {
+                        "com.docker.service.id": "test-words",
+                        "com.docker.service.name": "words",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test",
+                            "uid": "9a6d003a-b73f-11e8-9495-00155d0027be",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "headless",
+                            "protocol": "TCP",
+                            "port": 55555,
+                            "targetPort": 55555
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-words",
+                        "com.docker.service.name": "words",
+                        "com.docker.stack.namespace": "test"
+                    },
+                    "clusterIP": "None",
+                    "type": "ClusterIP",
+                    "sessionAffinity": "None"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            }
+        }
+    }
+}

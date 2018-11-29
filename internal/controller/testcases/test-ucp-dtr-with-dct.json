@@ -1,0 +1,744 @@
+{
+    "Stack": {
+        "metadata": {
+            "name": "test-dct",
+            "namespace": "default",
+            "selfLink": "/apis/compose.docker.com/v1beta2/namespaces/default/stacks/test-dct",
+            "uid": "f4275ad0-bb15-11e8-a403-5ac39540ac69",
+            "resourceVersion": "95118",
+            "creationTimestamp": "2018-09-18T07:39:19Z"
+        },
+        "spec": {
+            "services": [
+                {
+                    "name": "notag",
+                    "deploy": {
+                        "resources": {},
+                        "placement": {}
+                    },
+                    "image": "34.217.111.87/dct/nginx",
+                    "ports": [
+                        {
+                            "mode": "ingress",
+                            "target": 80,
+                            "published": 32769,
+                            "protocol": "tcp"
+                        }
+                    ]
+                },
+                {
+                    "name": "with-randomport",
+                    "deploy": {
+                        "resources": {},
+                        "placement": {}
+                    },
+                    "image": "34.217.111.87/dct/nginx",
+                    "ports": [
+                        {
+                            "mode": "ingress",
+                            "target": 80,
+                            "protocol": "tcp"
+                        }
+                    ]
+                },
+                {
+                    "name": "with-tag",
+                    "deploy": {
+                        "mode": "global",
+                        "resources": {},
+                        "placement": {}
+                    },
+                    "image": "34.217.111.87/dct/nginx:1.15.3-alpine",
+                    "ports": [
+                        {
+                            "mode": "ingress",
+                            "target": 80,
+                            "published": 32770,
+                            "protocol": "tcp"
+                        }
+                    ]
+                }
+            ]
+        },
+        "status": {
+            "phase": "Available",
+            "message": "Stack is started"
+        }
+    },
+    "Children": {
+        "Deployments": {
+            "default/notag": {
+                "metadata": {
+                    "name": "notag",
+                    "namespace": "default",
+                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/notag",
+                    "uid": "f453f300-bb15-11e8-a33a-0242ac11000e",
+                    "resourceVersion": "95129",
+                    "generation": 3,
+                    "creationTimestamp": "2018-09-18T07:39:20Z",
+                    "labels": {
+                        "com.docker.service.id": "test-dct-notag",
+                        "com.docker.service.name": "notag",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "annotations": {
+                        "deployment.kubernetes.io/revision": "1"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-dct",
+                            "uid": "f4275ad0-bb15-11e8-a403-5ac39540ac69",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "replicas": 1,
+                    "selector": {
+                        "matchLabels": {
+                            "com.docker.service.id": "test-dct-notag",
+                            "com.docker.service.name": "notag",
+                            "com.docker.stack.namespace": "test-dct"
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "creationTimestamp": null,
+                            "labels": {
+                                "com.docker.service.id": "test-dct-notag",
+                                "com.docker.service.name": "notag",
+                                "com.docker.stack.namespace": "test-dct"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "notag",
+                                    "image": "34.217.111.87/dct/nginx@sha256:c0b69559d28fb325a64c6c8f47d14c26b95aa047312b29c699da10380e90b4d7",
+                                    "ports": [
+                                        {
+                                            "containerPort": 80,
+                                            "protocol": "TCP"
+                                        }
+                                    ],
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File",
+                                    "imagePullPolicy": "IfNotPresent"
+                                }
+                            ],
+                            "restartPolicy": "Always",
+                            "terminationGracePeriodSeconds": 30,
+                            "dnsPolicy": "ClusterFirst",
+                            "securityContext": {},
+                            "affinity": {
+                                "nodeAffinity": {
+                                  "requiredDuringSchedulingIgnoredDuringExecution": {
+                                    "nodeSelectorTerms": [
+                                      {
+                                        "matchExpressions": [
+                                          {
+                                            "key": "beta.kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                              "linux"
+                                            ]
+                                          },
+                                          {
+                                            "key": "beta.kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                              "amd64"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                            "schedulerName": "default-scheduler",
+                            "tolerations": [
+                                {
+                                    "key": "com.docker.ucp.manager",
+                                    "operator": "Exists"
+                                }
+                            ]
+                        }
+                    },
+                    "strategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxUnavailable": "25%",
+                            "maxSurge": "25%"
+                        }
+                    },
+                    "revisionHistoryLimit": 3,
+                    "progressDeadlineSeconds": 600
+                },
+                "status": {
+                    "observedGeneration": 3,
+                    "replicas": 1,
+                    "updatedReplicas": 1,
+                    "readyReplicas": 1,
+                    "availableReplicas": 1,
+                    "conditions": [
+                        {
+                            "type": "Available",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-18T07:39:22Z",
+                            "lastTransitionTime": "2018-09-18T07:39:22Z",
+                            "reason": "MinimumReplicasAvailable",
+                            "message": "Deployment has minimum availability."
+                        },
+                        {
+                            "type": "Progressing",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-18T07:39:22Z",
+                            "lastTransitionTime": "2018-09-18T07:39:20Z",
+                            "reason": "NewReplicaSetAvailable",
+                            "message": "ReplicaSet \"notag-5cf5bc6596\" has successfully progressed."
+                        }
+                    ]
+                }
+            },
+            "default/with-randomport": {
+                "metadata": {
+                    "name": "with-randomport",
+                    "namespace": "default",
+                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/with-randomport",
+                    "uid": "f464d63a-bb15-11e8-a33a-0242ac11000e",
+                    "resourceVersion": "95132",
+                    "generation": 3,
+                    "creationTimestamp": "2018-09-18T07:39:20Z",
+                    "labels": {
+                        "com.docker.service.id": "test-dct-with-randomport",
+                        "com.docker.service.name": "with-randomport",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "annotations": {
+                        "deployment.kubernetes.io/revision": "1"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-dct",
+                            "uid": "f4275ad0-bb15-11e8-a403-5ac39540ac69",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "replicas": 1,
+                    "selector": {
+                        "matchLabels": {
+                            "com.docker.service.id": "test-dct-with-randomport",
+                            "com.docker.service.name": "with-randomport",
+                            "com.docker.stack.namespace": "test-dct"
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "creationTimestamp": null,
+                            "labels": {
+                                "com.docker.service.id": "test-dct-with-randomport",
+                                "com.docker.service.name": "with-randomport",
+                                "com.docker.stack.namespace": "test-dct"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "with-randomport",
+                                    "image": "34.217.111.87/dct/nginx@sha256:c0b69559d28fb325a64c6c8f47d14c26b95aa047312b29c699da10380e90b4d7",
+                                    "ports": [
+                                        {
+                                            "containerPort": 80,
+                                            "protocol": "TCP"
+                                        }
+                                    ],
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File",
+                                    "imagePullPolicy": "IfNotPresent"
+                                }
+                            ],
+                            "restartPolicy": "Always",
+                            "terminationGracePeriodSeconds": 30,
+                            "dnsPolicy": "ClusterFirst",
+                            "securityContext": {},
+                            "affinity": {
+                                "nodeAffinity": {
+                                  "requiredDuringSchedulingIgnoredDuringExecution": {
+                                    "nodeSelectorTerms": [
+                                      {
+                                        "matchExpressions": [
+                                          {
+                                            "key": "beta.kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                              "linux"
+                                            ]
+                                          },
+                                          {
+                                            "key": "beta.kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                              "amd64"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                            "schedulerName": "default-scheduler",
+                            "tolerations": [
+                                {
+                                    "key": "com.docker.ucp.manager",
+                                    "operator": "Exists"
+                                }
+                            ]
+                        }
+                    },
+                    "strategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxUnavailable": "25%",
+                            "maxSurge": "25%"
+                        }
+                    },
+                    "revisionHistoryLimit": 3,
+                    "progressDeadlineSeconds": 600
+                },
+                "status": {
+                    "observedGeneration": 3,
+                    "replicas": 1,
+                    "updatedReplicas": 1,
+                    "readyReplicas": 1,
+                    "availableReplicas": 1,
+                    "conditions": [
+                        {
+                            "type": "Available",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-18T07:39:22Z",
+                            "lastTransitionTime": "2018-09-18T07:39:22Z",
+                            "reason": "MinimumReplicasAvailable",
+                            "message": "Deployment has minimum availability."
+                        },
+                        {
+                            "type": "Progressing",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-18T07:39:22Z",
+                            "lastTransitionTime": "2018-09-18T07:39:20Z",
+                            "reason": "NewReplicaSetAvailable",
+                            "message": "ReplicaSet \"with-randomport-5f4f4d86bb\" has successfully progressed."
+                        }
+                    ]
+                }
+            }
+        },
+        "Statefulsets": {},
+        "Daemonsets": {
+            "default/with-tag": {
+                "metadata": {
+                    "name": "with-tag",
+                    "namespace": "default",
+                    "selfLink": "/apis/apps/v1beta2/namespaces/default/daemonsets/with-tag",
+                    "uid": "f473875f-bb15-11e8-a33a-0242ac11000e",
+                    "resourceVersion": "95115",
+                    "generation": 1,
+                    "creationTimestamp": "2018-09-18T07:39:20Z",
+                    "labels": {
+                        "com.docker.service.id": "test-dct-with-tag",
+                        "com.docker.service.name": "with-tag",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "annotations": {
+                        "deprecated.daemonset.template.generation": "1"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-dct",
+                            "uid": "f4275ad0-bb15-11e8-a403-5ac39540ac69",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "selector": {
+                        "matchLabels": {
+                            "com.docker.service.id": "test-dct-with-tag",
+                            "com.docker.service.name": "with-tag",
+                            "com.docker.stack.namespace": "test-dct"
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "creationTimestamp": null,
+                            "labels": {
+                                "com.docker.service.id": "test-dct-with-tag",
+                                "com.docker.service.name": "with-tag",
+                                "com.docker.stack.namespace": "test-dct"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "with-tag",
+                                    "image": "34.217.111.87/dct/nginx:1.15.3-alpine@sha256:1b3fd627836d0e6c93eff8d2c46769236d0fca34debe42f4edb4f62605746a3a",
+                                    "ports": [
+                                        {
+                                            "containerPort": 80,
+                                            "protocol": "TCP"
+                                        }
+                                    ],
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File",
+                                    "imagePullPolicy": "IfNotPresent"
+                                }
+                            ],
+                            "restartPolicy": "Always",
+                            "terminationGracePeriodSeconds": 30,
+                            "dnsPolicy": "ClusterFirst",
+                            "securityContext": {},
+                            "affinity": {
+                                "nodeAffinity": {
+                                  "requiredDuringSchedulingIgnoredDuringExecution": {
+                                    "nodeSelectorTerms": [
+                                      {
+                                        "matchExpressions": [
+                                          {
+                                            "key": "beta.kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                              "linux"
+                                            ]
+                                          },
+                                          {
+                                            "key": "beta.kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                              "amd64"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                            "schedulerName": "default-scheduler",
+                            "tolerations": [
+                                {
+                                    "key": "com.docker.ucp.manager",
+                                    "operator": "Exists"
+                                }
+                            ]
+                        }
+                    },
+                    "updateStrategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxUnavailable": 1
+                        }
+                    },
+                    "revisionHistoryLimit": 10
+                },
+                "status": {
+                    "currentNumberScheduled": 3,
+                    "numberMisscheduled": 0,
+                    "desiredNumberScheduled": 3,
+                    "numberReady": 3,
+                    "observedGeneration": 1,
+                    "updatedNumberScheduled": 3,
+                    "numberAvailable": 3
+                }
+            }
+        },
+        "Services": {
+            "default/notag": {
+                "metadata": {
+                    "name": "notag",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/notag",
+                    "uid": "f4554d99-bb15-11e8-a33a-0242ac11000e",
+                    "resourceVersion": "94988",
+                    "creationTimestamp": "2018-09-18T07:39:20Z",
+                    "labels": {
+                        "com.docker.service.id": "test-dct-notag",
+                        "com.docker.service.name": "notag",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-dct",
+                            "uid": "f4275ad0-bb15-11e8-a403-5ac39540ac69",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "headless",
+                            "protocol": "TCP",
+                            "port": 55555,
+                            "targetPort": 55555
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-dct-notag",
+                        "com.docker.service.name": "notag",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "clusterIP": "None",
+                    "type": "ClusterIP",
+                    "sessionAffinity": "None"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/notag-published": {
+                "metadata": {
+                    "name": "notag-published",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/notag-published",
+                    "uid": "f457399b-bb15-11e8-a33a-0242ac11000e",
+                    "resourceVersion": "94993",
+                    "creationTimestamp": "2018-09-18T07:39:20Z",
+                    "labels": {
+                        "com.docker.service.id": "test-dct-notag",
+                        "com.docker.service.name": "notag",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-dct",
+                            "uid": "f4275ad0-bb15-11e8-a403-5ac39540ac69",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "32769-tcp",
+                            "protocol": "TCP",
+                            "port": 80,
+                            "targetPort": 80,
+                            "nodePort": 32769
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-dct-notag",
+                        "com.docker.service.name": "notag",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "clusterIP": "10.96.50.118",
+                    "type": "NodePort",
+                    "sessionAffinity": "None",
+                    "externalTrafficPolicy": "Cluster"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/with-randomport": {
+                "metadata": {
+                    "name": "with-randomport",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/with-randomport",
+                    "uid": "f465b7ce-bb15-11e8-a33a-0242ac11000e",
+                    "resourceVersion": "95004",
+                    "creationTimestamp": "2018-09-18T07:39:20Z",
+                    "labels": {
+                        "com.docker.service.id": "test-dct-with-randomport",
+                        "com.docker.service.name": "with-randomport",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-dct",
+                            "uid": "f4275ad0-bb15-11e8-a403-5ac39540ac69",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "headless",
+                            "protocol": "TCP",
+                            "port": 55555,
+                            "targetPort": 55555
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-dct-with-randomport",
+                        "com.docker.service.name": "with-randomport",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "clusterIP": "None",
+                    "type": "ClusterIP",
+                    "sessionAffinity": "None"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/with-randomport-random-ports": {
+                "metadata": {
+                    "name": "with-randomport-random-ports",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/with-randomport-random-ports",
+                    "uid": "f46741fd-bb15-11e8-a33a-0242ac11000e",
+                    "resourceVersion": "95007",
+                    "creationTimestamp": "2018-09-18T07:39:20Z",
+                    "labels": {
+                        "com.docker.service.id": "test-dct-with-randomport",
+                        "com.docker.service.name": "with-randomport",
+                        "com.docker.stack.namespace": "test-dct"
+                    }
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "80-tcp",
+                            "protocol": "TCP",
+                            "port": 80,
+                            "targetPort": 80,
+                            "nodePort": 32787
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-dct-with-randomport",
+                        "com.docker.service.name": "with-randomport",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "clusterIP": "10.96.247.67",
+                    "type": "NodePort",
+                    "sessionAffinity": "None",
+                    "externalTrafficPolicy": "Cluster"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/with-tag": {
+                "metadata": {
+                    "name": "with-tag",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/with-tag",
+                    "uid": "f4747036-bb15-11e8-a33a-0242ac11000e",
+                    "resourceVersion": "95013",
+                    "creationTimestamp": "2018-09-18T07:39:20Z",
+                    "labels": {
+                        "com.docker.service.id": "test-dct-with-tag",
+                        "com.docker.service.name": "with-tag",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-dct",
+                            "uid": "f4275ad0-bb15-11e8-a403-5ac39540ac69",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "headless",
+                            "protocol": "TCP",
+                            "port": 55555,
+                            "targetPort": 55555
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-dct-with-tag",
+                        "com.docker.service.name": "with-tag",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "clusterIP": "None",
+                    "type": "ClusterIP",
+                    "sessionAffinity": "None"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/with-tag-published": {
+                "metadata": {
+                    "name": "with-tag-published",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/with-tag-published",
+                    "uid": "f4989f26-bb15-11e8-a33a-0242ac11000e",
+                    "resourceVersion": "95046",
+                    "creationTimestamp": "2018-09-18T07:39:20Z",
+                    "labels": {
+                        "com.docker.service.id": "test-dct-with-tag",
+                        "com.docker.service.name": "with-tag",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-dct",
+                            "uid": "f4275ad0-bb15-11e8-a403-5ac39540ac69",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "32770-tcp",
+                            "protocol": "TCP",
+                            "port": 80,
+                            "targetPort": 80,
+                            "nodePort": 32770
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-dct-with-tag",
+                        "com.docker.service.name": "with-tag",
+                        "com.docker.stack.namespace": "test-dct"
+                    },
+                    "clusterIP": "10.96.113.199",
+                    "type": "NodePort",
+                    "sessionAffinity": "None",
+                    "externalTrafficPolicy": "Cluster"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            }
+        }
+    }
+}

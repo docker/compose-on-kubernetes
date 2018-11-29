@@ -1,0 +1,1064 @@
+{
+    "Stack": {
+        "metadata": {
+            "name": "test-various-port-ordering",
+            "namespace": "default",
+            "selfLink": "/apis/compose.docker.com/v1beta2/namespaces/default/stacks/test-various-port-ordering",
+            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+            "resourceVersion": "24830",
+            "creationTimestamp": "2018-09-19T20:38:06Z"
+        },
+        "spec": {
+            "services": [
+                {
+                    "name": "by-port",
+                    "deploy": {
+                        "resources": {},
+                        "placement": {}
+                    },
+                    "image": "nginx",
+                    "ports": [
+                        {
+                            "mode": "ingress",
+                            "target": 81,
+                            "published": 80,
+                            "protocol": "tcp"
+                        },
+                        {
+                            "mode": "ingress",
+                            "target": 80,
+                            "published": 81,
+                            "protocol": "tcp"
+                        }
+                    ]
+                },
+                {
+                    "name": "by-target",
+                    "deploy": {
+                        "resources": {},
+                        "placement": {}
+                    },
+                    "image": "nginx",
+                    "ports": [
+                        {
+                            "mode": "ingress",
+                            "target": 80,
+                            "published": 81,
+                            "protocol": "tcp"
+                        },
+                        {
+                            "mode": "ingress",
+                            "target": 81,
+                            "published": 80,
+                            "protocol": "tcp"
+                        }
+                    ]
+                },
+                {
+                    "name": "reverse",
+                    "deploy": {
+                        "resources": {},
+                        "placement": {}
+                    },
+                    "image": "nginx",
+                    "ports": [
+                        {
+                            "mode": "ingress",
+                            "target": 81,
+                            "published": 81,
+                            "protocol": "tcp"
+                        },
+                        {
+                            "mode": "ingress",
+                            "target": 80,
+                            "published": 80,
+                            "protocol": "tcp"
+                        }
+                    ]
+                },
+                {
+                    "name": "sorted",
+                    "deploy": {
+                        "resources": {},
+                        "placement": {}
+                    },
+                    "image": "nginx",
+                    "ports": [
+                        {
+                            "mode": "ingress",
+                            "target": 80,
+                            "published": 80,
+                            "protocol": "tcp"
+                        },
+                        {
+                            "mode": "ingress",
+                            "target": 81,
+                            "published": 81,
+                            "protocol": "tcp"
+                        }
+                    ]
+                }
+            ]
+        },
+        "status": {
+            "phase": "Available",
+            "message": "Stack is started"
+        }
+    },
+    "Children": {
+        "Deployments": {
+            "default/by-port": {
+                "metadata": {
+                    "name": "by-port",
+                    "namespace": "default",
+                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/by-port",
+                    "uid": "e98bb345-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "26759",
+                    "generation": 42,
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-by-port",
+                        "com.docker.service.name": "by-port",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "annotations": {
+                        "deployment.kubernetes.io/revision": "1"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "replicas": 1,
+                    "selector": {
+                        "matchLabels": {
+                            "com.docker.service.id": "test-various-port-ordering-by-port",
+                            "com.docker.service.name": "by-port",
+                            "com.docker.stack.namespace": "test-various-port-ordering"
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "creationTimestamp": null,
+                            "labels": {
+                                "com.docker.service.id": "test-various-port-ordering-by-port",
+                                "com.docker.service.name": "by-port",
+                                "com.docker.stack.namespace": "test-various-port-ordering"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "by-port",
+                                    "image": "nginx",
+                                    "ports": [
+                                        {
+                                            "containerPort": 81,
+                                            "protocol": "TCP"
+                                        },
+                                        {
+                                            "containerPort": 80,
+                                            "protocol": "TCP"
+                                        }
+                                    ],
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File",
+                                    "imagePullPolicy": "IfNotPresent"
+                                }
+                            ],
+                            "restartPolicy": "Always",
+                            "terminationGracePeriodSeconds": 30,
+                            "dnsPolicy": "ClusterFirst",
+                            "securityContext": {},
+                            "affinity": {
+                                "nodeAffinity": {
+                                  "requiredDuringSchedulingIgnoredDuringExecution": {
+                                    "nodeSelectorTerms": [
+                                      {
+                                        "matchExpressions": [
+                                          {
+                                            "key": "beta.kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                              "linux"
+                                            ]
+                                          },
+                                          {
+                                            "key": "beta.kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                              "amd64"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                            "schedulerName": "default-scheduler"
+                        }
+                    },
+                    "strategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxUnavailable": "25%",
+                            "maxSurge": "25%"
+                        }
+                    },
+                    "revisionHistoryLimit": 3,
+                    "progressDeadlineSeconds": 600
+                },
+                "status": {
+                    "observedGeneration": 42,
+                    "replicas": 1,
+                    "updatedReplicas": 1,
+                    "readyReplicas": 1,
+                    "availableReplicas": 1,
+                    "conditions": [
+                        {
+                            "type": "Available",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-19T20:38:41Z",
+                            "lastTransitionTime": "2018-09-19T20:38:41Z",
+                            "reason": "MinimumReplicasAvailable",
+                            "message": "Deployment has minimum availability."
+                        },
+                        {
+                            "type": "Progressing",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-19T20:38:41Z",
+                            "lastTransitionTime": "2018-09-19T20:38:06Z",
+                            "reason": "NewReplicaSetAvailable",
+                            "message": "ReplicaSet \"by-port-5bbcf64b8\" has successfully progressed."
+                        }
+                    ]
+                }
+            },
+            "default/by-target": {
+                "metadata": {
+                    "name": "by-target",
+                    "namespace": "default",
+                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/by-target",
+                    "uid": "e99b0f24-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "26762",
+                    "generation": 42,
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-by-target",
+                        "com.docker.service.name": "by-target",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "annotations": {
+                        "deployment.kubernetes.io/revision": "1"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "replicas": 1,
+                    "selector": {
+                        "matchLabels": {
+                            "com.docker.service.id": "test-various-port-ordering-by-target",
+                            "com.docker.service.name": "by-target",
+                            "com.docker.stack.namespace": "test-various-port-ordering"
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "creationTimestamp": null,
+                            "labels": {
+                                "com.docker.service.id": "test-various-port-ordering-by-target",
+                                "com.docker.service.name": "by-target",
+                                "com.docker.stack.namespace": "test-various-port-ordering"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "by-target",
+                                    "image": "nginx",
+                                    "ports": [
+                                        {
+                                            "containerPort": 80,
+                                            "protocol": "TCP"
+                                        },
+                                        {
+                                            "containerPort": 81,
+                                            "protocol": "TCP"
+                                        }
+                                    ],
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File",
+                                    "imagePullPolicy": "IfNotPresent"
+                                }
+                            ],
+                            "restartPolicy": "Always",
+                            "terminationGracePeriodSeconds": 30,
+                            "dnsPolicy": "ClusterFirst",
+                            "securityContext": {},
+                            "affinity": {
+                                "nodeAffinity": {
+                                  "requiredDuringSchedulingIgnoredDuringExecution": {
+                                    "nodeSelectorTerms": [
+                                      {
+                                        "matchExpressions": [
+                                          {
+                                            "key": "beta.kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                              "linux"
+                                            ]
+                                          },
+                                          {
+                                            "key": "beta.kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                              "amd64"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                            "schedulerName": "default-scheduler"
+                        }
+                    },
+                    "strategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxUnavailable": "25%",
+                            "maxSurge": "25%"
+                        }
+                    },
+                    "revisionHistoryLimit": 3,
+                    "progressDeadlineSeconds": 600
+                },
+                "status": {
+                    "observedGeneration": 42,
+                    "replicas": 1,
+                    "updatedReplicas": 1,
+                    "readyReplicas": 1,
+                    "availableReplicas": 1,
+                    "conditions": [
+                        {
+                            "type": "Available",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-19T20:38:39Z",
+                            "lastTransitionTime": "2018-09-19T20:38:39Z",
+                            "reason": "MinimumReplicasAvailable",
+                            "message": "Deployment has minimum availability."
+                        },
+                        {
+                            "type": "Progressing",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-19T20:38:39Z",
+                            "lastTransitionTime": "2018-09-19T20:38:06Z",
+                            "reason": "NewReplicaSetAvailable",
+                            "message": "ReplicaSet \"by-target-fd75ccccd\" has successfully progressed."
+                        }
+                    ]
+                }
+            },
+            "default/reverse": {
+                "metadata": {
+                    "name": "reverse",
+                    "namespace": "default",
+                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/reverse",
+                    "uid": "e9acf5c2-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "26765",
+                    "generation": 42,
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-reverse",
+                        "com.docker.service.name": "reverse",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "annotations": {
+                        "deployment.kubernetes.io/revision": "1"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "replicas": 1,
+                    "selector": {
+                        "matchLabels": {
+                            "com.docker.service.id": "test-various-port-ordering-reverse",
+                            "com.docker.service.name": "reverse",
+                            "com.docker.stack.namespace": "test-various-port-ordering"
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "creationTimestamp": null,
+                            "labels": {
+                                "com.docker.service.id": "test-various-port-ordering-reverse",
+                                "com.docker.service.name": "reverse",
+                                "com.docker.stack.namespace": "test-various-port-ordering"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "reverse",
+                                    "image": "nginx",
+                                    "ports": [
+                                        {
+                                            "containerPort": 81,
+                                            "protocol": "TCP"
+                                        },
+                                        {
+                                            "containerPort": 80,
+                                            "protocol": "TCP"
+                                        }
+                                    ],
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File",
+                                    "imagePullPolicy": "IfNotPresent"
+                                }
+                            ],
+                            "restartPolicy": "Always",
+                            "terminationGracePeriodSeconds": 30,
+                            "dnsPolicy": "ClusterFirst",
+                            "securityContext": {},
+                            "affinity": {
+                                "nodeAffinity": {
+                                  "requiredDuringSchedulingIgnoredDuringExecution": {
+                                    "nodeSelectorTerms": [
+                                      {
+                                        "matchExpressions": [
+                                          {
+                                            "key": "beta.kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                              "linux"
+                                            ]
+                                          },
+                                          {
+                                            "key": "beta.kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                              "amd64"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                            "schedulerName": "default-scheduler"
+                        }
+                    },
+                    "strategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxUnavailable": "25%",
+                            "maxSurge": "25%"
+                        }
+                    },
+                    "revisionHistoryLimit": 3,
+                    "progressDeadlineSeconds": 600
+                },
+                "status": {
+                    "observedGeneration": 42,
+                    "replicas": 1,
+                    "updatedReplicas": 1,
+                    "readyReplicas": 1,
+                    "availableReplicas": 1,
+                    "conditions": [
+                        {
+                            "type": "Available",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-19T20:38:42Z",
+                            "lastTransitionTime": "2018-09-19T20:38:42Z",
+                            "reason": "MinimumReplicasAvailable",
+                            "message": "Deployment has minimum availability."
+                        },
+                        {
+                            "type": "Progressing",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-19T20:38:42Z",
+                            "lastTransitionTime": "2018-09-19T20:38:06Z",
+                            "reason": "NewReplicaSetAvailable",
+                            "message": "ReplicaSet \"reverse-5df475799c\" has successfully progressed."
+                        }
+                    ]
+                }
+            },
+            "default/sorted": {
+                "metadata": {
+                    "name": "sorted",
+                    "namespace": "default",
+                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/sorted",
+                    "uid": "e9d778a0-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "26768",
+                    "generation": 42,
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-sorted",
+                        "com.docker.service.name": "sorted",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "annotations": {
+                        "deployment.kubernetes.io/revision": "1"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "replicas": 1,
+                    "selector": {
+                        "matchLabels": {
+                            "com.docker.service.id": "test-various-port-ordering-sorted",
+                            "com.docker.service.name": "sorted",
+                            "com.docker.stack.namespace": "test-various-port-ordering"
+                        }
+                    },
+                    "template": {
+                        "metadata": {
+                            "creationTimestamp": null,
+                            "labels": {
+                                "com.docker.service.id": "test-various-port-ordering-sorted",
+                                "com.docker.service.name": "sorted",
+                                "com.docker.stack.namespace": "test-various-port-ordering"
+                            }
+                        },
+                        "spec": {
+                            "containers": [
+                                {
+                                    "name": "sorted",
+                                    "image": "nginx",
+                                    "ports": [
+                                        {
+                                            "containerPort": 80,
+                                            "protocol": "TCP"
+                                        },
+                                        {
+                                            "containerPort": 81,
+                                            "protocol": "TCP"
+                                        }
+                                    ],
+                                    "resources": {},
+                                    "terminationMessagePath": "/dev/termination-log",
+                                    "terminationMessagePolicy": "File",
+                                    "imagePullPolicy": "IfNotPresent"
+                                }
+                            ],
+                            "restartPolicy": "Always",
+                            "terminationGracePeriodSeconds": 30,
+                            "dnsPolicy": "ClusterFirst",
+                            "securityContext": {},
+                            "affinity": {
+                                "nodeAffinity": {
+                                  "requiredDuringSchedulingIgnoredDuringExecution": {
+                                    "nodeSelectorTerms": [
+                                      {
+                                        "matchExpressions": [
+                                          {
+                                            "key": "beta.kubernetes.io/os",
+                                            "operator": "In",
+                                            "values": [
+                                              "linux"
+                                            ]
+                                          },
+                                          {
+                                            "key": "beta.kubernetes.io/arch",
+                                            "operator": "In",
+                                            "values": [
+                                              "amd64"
+                                            ]
+                                          }
+                                        ]
+                                      }
+                                    ]
+                                  }
+                                }
+                              },
+                            "schedulerName": "default-scheduler"
+                        }
+                    },
+                    "strategy": {
+                        "type": "RollingUpdate",
+                        "rollingUpdate": {
+                            "maxUnavailable": "25%",
+                            "maxSurge": "25%"
+                        }
+                    },
+                    "revisionHistoryLimit": 3,
+                    "progressDeadlineSeconds": 600
+                },
+                "status": {
+                    "observedGeneration": 42,
+                    "replicas": 1,
+                    "updatedReplicas": 1,
+                    "readyReplicas": 1,
+                    "availableReplicas": 1,
+                    "conditions": [
+                        {
+                            "type": "Available",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-19T20:38:45Z",
+                            "lastTransitionTime": "2018-09-19T20:38:45Z",
+                            "reason": "MinimumReplicasAvailable",
+                            "message": "Deployment has minimum availability."
+                        },
+                        {
+                            "type": "Progressing",
+                            "status": "True",
+                            "lastUpdateTime": "2018-09-19T20:38:45Z",
+                            "lastTransitionTime": "2018-09-19T20:38:06Z",
+                            "reason": "NewReplicaSetAvailable",
+                            "message": "ReplicaSet \"sorted-7cd9cc57bb\" has successfully progressed."
+                        }
+                    ]
+                }
+            }
+        },
+        "Statefulsets": {},
+        "Daemonsets": {},
+        "Services": {
+            "default/by-port": {
+                "metadata": {
+                    "name": "by-port",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/by-port",
+                    "uid": "e98d85f3-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "24641",
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-by-port",
+                        "com.docker.service.name": "by-port",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "headless",
+                            "protocol": "TCP",
+                            "port": 55555,
+                            "targetPort": 55555
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-various-port-ordering-by-port",
+                        "com.docker.service.name": "by-port",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "clusterIP": "None",
+                    "type": "ClusterIP",
+                    "sessionAffinity": "None"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/by-port-published": {
+                "metadata": {
+                    "name": "by-port-published",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/by-port-published",
+                    "uid": "e99801b5-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "24652",
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-by-port",
+                        "com.docker.service.name": "by-port",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "80-tcp",
+                            "protocol": "TCP",
+                            "port": 80,
+                            "targetPort": 81,
+                            "nodePort": 31303
+                        },
+                        {
+                            "name": "81-tcp",
+                            "protocol": "TCP",
+                            "port": 81,
+                            "targetPort": 80,
+                            "nodePort": 30867
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-various-port-ordering-by-port",
+                        "com.docker.service.name": "by-port",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "clusterIP": "10.104.217.39",
+                    "type": "LoadBalancer",
+                    "sessionAffinity": "None",
+                    "externalTrafficPolicy": "Cluster"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/by-target": {
+                "metadata": {
+                    "name": "by-target",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/by-target",
+                    "uid": "e99e0746-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "24661",
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-by-target",
+                        "com.docker.service.name": "by-target",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "headless",
+                            "protocol": "TCP",
+                            "port": 55555,
+                            "targetPort": 55555
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-various-port-ordering-by-target",
+                        "com.docker.service.name": "by-target",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "clusterIP": "None",
+                    "type": "ClusterIP",
+                    "sessionAffinity": "None"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/by-target-published": {
+                "metadata": {
+                    "name": "by-target-published",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/by-target-published",
+                    "uid": "e9aa3753-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "24677",
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-by-target",
+                        "com.docker.service.name": "by-target",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "81-tcp",
+                            "protocol": "TCP",
+                            "port": 81,
+                            "targetPort": 80,
+                            "nodePort": 31060
+                        },
+                        {
+                            "name": "80-tcp",
+                            "protocol": "TCP",
+                            "port": 80,
+                            "targetPort": 81,
+                            "nodePort": 30985
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-various-port-ordering-by-target",
+                        "com.docker.service.name": "by-target",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "clusterIP": "10.97.15.159",
+                    "type": "LoadBalancer",
+                    "sessionAffinity": "None",
+                    "externalTrafficPolicy": "Cluster"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/reverse": {
+                "metadata": {
+                    "name": "reverse",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/reverse",
+                    "uid": "e9af38a8-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "24684",
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-reverse",
+                        "com.docker.service.name": "reverse",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "headless",
+                            "protocol": "TCP",
+                            "port": 55555,
+                            "targetPort": 55555
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-various-port-ordering-reverse",
+                        "com.docker.service.name": "reverse",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "clusterIP": "None",
+                    "type": "ClusterIP",
+                    "sessionAffinity": "None"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/reverse-published": {
+                "metadata": {
+                    "name": "reverse-published",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/reverse-published",
+                    "uid": "e9d2fde2-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "24699",
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-reverse",
+                        "com.docker.service.name": "reverse",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "81-tcp",
+                            "protocol": "TCP",
+                            "port": 81,
+                            "targetPort": 81,
+                            "nodePort": 32342
+                        },
+                        {
+                            "name": "80-tcp",
+                            "protocol": "TCP",
+                            "port": 80,
+                            "targetPort": 80,
+                            "nodePort": 31921
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-various-port-ordering-reverse",
+                        "com.docker.service.name": "reverse",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "clusterIP": "10.101.212.240",
+                    "type": "LoadBalancer",
+                    "sessionAffinity": "None",
+                    "externalTrafficPolicy": "Cluster"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/sorted": {
+                "metadata": {
+                    "name": "sorted",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/sorted",
+                    "uid": "ea06ea49-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "24715",
+                    "creationTimestamp": "2018-09-19T20:38:06Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-sorted",
+                        "com.docker.service.name": "sorted",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "headless",
+                            "protocol": "TCP",
+                            "port": 55555,
+                            "targetPort": 55555
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-various-port-ordering-sorted",
+                        "com.docker.service.name": "sorted",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "clusterIP": "None",
+                    "type": "ClusterIP",
+                    "sessionAffinity": "None"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            },
+            "default/sorted-published": {
+                "metadata": {
+                    "name": "sorted-published",
+                    "namespace": "default",
+                    "selfLink": "/api/v1/namespaces/default/services/sorted-published",
+                    "uid": "ea5f0b0f-bc4b-11e8-a6d8-00155d0027c4",
+                    "resourceVersion": "24720",
+                    "creationTimestamp": "2018-09-19T20:38:07Z",
+                    "labels": {
+                        "com.docker.service.id": "test-various-port-ordering-sorted",
+                        "com.docker.service.name": "sorted",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "ownerReferences": [
+                        {
+                            "apiVersion": "compose.docker.com/v1beta2",
+                            "kind": "Stack",
+                            "name": "test-various-port-ordering",
+                            "uid": "e9736ad2-bc4b-11e8-bb16-00155d0027c4",
+                            "controller": true,
+                            "blockOwnerDeletion": true
+                        }
+                    ]
+                },
+                "spec": {
+                    "ports": [
+                        {
+                            "name": "80-tcp",
+                            "protocol": "TCP",
+                            "port": 80,
+                            "targetPort": 80,
+                            "nodePort": 31394
+                        },
+                        {
+                            "name": "81-tcp",
+                            "protocol": "TCP",
+                            "port": 81,
+                            "targetPort": 81,
+                            "nodePort": 31626
+                        }
+                    ],
+                    "selector": {
+                        "com.docker.service.id": "test-various-port-ordering-sorted",
+                        "com.docker.service.name": "sorted",
+                        "com.docker.stack.namespace": "test-various-port-ordering"
+                    },
+                    "clusterIP": "10.109.185.185",
+                    "type": "LoadBalancer",
+                    "sessionAffinity": "None",
+                    "externalTrafficPolicy": "Cluster"
+                },
+                "status": {
+                    "loadBalancer": {}
+                }
+            }
+        }
+    }
+}

@@ -1,0 +1,396 @@
+version: 2
+
+aliases:
+  docker-login: &docker-login
+    username: $DOCKER_USER
+    password: $DOCKER_PASS
+  compose-ci-docker: &compose-ci-docker
+    - image: dockereng/kube-compose-ci-docker
+      auth: *docker-login
+  compose-ci-golang: &compose-ci-golang
+    - image: dockereng/kube-compose-ci-golang
+      auth: *docker-login
+  cluster-setup-steps: &cluster-setup-steps
+    - attach_workspace:
+        at: /root
+    - run:
+        name: Deploy testkit cluster
+        command: ./scripts/e2e-cluster.sh create
+    - persist_to_workspace:
+        root: /root/
+        paths:
+          - '.kube'
+    - run:
+        name: Tear down testkit cluster (on failure)
+        command: |
+          ./scripts/e2e-cluster.sh delete
+        when: on_fail
+
+  deploy-images-steps: &deploy-images-steps
+    - attach_workspace:
+        at: /root
+    - run:
+        name: Deploy images
+        command: |
+          for image in controller-coverage api-server-coverage controller api-server; do
+            ./scripts/e2e-cluster.sh docker load -i /root/kube-compose-$image.tar
+          done
+    - run:
+        name: Tear down testkit cluster (on failure)
+        command: |
+          ./scripts/e2e-cluster.sh delete
+        when: on_fail
+
+  test-e2e-steps: &test-e2e-steps
+    - attach_workspace:
+        at: /root
+    - run:
+        name: Run e2e tests
+        command: |
+          export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
+          export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
+          export IMAGE_PREFIX=kube-compose-
+          export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY}/${IMAGE_PREFIX}
+          KUBECONFIG=$HOME/.kube/${KUBE_VERSION}/config.testkit kubectl create namespace e2emigration
+          KUBECONFIG=$HOME/.kube/${KUBE_VERSION}/config.testkit kubectl -n e2emigration create secret docker-registry migration-pull-secret --docker-server=https://index.docker.io/v1/ --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS} --docker-email=noreply@docker.com
+          PATH="$PATH:$GOPATH/bin" make KUBECONFIG=$HOME/.kube/${KUBE_VERSION}/config.testkit TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e
+    - persist_to_workspace:
+        root: /root/
+        paths:
+          - 'src/github.com/docker/compose-on-kubernetes/e2e/e2e/compose-*/coverage.txt'
+    - run:
+        name: Tear down testkit cluster
+        command: |
+          ./scripts/e2e-cluster.sh delete
+        when: always
+
+jobs:
+  checkout:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    steps:
+      - checkout
+      - setup_remote_docker:
+          version: 17.07.0-ce
+      - run:
+          name: Login to docker hub
+          command: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+      - run:
+          name: Setup testkit
+          command: ./scripts/e2e-cluster.sh auth
+      - persist_to_workspace:
+          root: /root/
+          paths:
+            - 'src'
+            - '.docker'
+            - '.testkit'
+            - '.aws'
+            - '.kube'
+  validate:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    steps:
+      - attach_workspace:
+          at: /root
+      - setup_remote_docker:
+          version: 17.07.0-ce
+      - run: make -f docker.Makefile validate
+  validate-vendor:
+    docker: *compose-ci-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    steps:
+      - attach_workspace:
+          at: /root
+      - run:
+          name: Validate vendoring
+          command: make validate-vendor
+  check-licenses:
+    docker: *compose-ci-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    steps:
+      - attach_workspace:
+          at: /root
+      - run: make check-licenses
+  images:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    steps:
+      - attach_workspace:
+          at: /root
+      - setup_remote_docker:
+          version: 17.07.0-ce
+      - run:
+          name: Build images
+          command: |
+            export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
+            export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
+            export IMAGE_PREFIX=kube-compose-
+            export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
+            echo "building images with TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} and IMAGE_REPO_PREFIX=${IMAGE_REPO_PREFIX}"
+            make -f docker.Makefile TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} images
+            for image in controller controller-coverage api-server api-server-coverage installer e2e-tests; do
+              docker save "${IMAGE_REPO_PREFIX}$image:${CIRCLE_TAG:-${CIRCLE_SHA1}}" -o "/root/${IMAGE_PREFIX}$image.tar"
+            done
+      - run:
+          name: Tear down testkit cluster (on failure)
+          command: |
+            KUBE_VERSION=1.10.5 ./scripts/e2e-cluster.sh delete
+            KUBE_VERSION=1.11.4 ./scripts/e2e-cluster.sh delete
+          when: on_fail
+      - persist_to_workspace:
+          root: /root/
+          paths:
+            - kube-compose-api-server.tar
+            - kube-compose-api-server-coverage.tar
+            - kube-compose-controller.tar
+            - kube-compose-controller-coverage.tar
+            - kube-compose-installer.tar
+            - kube-compose-e2e-tests.tar
+  test-unit:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    steps:
+      - attach_workspace:
+          at: /root
+      - setup_remote_docker:
+          version: 17.07.0-ce
+      - run:
+          name: Run unit tests
+          command: make -f docker.Makefile test-unit
+      - persist_to_workspace:
+          root: /root/
+          paths:
+            - 'src/github.com/docker/compose-on-kubernetes/coverage.txt'
+  cluster-setup-1_10:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.10.5
+    steps: *cluster-setup-steps
+  cluster-setup-1_11:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.11.4
+    steps: *cluster-setup-steps
+  cluster-setup-benchmark:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.11.4
+      - KUBE_ENV_NAME: benchmark
+    steps: *cluster-setup-steps
+  deploy-images-1_10:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.10.5
+    steps: *deploy-images-steps
+  deploy-images-1_11:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.11.4
+    steps: *deploy-images-steps
+  deploy-images-benchmark:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.11.4
+      - KUBE_ENV_NAME: benchmark
+    steps: *deploy-images-steps
+  test-e2e-1_10:
+    docker: *compose-ci-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.10.5
+    steps: *test-e2e-steps
+  test-e2e-1_11:
+    docker: *compose-ci-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.11.4
+    steps: *test-e2e-steps
+  coverage-upload:
+    docker: *compose-ci-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    steps:
+      - attach_workspace:
+          at: /root
+      - run:
+          name: Upload coverage
+          command: bash <(curl -s https://codecov.io/bash) -t 7fee2328-dd39-4a6d-8a8c-130440d8c3e6
+  push-to-hub:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    steps:
+      - attach_workspace:
+          at: /root
+      - setup_remote_docker:
+          version: 17.07.0-ce
+      - deploy:
+          name: push-to-hub
+          command: |
+            echo "Logging in with $DOCKER_USER"
+            echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
+            if [ "$CI_PULL_REQUEST" != "" ]; then
+              # case where a pull request from a fork's master
+              exit 0
+            fi
+            export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
+            export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
+            export IMAGE_PREFIX=kube-compose-
+            export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY}/${IMAGE_PREFIX}
+            TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}}
+            for image in api-server controller installer e2e-tests; do
+              docker load -i /root/${IMAGE_PREFIX}$image.tar
+              docker tag ${IMAGE_REPO_PREFIX}$image:$TAG ${IMAGE_REPO_PREFIX}$image:latest
+              docker push ${IMAGE_REPO_PREFIX}$image:$TAG
+              if echo "${CIRCLE_TAG}" | grep -q -v "rc"; then
+                docker push ${IMAGE_REPO_PREFIX}$image:latest
+              fi
+            done
+  run-benchmark:
+    docker: *compose-ci-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes    
+    environment:
+      - KUBE_VERSION: 1.11.4
+      - KUBE_ENV_NAME: benchmark
+    steps:
+      - attach_workspace:
+          at: /root
+      - setup_remote_docker:
+          version: 17.07.0-ce
+      - run:
+          name: benchmark
+          command: |
+            export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
+            export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
+            export IMAGE_PREFIX=kube-compose-
+            export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
+            make bin/e2e_benchmark
+            TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} ./bin/e2e_benchmark --kubeconfig=$HOME/.kube/benchmark/config.testkit --logs-namespace=benchmark -f report --max-duration 7m
+      - run:
+          name: Tear down testkit cluster
+          command: |
+            ./scripts/e2e-cluster.sh delete
+          when: always
+workflows:
+  version: 2
+  build:
+    jobs:
+      - checkout:
+          filters:
+            tags:
+              only: /v.*/
+      - cluster-setup-1_10:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /v.*/
+      - cluster-setup-1_11:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /v.*/
+      - test-unit:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /v.*/
+      - validate:
+          requires:
+            - images
+          filters:
+            tags:
+              only: /v.*/
+      - validate-vendor:
+          requires:
+            - deploy-images-1_11
+          filters:
+            tags:
+              only: /v.*/
+      - check-licenses:
+          requires:
+            - deploy-images-1_10
+          filters:
+            tags:
+              only: /v.*/
+      - images:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /v.*/
+      - test-unit:
+          requires:
+            - images
+          filters:
+            tags:
+              only: /v.*/
+      - deploy-images-1_10:
+          requires:
+            - cluster-setup-1_10
+            - images
+          filters:
+            tags:
+              only: /v.*/
+      - deploy-images-1_11:
+          requires:
+            - cluster-setup-1_11
+            - images
+          filters:
+            tags:
+              only: /v.*/
+      - test-e2e-1_10:
+          requires:
+            - deploy-images-1_10
+          filters:
+            tags:
+              only: /v.*/
+      - test-e2e-1_11:
+          requires:
+            - deploy-images-1_11
+          filters:
+            tags:
+              only: /v.*/
+      - coverage-upload:
+          requires:
+            - test-unit
+            - test-e2e-1_10
+            - test-e2e-1_11
+          filters:
+            tags:
+              only: /v.*/
+      - cluster-setup-benchmark:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /v.*/
+      - deploy-images-benchmark:
+          requires:
+            - cluster-setup-benchmark
+            - images
+          filters:
+            tags:
+              only: /v.*/
+      - run-benchmark:
+          requires:
+            - deploy-images-benchmark
+          filters:
+            tags:
+              only: /v.*/
+          
+      - push-to-hub:
+          requires:
+            - test-e2e-1_10
+            - test-e2e-1_11
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /v.*/
