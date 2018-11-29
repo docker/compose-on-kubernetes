@@ -41,6 +41,7 @@ type installer struct {
 	customMatch             func(Status) bool
 	expiresOffset           time.Duration
 	customTLSHash           string
+	debugImages             bool
 }
 
 // RuntimeObjectFilter allows to modify or bypass completely a k8s object
@@ -121,6 +122,7 @@ func WithUnsafe(o UnsafeOptions) InstallerOption {
 	return func(i *installer) {
 		i.commonOptions = o.OptionsCommon
 		i.enableCoverage = o.Coverage
+		i.debugImages = o.Debug
 	}
 }
 
@@ -158,6 +160,9 @@ func newInstaller(config *rest.Config, options ...InstallerOption) (*installer, 
 	if i.controllerImageOverride != "" && i.apiServerImageOverride != "" {
 		// compute a tag for these images
 		i.commonOptions.Tag = tagForCusomImages(i.controllerImageOverride, i.apiServerImageOverride)
+	}
+	if i.debugImages {
+		i.commonOptions.Tag = "debug"
 	}
 	i.labels = map[string]string{
 		fryKey:                composeFry,
@@ -306,6 +311,10 @@ func (c *installer) isInstalled() (Status, error) {
 }
 
 func (s Status) match(c *installer) (bool, string) {
+	// make sure debug tags are never a match
+	if c.commonOptions.Tag == "debug" || s.Tag == "debug" {
+		return false, "force redeploy if desired or current state is in debug mode"
+	}
 	if s.Tag == c.commonOptions.Tag && s.DefaultServiceType == c.commonOptions.DefaultServiceType {
 		// check customTLSHash
 

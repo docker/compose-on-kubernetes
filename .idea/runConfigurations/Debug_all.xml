@@ -1,0 +1,7 @@
+<component name="ProjectRunConfigurationManager">
+  <configuration default="false" name="Debug all" type="CompoundRunConfigurationType" factoryName="Compound Run Configuration">
+    <toRun type="GoRemoteDebugConfigurationType" name="api-server" />
+    <toRun type="GoRemoteDebugConfigurationType" name="controller" />
+    <method v="2" />
+  </configuration>
+</component>

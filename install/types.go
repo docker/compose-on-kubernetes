@@ -22,6 +22,7 @@ type OptionsCommon struct {
 type UnsafeOptions struct {
 	OptionsCommon
 	Coverage bool
+	Debug    bool
 }
 
 // EtcdOptions holds install options related to ETCD

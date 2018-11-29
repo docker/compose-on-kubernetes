@@ -1,0 +1,46 @@
+# syntax = tonistiigi/dockerfile:runmount20180607
+ARG BUILD_BASE
+ARG RUN_BASE
+
+FROM ${BUILD_BASE} AS build
+RUN apk add --no-cache \
+  coreutils \
+  make \
+  git
+RUN --mount=target=/root/.cache,type=cache git clone https://github.com/derekparker/delve.git /go/src/github.com/derekparker/delve && \
+  cd /go/src/github.com/derekparker/delve && \
+  git checkout v1.1.0 && \
+  make install
+WORKDIR /go/src/github.com/docker/compose-on-kubernetes
+COPY . .
+ARG BUILDTIME
+ARG GITCOMMIT
+ARG VERSION
+ARG IMAGE_REPO_PREFIX
+ENV GITCOMMIT=$GITCOMMIT VERSION=$VERSION BUILDTIME=$BUILDTIME IMAGE_REPO_PREFIX=$IMAGE_REPO_PREFIX
+ENV CGO_ENABLED=0
+RUN --mount=target=/root/.cache,type=cache make DEBUG=true bin/compose-controller bin/api-server
+
+
+FROM ${RUN_BASE} AS runbase
+RUN apk add ca-certificates --no-cache
+COPY --from=build /go/bin/dlv /
+WORKDIR /go/src/github.com/docker/compose-on-kubernetes
+COPY . .
+
+# compose-api-server with debug symbols
+FROM runbase AS compose-api-server-debug
+ENTRYPOINT ["/api-server"]
+COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/bin/api-server /api-server
+
+# compose-api-server with remote debugging
+FROM compose-api-server-debug AS compose-api-server-live-debug
+ENTRYPOINT ["/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--accept-multiclient=true", "exec", "/api-server", "--"]
+
+# compose-controller with debug symbols
+FROM runbase AS compose-controller-debug
+ENTRYPOINT ["/compose-controller", "--log-level", "debug"]
+COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/bin/compose-controller /compose-controller
+
+FROM compose-controller-debug AS compose-controller-live-debug
+ENTRYPOINT ["/dlv", "--listen=:40000", "--headless=true", "--api-version=2", "--accept-multiclient=true", "exec", "/compose-controller", "--"]

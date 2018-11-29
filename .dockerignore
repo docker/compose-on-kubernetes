@@ -1,0 +1,8 @@
+.git
+.vscode
+.idea
+.circleci
+bin
+ci-images
+docs
+samples
