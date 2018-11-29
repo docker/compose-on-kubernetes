@@ -1,0 +1,21 @@
+#!/bin/sh -xe
+
+kubectlx ()
+{
+    kubectl --kubeconfig "$HOME/.kube/${KUBE_VERSION}/config.testkit" -n e2e "$@"
+}
+
+PODS=$(kubectlx get pods -o json | jq ".items[].metadata.name" | tr -d '"')
+
+for p in $PODS; do
+    echo "Retrieving coverage from $p"
+    PS=$(kubectlx exec "$p" $(echo "$p" | grep -q api && echo "-c" "compose") -- ps aux)
+    PID=$(echo "$PS" | grep '/[-a-z]*.test' | awk "{print \$1}")
+    kubectlx exec "$p" $(echo "$p" | grep -q api && echo "-c" "compose") -- kill -2 $PID
+    while ! kubectlx exec  "$p" $(echo "$p" | grep -q api && echo "-c" "compose") -- test -f /coverage.txt; do
+        kubectlx exec "$p" $(echo "$p" | grep -q api && echo "-c" "compose") -- ps aux
+        sleep 1
+    done
+    mkdir -p "e2e/$p"
+    kubectlx exec  "$p" $(echo "$p" | grep -q api && echo "-c" "compose") -- cat /coverage.txt > "e2e/$p/coverage.txt"
+done

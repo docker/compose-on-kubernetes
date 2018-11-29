@@ -1,0 +1,11 @@
+.idea
+bin
+apiserver.local.config/
+kubeconfig
+default.etcd
+./config/
+.pull-secret
+.vscode
+testkit
+junit*.xml
+*coverage.txt

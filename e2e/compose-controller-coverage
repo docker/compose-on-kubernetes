@@ -1,0 +1,5 @@
+#!/bin/sh -xe
+
+if /compose-controller.test -test.coverprofile=/coverage.txt; then
+    sleep 3600
+fi

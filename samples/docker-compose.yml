@@ -1,0 +1,20 @@
+version: '3.3'
+
+services:
+  web:
+    build: web
+    image: dockerdemos/lab-web
+    ports:
+     - "80:80"
+
+  words:
+    build: words
+    image: dockerdemos/lab-words
+    deploy:
+      replicas: 5
+
+  db:
+    build: db
+    image: dockerdemos/lab-db
+    volumes: 
+    - test-volume:/test-volume

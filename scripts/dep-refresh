@@ -1,0 +1,13 @@
+#!/usr/bin/env bash
+dep ensure -v
+
+# remove links to outer directories
+find ./vendor -type l | while read filename
+do
+	if realpath $filename | grep -v "^$(pwd)" > /dev/null; then
+		rm -f $filename
+	fi
+done
+
+# remove broken links
+find ./vendor -type l -exec test ! -e {} \; -print | xargs rm -f

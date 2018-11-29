@@ -1,0 +1,17 @@
+image: Visual Studio 2017
+
+environment:
+  GOPATH: C:\gopath
+  GOROOT: C:\go110
+  CGO_ENABLED: "1"
+
+clone_folder: c:\gopath\src\github.com\docker\compose-on-kubernetes
+
+before_build:
+  - set PATH=%GOROOT%\bin;%PATH%
+
+build_script:
+  - cmd: C:\msys64\usr\bin\bash -lc "cd /c/gopath/src/github.com/docker/compose-on-kubernetes && make GITCOMMIT=$(echo ${APPVEYOR_REPO_COMMIT} | cut -c 1-7) VERSION=${APPVEYOR_REPO_TAG_NAME} binaries"
+
+test_script:
+  - cmd: C:\msys64\usr\bin\bash -lc "cd /c/gopath/src/github.com/docker/compose-on-kubernetes && make test"

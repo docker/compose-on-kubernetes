@@ -1,0 +1,7 @@
+kind: "Stack"
+apiVersion: "compose.docker.com/v1beta1"
+metadata:
+  name: "sample-stack"
+  namespace: "default"
+spec:
+  composeFile: "hello world"
