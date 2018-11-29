@@ -1,4 +1,5 @@
-.idea
+.idea/*
+!./idea/runConfigurations/
 bin
 apiserver.local.config/
 kubeconfig

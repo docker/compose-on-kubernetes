@@ -36,14 +36,18 @@ const (
 	composeFry                  = "compose"
 	composeAPIServerFry         = "compose.api"
 	composeGroupName            = "compose.docker.com"
+
+	controllerDebugPort = 40000
+	apiServerDebugPort  = 40001
 )
 
 var (
-	imagePrefix = func() string {
+	imageRepoPrefix = "docker/kube-compose-"
+	imagePrefix     = func() string {
 		if ir := os.Getenv("IMAGE_REPO_PREFIX"); ir != "" {
 			return ir
 		}
-		return "docker/kube-compose-"
+		return imageRepoPrefix
 	}()
 	everythingSelector = fmt.Sprintf("%s in (%s, %s)", fryKey, composeFry, composeAPIServerFry)
 )
@@ -489,37 +493,49 @@ func applyCustomTLSHash(hash string, deploy *appsv1beta2types.Deployment) {
 	deploy.Spec.Template.Annotations[customTLSHashAnnotationName] = hash
 }
 
-func (c *installer) createAPIServer(ctx *installerContext) error {
-	log.Debugf("Create API server deployment and service in namespace %q", c.commonOptions.Namespace)
-	image, args, env, pullPolicy := func() (string, []string, []corev1types.EnvVar, corev1types.PullPolicy) {
-		if c.enableCoverage {
-			return imagePrefix + "api-server-coverage",
-				[]string{},
-				[]corev1types.EnvVar{{Name: "TEST_API_SERVER", Value: "1"}},
-				corev1types.PullNever
-		}
-		return imagePrefix + "api-server",
-			[]string{
-				"--kubeconfig", "",
-				"--authentication-kubeconfig", "",
-				"--authorization-kubeconfig", "",
+func (c *installer) configureAPIServerImage() (image string, args []string, env []corev1types.EnvVar, pullPolicy corev1types.PullPolicy) {
+	if c.enableCoverage {
+		return imagePrefix + "api-server-coverage" + ":" + c.commonOptions.Tag,
+			[]string{},
+			[]corev1types.EnvVar{{Name: "TEST_API_SERVER", Value: "1"}},
+			corev1types.PullNever
+	}
+	if c.debugImages {
+		return imagePrefix + "api-server-debug:latest", []string{
+				"--kubeconfig=",
+				"--authentication-kubeconfig=",
+				"--authorization-kubeconfig=",
 				"--service-name=compose-api",
 				"--service-namespace", c.commonOptions.Namespace,
 			},
 			[]corev1types.EnvVar{},
-			corev1types.PullAlways
-	}()
+			corev1types.PullNever
+	}
+	return imagePrefix + "api-server" + ":" + c.commonOptions.Tag,
+		[]string{
+			"--kubeconfig", "",
+			"--authentication-kubeconfig=",
+			"--authorization-kubeconfig=",
+			"--service-name=compose-api",
+			"--service-namespace", c.commonOptions.Namespace,
+		},
+		[]corev1types.EnvVar{},
+		corev1types.PullAlways
+}
 
+func (c *installer) createAPIServer(ctx *installerContext) error {
+	log.Debugf("Create API server deployment and service in namespace %q", c.commonOptions.Namespace)
+	image, args, env, pullPolicy := c.configureAPIServerImage()
 	if c.apiServerImageOverride != "" {
 		image = c.apiServerImageOverride
-	} else {
-		image += ":" + c.commonOptions.Tag
 	}
 
 	affinity := c.commonOptions.APIServerAffinity
 	if affinity == nil {
 		affinity = linuxAmd64NodeAffinity
 	}
+
+	log.Infof("Api server: image: %q, pullPolicy: %q", image, pullPolicy)
 
 	deploy := &appsv1beta2types.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
@@ -563,12 +579,53 @@ func (c *installer) createAPIServer(ctx *installerContext) error {
 			},
 		},
 	}
+
 	applyEtcdOptions(&deploy.Spec.Template.Spec, c.etcdOptions)
 	applyNetworkOptions(&deploy.Spec.Template.Spec, c.networkOptions)
 	port := 9443
 	if c.networkOptions != nil && c.networkOptions.Port != 0 {
 		port = int(c.networkOptions.Port)
 	}
+
+	applyCustomTLSHash(c.customTLSHash, deploy)
+
+	shouldDo, err := c.objectFilter.filter(deploy)
+	if err != nil {
+		return err
+	}
+	if shouldDo {
+		if c.debugImages {
+			trueval := true
+			for ix := range deploy.Spec.Template.Spec.Containers {
+				deploy.Spec.Template.Spec.Containers[ix].SecurityContext = &corev1types.SecurityContext{
+					Privileged: &trueval,
+				}
+				deploy.Spec.Template.Spec.Containers[ix].LivenessProbe = nil
+			}
+		}
+		d, err := c.appsClient.Deployments(c.commonOptions.Namespace).Get("compose-api", metav1.GetOptions{})
+		if err == nil {
+			deploy.ObjectMeta.ResourceVersion = d.ObjectMeta.ResourceVersion
+			_, err = c.appsClient.Deployments(c.commonOptions.Namespace).Update(deploy)
+		} else {
+			_, err = c.appsClient.Deployments(c.commonOptions.Namespace).Create(deploy)
+		}
+		if err != nil {
+			return err
+		}
+	}
+
+	if err = c.createAPIServerService(port); err != nil {
+		return err
+	}
+	if c.debugImages {
+		// create a load balanced service for exposing remote debug endpoint
+		return c.createDebugService("compose-api-server-remote-debug", apiServerDebugPort, c.apiLabels)
+	}
+	return nil
+}
+
+func (c *installer) createAPIServerService(port int) error {
 	svc := &corev1types.Service{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "compose-api",
@@ -586,27 +643,7 @@ func (c *installer) createAPIServer(ctx *installerContext) error {
 			Selector: c.apiLabels,
 		},
 	}
-
-	applyCustomTLSHash(c.customTLSHash, deploy)
-
-	shouldDo, err := c.objectFilter.filter(deploy)
-	if err != nil {
-		return err
-	}
-	if shouldDo {
-
-		d, err := c.appsClient.Deployments(c.commonOptions.Namespace).Get("compose-api", metav1.GetOptions{})
-		if err == nil {
-			deploy.ObjectMeta.ResourceVersion = d.ObjectMeta.ResourceVersion
-			_, err = c.appsClient.Deployments(c.commonOptions.Namespace).Update(deploy)
-		} else {
-			_, err = c.appsClient.Deployments(c.commonOptions.Namespace).Create(deploy)
-		}
-		if err != nil {
-			return err
-		}
-	}
-	shouldDo, err = c.objectFilter.filter(svc)
+	shouldDo, err := c.objectFilter.filter(svc)
 	if err != nil {
 		return err
 	}
@@ -619,9 +656,7 @@ func (c *installer) createAPIServer(ctx *installerContext) error {
 		} else {
 			_, err = c.coreClient.Services(c.commonOptions.Namespace).Create(svc)
 		}
-		if err != nil {
-			return err
-		}
+		return err
 	}
 	return nil
 }
@@ -633,18 +668,26 @@ func pullSecrets(secret *corev1types.Secret) []corev1types.LocalObjectReference 
 	return []corev1types.LocalObjectReference{{Name: secret.Name}}
 }
 
+func (c *installer) configureControllerImage() (image string, args []string, pullPolicy v1.PullPolicy) {
+	if c.enableCoverage {
+		return imagePrefix + "controller-coverage" + ":" + c.commonOptions.Tag, []string{}, corev1types.PullNever
+	}
+	if c.debugImages {
+		return imagePrefix + "controller-debug:latest", []string{
+			"--kubeconfig=",
+			"--reconciliation-interval", c.commonOptions.ReconciliationInterval.String(),
+		}, corev1types.PullNever
+	}
+	return imagePrefix + "controller:" + c.commonOptions.Tag, []string{
+		"--kubeconfig", "",
+		"--reconciliation-interval", c.commonOptions.ReconciliationInterval.String(),
+	}, corev1types.PullAlways
+}
+
 func (c *installer) createController(ctx *installerContext) error {
 	log.Debugf("Create deployment with tag %q in namespace %q, reconciliation interval %s", c.commonOptions.Tag, c.commonOptions.Namespace, c.commonOptions.ReconciliationInterval)
 
-	image, args, pullPolicy := func() (string, []string, v1.PullPolicy) {
-		if c.enableCoverage {
-			return imagePrefix + "controller-coverage", []string{}, corev1types.PullNever
-		}
-		return imagePrefix + "controller", []string{
-			"--kubeconfig", "",
-			"--reconciliation-interval", c.commonOptions.ReconciliationInterval.String(),
-		}, corev1types.PullAlways
-	}()
+	image, args, pullPolicy := c.configureControllerImage()
 
 	if c.commonOptions.DefaultServiceType != "" {
 		args = append(args, "--default-service-type="+c.commonOptions.DefaultServiceType)
@@ -652,13 +695,12 @@ func (c *installer) createController(ctx *installerContext) error {
 
 	if c.controllerImageOverride != "" {
 		image = c.controllerImageOverride
-	} else {
-		image += ":" + c.commonOptions.Tag
 	}
 	affinity := c.commonOptions.ControllerAffinity
 	if affinity == nil {
 		affinity = linuxAmd64NodeAffinity
 	}
+	log.Infof("Controller: image: %q, pullPolicy: %q", image, pullPolicy)
 	deploy := &appsv1beta2types.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "compose",
@@ -710,14 +752,55 @@ func (c *installer) createController(ctx *installerContext) error {
 		return err
 	}
 	if shouldDo {
+		if c.debugImages {
+			trueval := true
+			for ix := range deploy.Spec.Template.Spec.Containers {
+				deploy.Spec.Template.Spec.Containers[ix].SecurityContext = &corev1types.SecurityContext{
+					Privileged: &trueval,
+				}
+				deploy.Spec.Template.Spec.Containers[ix].LivenessProbe = nil
+			}
+		}
 		d, err := c.appsClient.Deployments(c.commonOptions.Namespace).Get("compose", metav1.GetOptions{})
 		if err == nil {
 			deploy.ObjectMeta.ResourceVersion = d.ObjectMeta.ResourceVersion
-			_, err = c.appsClient.Deployments(c.commonOptions.Namespace).Update(deploy)
+			if _, err = c.appsClient.Deployments(c.commonOptions.Namespace).Update(deploy); err != nil {
+				return err
+			}
+		} else if _, err = c.appsClient.Deployments(c.commonOptions.Namespace).Create(deploy); err != nil {
 			return err
 		}
-		_, err = c.appsClient.Deployments(c.commonOptions.Namespace).Create(deploy)
-		return err
+	}
+	if c.debugImages {
+		// create a load balanced service for exposing remote debug endpoint
+		return c.createDebugService("compose-controller-remote-debug", controllerDebugPort, c.labels)
 	}
 	return nil
+}
+
+func (c *installer) createDebugService(name string, port int32, labels map[string]string) error {
+	svc, err := c.coreClient.Services(c.commonOptions.Namespace).Get(name, metav1.GetOptions{})
+	if err == nil {
+		svc.Spec.Type = corev1types.ServiceTypeLoadBalancer
+		svc.Spec.Ports = []corev1types.ServicePort{
+			{Name: "delve", Port: port, TargetPort: intstr.FromInt(40000)},
+		}
+		svc.Spec.Selector = labels
+		_, err = c.coreClient.Services(c.commonOptions.Namespace).Update(svc)
+		return err
+	}
+	_, err = c.coreClient.Services(c.commonOptions.Namespace).Create(&corev1types.Service{
+		ObjectMeta: metav1.ObjectMeta{
+			Name:   name,
+			Labels: labels,
+		},
+		Spec: corev1types.ServiceSpec{
+			Type:     corev1types.ServiceTypeLoadBalancer,
+			Selector: labels,
+			Ports: []corev1types.ServicePort{
+				{Name: "delve", Port: port, TargetPort: intstr.FromInt(40000)},
+			},
+		},
+	})
+	return err
 }

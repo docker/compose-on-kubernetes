@@ -23,16 +23,8 @@ LDFLAGS := "-s -w \
   -X ${PKG_NAME}/internal.Version=${VERSION} \
   -X ${PKG_NAME}/install.imageRepoPrefix=${IMAGE_REPO_PREFIX}"
 
-## local dev related
-ifeq ($(ETCD_ADDRESS),)
-  ifeq ($(OS),Windows_NT)
-    HOST_IP := $(shell powershell -Command "(Test-Connection -ComputerName \$env:COMPUTERNAME -Count 1).IPV4Address.IPAddressToString")
-  else ifeq ($(shell uname),Darwin)
-    HOST_IP := $(shell ipconfig getifaddr en0)
-  else
-    HOST_IP := $(shell hostname -i | awk '{print $1}')
-  endif
-  ETCD_ADDRESS := http://$(HOST_IP):7777
+ifeq ($(DEBUG),true)
+  GOBUILD_FLAGS := -gcflags "all=-N -l"
 endif
 
 .PHONY: all binaries check test e2e vendor run clean validate build-validate-image install uninstall e2e-binary
@@ -49,7 +41,7 @@ clean: ## clean the binaries
 
 bin/%: cmd/% FORCE
 	@echo "🌟 $@"
-	@go build $(VERBOSE_GO) -ldflags=$(LDFLAGS) -o $@$(EXEC_EXT) ./$<
+	@go build $(VERBOSE_GO) $(GOBUILD_FLAGS) -ldflags=$(LDFLAGS) -o $@$(EXEC_EXT) ./$<
 
 e2e-binary: ## make the end to end test binary
 	@echo "🌟 $@"
@@ -92,23 +84,6 @@ e2e-no-provisioning: e2e-binary ## run the e2e tests on an already provisionned 
 	ginkgo -v -p e2e/e2e.test -- --skip-provisioning $(TEST_ARGS) 2>&1 | tee e2e-test-output.txt
 	grep SUCCESS e2e-test-output.txt | grep -q "$(E2E_EXPECTED_SKIP) Skipped"
 
-setup-api-server-dev: ## setup api-server kube objects for local development
-	@( 																\
-		cd artifacts && ./setup-linux-dev.sh ${ETCD_ADDRESS} 		\
-	)
-
-teardown-api-server-dev: ## remove api-server kube objects for local development
-	@(																\
-		kubectl delete apiservice v1beta1.compose.docker.com && 	\
-		kubectl delete apiservice v1beta2.compose.docker.com && 	\
-		kubectl delete endpoints compose-api -n=docker &&			\
-		kubectl delete service compose-api -n=docker &&				\
-		kubectl delete namespace docker 							\
-	)
-
-run-api-server-dev: bin/api-server ## run dev api-server
-	ETCD_ADDRESS=${ETCD_ADDRESS} ./run-linux-dev.sh
-
 validate-vendor: ## validate vendoring
 	./scripts/validate-vendor
 
@@ -120,4 +95,3 @@ help: ## this help
 
 openapi:
 	openapi-gen -i github.com/docker/compose-on-kubernetes/api/compose/v1beta1,github.com/docker/compose-on-kubernetes/api/compose/v1beta2,github.com/docker/compose-on-kubernetes/api/compose/impersonation,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/apimachinery/pkg/version,k8s.io/apimachinery/pkg/runtime -p github.com/docker/compose-on-kubernetes/api/openapi
-	
