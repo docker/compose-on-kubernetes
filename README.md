@@ -1,4 +1,4 @@
-# Compose on Kubernetes
+# Compose on Kubernetes [![CircleCI](https://circleci.com/gh/docker/compose-on-kubernetes/tree/master.svg?style=svg)](https://circleci.com/gh/docker/compose-on-kubernetes/tree/master)
 
 Compose on Kubernetes tools add support of Docker Compose files in Kubernetes.
 
