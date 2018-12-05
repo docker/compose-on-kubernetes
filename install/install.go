@@ -28,6 +28,10 @@ const (
 	// TimeoutDefault is the default install timeout.
 	TimeoutDefault = 30 * time.Second
 
+	// installWaitNumMaxPolls is the maximum number of API operations to be
+	// performed in sequence while waiting for the component to be installed.
+	installWaitNumMaxPolls = 60
+
 	fryKey                      = "com.docker.fry"
 	imageTagKey                 = "com.docker.image-tag"
 	namespaceKey                = "com.docker.deploy-namespace"
@@ -171,7 +175,7 @@ func IsRunning(config *rest.Config) (bool, error) {
 			if err != nil {
 				return false, err
 			}
-			err = wait.For(10, func() (bool, error) {
+			err = wait.For(installWaitNumMaxPolls, func() (bool, error) {
 				_, err := stackClient.ComposeV1beta2().Stacks("e2e").List(metav1.ListOptions{})
 				if err != nil {
 					return false, nil
