@@ -2,40 +2,37 @@
 
 [![CircleCI](https://circleci.com/gh/docker/compose-on-kubernetes/tree/master.svg?style=svg)](https://circleci.com/gh/docker/compose-on-kubernetes/tree/master)
 
-Compose on Kubernetes tools add support of Docker Compose files in Kubernetes.
+Compose on Kubernetes allows you to deploy Docker Compose files onto a Kubernetes cluster.
 
-## Architecture
+# Get started
 
-This project brings `compose.docker.com/v1beta1` and `compose.docker.com/v1beta2` APIs to your cluster.
+Compose on Kubernetes comes installed on Docker Dekstop and Docker Enterprise. To deploy a stack, you can use the Docker CLI:
 
-See the [architecture document](docs/architecture.md) for more information.
+```console
+$ cat docker-compose.yml
+version: '3.3'
 
-## Running for local development
+services:
 
-First ensure that you have a running Kubernetes cluster set up.
+  db:
+    build: db
+    image: dockersamples/k8s-wordsmith-db
 
-Perform a local build of the binaries.
+  words:
+    build: words
+    image: dockersamples/k8s-wordsmith-api
+    deploy:
+      replicas: 5
 
-```bash
-$ make binaries
+  web:
+    build: web
+    image: dockersamples/k8s-wordsmith-web
+    ports:
+     - "33000:80"
+
+$ docker stack deploy --orchestrator=kubernetes -c docker-compose.yml hellostack
 ```
 
-Setup the cluster for local development.
+# Developing Compose on Kubernetes
 
-```bash
-$ make setup-api-server-dev
-```
-
-Run the API server.
-
-```bash
-$ make run-api-server-dev
-```
-
-Run the `compose-controller`.
-
-```bash
-$ ./bin/compose-controller
-```
-
-You should now be able to deploy stacks to your cluster using `docker stack deploy`.
+See the [contributing](./CONTRIBUTING.md) and [debugging](./DEBUGGING.md) guides.
