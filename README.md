@@ -6,7 +6,7 @@ Compose on Kubernetes allows you to deploy Docker Compose files onto a Kubernete
 
 # Get started
 
-Compose on Kubernetes comes installed on Docker Dekstop and Docker Enterprise. To deploy a stack, you can use the Docker CLI:
+Compose on Kubernetes comes installed on Docker Desktop and Docker Enterprise. To deploy a stack, you can use the Docker CLI:
 
 ```console
 $ cat docker-compose.yml
