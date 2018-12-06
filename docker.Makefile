@@ -68,7 +68,7 @@ uninstall: ${IMAGE_REPO_PREFIX}installer ## uninstall compose kubernetes compone
 	@docker run --net=host --rm -v ~/.kube/config:/root/.kube/config ${IMAGE_REPO_PREFIX}installer -uninstall
 
 help: ## this help
-	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(Makefile_LIST) | sort
+	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 test-unit:
 	@tar cf - Dockerfile doc.go Makefile common.mk cmd install api internal vendor e2e dockerfiles/Dockerfile.test | docker build -t docker/kube-compose-unit-test-base --build-arg TEST_BASE=$(TEST_BASE_IMAGE) -f dockerfiles/Dockerfile.test -
