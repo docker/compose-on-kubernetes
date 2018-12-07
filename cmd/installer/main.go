@@ -23,6 +23,7 @@ func parseOptions(uninstall *bool, options *install.SafeOptions) *rest.Config {
 	flag.DurationVar(&options.OptionsCommon.ReconciliationInterval, "reconciliation-interval", constants.DefaultFullSyncInterval, "Interval of reconciliation loop")
 	flag.StringVar(&options.OptionsCommon.Tag, "tag", "latest", "Image tag")
 	flag.StringVar(&options.Etcd.Servers, "etcd-servers", "", "etcd server addresses")
+	flag.BoolVar(&options.SkipLivenessProbes, "skip-liveness-probes", false, "Disable liveness probe on Controller and API server deployments. Use this when HTTPS liveness probe fails.")
 
 	flag.StringVar(&etcdCA, "etcd-ca-file", "", "CA of etcd TLS certificate")
 	flag.StringVar(&etcdCert, "etcd-cert-file", "", "TLS client certificate for accessing etcd")

@@ -583,6 +583,9 @@ func (c *installer) createAPIServer(ctx *installerContext) error {
 			},
 		},
 	}
+	if c.commonOptions.SkipLivenessProbes {
+		deploy.Spec.Template.Spec.Containers[0].LivenessProbe = nil
+	}
 
 	applyEtcdOptions(&deploy.Spec.Template.Spec, c.etcdOptions)
 	applyNetworkOptions(&deploy.Spec.Template.Spec, c.networkOptions)
@@ -749,6 +752,10 @@ func (c *installer) createController(ctx *installerContext) error {
 	}
 	if c.enableCoverage {
 		deploy.Spec.Template.Spec.Containers[0].Env = []corev1types.EnvVar{{Name: "TEST_COMPOSE_CONTROLLER", Value: "1"}}
+	}
+
+	if c.commonOptions.SkipLivenessProbes {
+		deploy.Spec.Template.Spec.Containers[0].LivenessProbe = nil
 	}
 
 	shouldDo, err := c.objectFilter.filter(deploy)
