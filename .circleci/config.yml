@@ -134,8 +134,8 @@ jobs:
       - run:
           name: Tear down testkit cluster (on failure)
           command: |
-            KUBE_VERSION=1.10.5 ./scripts/e2e-cluster.sh delete
-            KUBE_VERSION=1.11.4 ./scripts/e2e-cluster.sh delete
+            KUBE_VERSION=1.10.11 ./scripts/e2e-cluster.sh delete
+            KUBE_VERSION=1.11.5 ./scripts/e2e-cluster.sh delete
           when: on_fail
       - persist_to_workspace:
           root: /root/
@@ -165,51 +165,51 @@ jobs:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
-      - KUBE_VERSION: 1.10.5
+      - KUBE_VERSION: 1.10.11
     steps: *cluster-setup-steps
   cluster-setup-1_11:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
-      - KUBE_VERSION: 1.11.4
+      - KUBE_VERSION: 1.11.5
     steps: *cluster-setup-steps
   cluster-setup-benchmark:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
-      - KUBE_VERSION: 1.11.4
+      - KUBE_VERSION: 1.11.5
       - KUBE_ENV_NAME: benchmark
     steps: *cluster-setup-steps
   deploy-images-1_10:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
-      - KUBE_VERSION: 1.10.5
+      - KUBE_VERSION: 1.10.11
     steps: *deploy-images-steps
   deploy-images-1_11:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
-      - KUBE_VERSION: 1.11.4
+      - KUBE_VERSION: 1.11.5
     steps: *deploy-images-steps
   deploy-images-benchmark:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
-      - KUBE_VERSION: 1.11.4
+      - KUBE_VERSION: 1.11.5
       - KUBE_ENV_NAME: benchmark
     steps: *deploy-images-steps
   test-e2e-1_10:
     docker: *compose-ci-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
-      - KUBE_VERSION: 1.10.5
+      - KUBE_VERSION: 1.10.11
     steps: *test-e2e-steps
   test-e2e-1_11:
     docker: *compose-ci-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
-      - KUBE_VERSION: 1.11.4
+      - KUBE_VERSION: 1.11.5
     steps: *test-e2e-steps
   coverage-upload:
     docker: *compose-ci-golang
@@ -285,7 +285,7 @@ jobs:
     docker: *compose-ci-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes    
     environment:
-      - KUBE_VERSION: 1.11.4
+      - KUBE_VERSION: 1.11.5
       - KUBE_ENV_NAME: benchmark
     steps:
       - attach_workspace:
