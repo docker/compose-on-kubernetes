@@ -265,8 +265,7 @@ jobs:
               # case where we are not on a tag
               exit 0
             fi      
-            export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
-            export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
+            export IMAGE_REPOSITORY=docker
             export IMAGE_PREFIX=kube-compose-
             export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY}/${IMAGE_PREFIX}
             TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}}          
@@ -276,7 +275,11 @@ jobs:
             mv bin/installer bin/installer-darwin
             GOOS=windows make bin/installer
             mv bin/installer bin/installer-windows.exe
-            go get github.com/tcnksm/ghr
+            go get -d github.com/tcnksm/ghr
+            cd /root/src/github.com/tcnksm/ghr
+            git checkout v0.12.0
+            go install
+            cd /root/src/github.com/docker/compose-on-kubernetes
             ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${TAG} ./bin/
   run-benchmark:
     docker: *compose-ci-golang
