@@ -841,7 +841,7 @@
     "storage/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "kubernetes-1.11.4"
+  revision = "kubernetes-1.11.5"
 
 [[projects]]
   digest = "1:e762108455a2930c3d35d270c67192f67c4d68135391e29dae2506156c630cd1"
@@ -854,7 +854,7 @@
     "pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "kubernetes-1.11.4"
+  revision = "kubernetes-1.11.5"
 
 [[projects]]
   digest = "1:d1cb38288f05c05ab1900a3600a7545837483d4d9dd9268bb352947a47f85ec9"
@@ -910,7 +910,7 @@
     "third_party/forked/golang/reflect",
   ]
   pruneopts = "NUT"
-  revision = "kubernetes-1.11.4"
+  revision = "kubernetes-1.11.5"
 
 [[projects]]
   digest = "1:5c5d0d8da6a2a6b1df8509fefe8bacce11c6f0b3b4f860e4a5344d375404c90c"
@@ -1007,7 +1007,7 @@
     "plugin/pkg/authorizer/webhook",
   ]
   pruneopts = "NUT"
-  revision = "kubernetes-1.11.4"
+  revision = "kubernetes-1.11.5"
 
 [[projects]]
   digest = "1:3a273c18893721496e09d87704cbbd83d3e6996d7a50e7d1fa47cf7c914c220b"
@@ -1172,7 +1172,7 @@
     "util/retry",
   ]
   pruneopts = "NUT"
-  revision = "kubernetes-1.11.4"
+  revision = "kubernetes-1.11.5"
 
 [[projects]]
   digest = "1:8347f4a07e009c4199157346c27f02a0cd1ecabf3fab1379400df11ac158185d"
@@ -1185,7 +1185,7 @@
     "pkg/client/clientset_generated/clientset/typed/apiregistration/v1beta1",
   ]
   pruneopts = "NUT"
-  revision = "kubernetes-1.11.4"
+  revision = "kubernetes-1.11.5"
 
 [[projects]]
   branch = "master"
@@ -1237,6 +1237,7 @@
     "k8s.io/apimachinery/pkg/api/meta",
     "k8s.io/apimachinery/pkg/api/resource",
     "k8s.io/apimachinery/pkg/apis/meta/v1",
+    "k8s.io/apimachinery/pkg/apis/meta/v1beta1",
     "k8s.io/apimachinery/pkg/conversion",
     "k8s.io/apimachinery/pkg/fields",
     "k8s.io/apimachinery/pkg/labels",
