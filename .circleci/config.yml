@@ -250,6 +250,37 @@ jobs:
                 docker push ${IMAGE_REPO_PREFIX}$image:latest
               fi
             done
+  build-and-release-installer:
+    docker: *compose-ci-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    steps:
+      - attach_workspace:
+          at: /root
+      - setup_remote_docker:
+          version: 17.07.0-ce
+      - deploy:
+          name: push-to-hub
+          command: |      
+            if [ "$CIRCLE_TAG" == "" ]; then
+              # case where we are not on a tag
+              exit 0
+            fi      
+            export IMAGE_REPOSITORY=docker
+            export IMAGE_PREFIX=kube-compose-
+            export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY}/${IMAGE_PREFIX}
+            TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}}          
+            GOOS=linux make bin/installer
+            mv bin/installer bin/installer-linux
+            GOOS=darwin make bin/installer
+            mv bin/installer bin/installer-darwin
+            GOOS=windows make bin/installer
+            mv bin/installer bin/installer-windows.exe
+            go get -d github.com/tcnksm/ghr
+            cd /root/src/github.com/tcnksm/ghr
+            git checkout v0.12.0
+            go install
+            cd /root/src/github.com/docker/compose-on-kubernetes
+            ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${TAG} ./bin/
   run-benchmark:
     docker: *compose-ci-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes    
@@ -394,3 +425,13 @@ workflows:
               only: master
             tags:
               only: /v.*/
+      - build-and-release-installer:
+          requires:
+            - test-e2e-1_10
+            - test-e2e-1_11
+          filters:
+            branches:
+              only: master
+            tags:
+              only: /v.*/
+              
