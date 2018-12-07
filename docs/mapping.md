@@ -1,6 +1,6 @@
 # Stack to Kubernetes mapping
 
-There are several key differences between Swarm and Kubernetes which  prevent a
+There are several key differences between Swarm and Kubernetes which prevent a
 1:1 mapping of Swarm onto Kubernetes. An opinionated mapping can be achieved,
 however, with a couple of minor caveats.
 
@@ -201,7 +201,11 @@ implicitly creates
 and
 _ClusterIP_ services.
 
-**Note**: For clusters that do not have a LoadBalancer, the controller can be run with `--default-service-type=NodePort`. This way, a NodePort service is created instead of a LoadBalancer service, with the published port being used as the node port. This impose the published port to be within the configured NodePort range.
+**Note**: For clusters that do not have a _LoadBalancer_, the controller can be
+run with `--default-service-type=NodePort`. This way, a _NodePort_ service is
+created instead of a _LoadBalancer_ service, with the published port being used
+as the node port. This requires that the published port to be within the
+configured _NodePort_ range.
 
-If only a target port is specified then a NodePort is created with a random
+If only a target port is specified then a _NodePort_ is created with a random
 port.
