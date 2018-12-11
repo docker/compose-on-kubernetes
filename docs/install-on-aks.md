@@ -2,8 +2,8 @@
 
 ## Pre-requisites
 - To install Compose on Kubernetes on Azure AKS, you must create an AKS cluster with RBAC enabled.
-- To install etcd using those instructions, you must have Helm on your client environment
-- Download the Compose on Kubernetes installer
+- To install etcd using these instructions, you must have [Helm](https://helm.sh) in your client environment.
+- [Download the Compose on Kubernetes installer](https://github.com/docker/compose-on-kubernetes/releases)
 
 ## Create compose namespace
 
@@ -24,7 +24,7 @@ If you already have an etcd instance, skip this.
 - Run `helm install --name etcd-operator stable/etcd-operator --namespace compose` to install the etcd-operator chart
 - Create an etcd cluster definition like this one in a file named compose-etcd.yaml:
 
-```
+```yaml
 apiVersion: "etcd.database.coreos.com/v1beta2"
 kind: "EtcdCluster"
 metadata:
@@ -35,14 +35,14 @@ spec:
   version: "3.2.13"
 ```
 - Run `kubectl apply -f compose-etcd.yaml`
-- This should bring an etcd cluster in the compose namespace
+- This should bring an etcd cluster in the `compose` namespace
 
 **Note: this cluster configuration is really naive and does does not use mutual TLS to authenticate application accessing the data. For enabling mutual TLS, please refer to https://github.com/coreos/etcd-operator** 
 
 ## Deploy Compose on Kubernetes
 
-run `installer-[darwin|linux|windows.exe] -namespace=compose -etcd-servers=http://compose-etcd-client:2379 -tag=v0.4.16 -skip-liveness-probes=true`
+Run `installer-[darwin|linux|windows.exe] -namespace=compose -etcd-servers=http://compose-etcd-client:2379 -tag=v0.4.16 -skip-liveness-probes=true`
 
-**Note: There is currently an issue with AKS where the API Server Liveness Probe always failes due to a TLS issue. We'll get in touch with Microsoft to try to solve the issue in the future.**
+**Note: There is currently an issue with AKS where the API Server Liveness Probe always fails due to a TLS issue. We'll get in touch with Microsoft to try to solve the issue in the future.**
 
 **Note: To setup Mutual TLS with the etcd instance, you can use `etcd-ca-file`, `etcd-key-file` and `etcd-cert-file` flags.**
