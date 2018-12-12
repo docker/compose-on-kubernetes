@@ -792,7 +792,7 @@ services:
     command:
     - /bin/sh
     - -c
-    - "grep http /tmp/hostetc/services ; sleep 3600"
+    - "cat /tmp/hostetc/host.conf ; sleep 3600"
     volumes:
       - type: bind
         source: /etc
@@ -805,7 +805,7 @@ services:
 		data, err := ioutil.ReadAll(s)
 		expectNoError(err)
 		sdata := string(data)
-		Expect(strings.Contains(sdata, "443/tcp")).To(BeTrue())
+		Expect(strings.Contains(sdata, "order")).To(BeTrue())
 	})
 
 	It("Should support volumes", func() {
