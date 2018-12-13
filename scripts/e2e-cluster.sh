@@ -14,7 +14,7 @@ create_cluster() {
     -e CLUSTER_NAME=$CLUSTER_NAME \
     -v $GOPATH/src:/go/src \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    -v $KUBE_FOLDER:/root/.kube/kind-config-$CLUSTER_NAME \
+    -v $HOME/.kube:/root/.kube \
     jdrouet/kind-testing
 }
 
