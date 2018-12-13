@@ -74,6 +74,9 @@ install-ginkgo:
 	go get -u github.com/onsi/ginkgo/ginkgo
 	go get -u github.com/onsi/gomega/...
 
+install-kind:
+	go get -u sigs.k8s.io/kind
+
 e2e: e2e-binary ## Run the e2e tests
 	ginkgo -v -p e2e/e2e.test -- -tag "$(TAG)" 2>&1 | tee e2e-test-output.txt
 	grep SUCCESS e2e-test-output.txt | grep  -q "$(E2E_EXPECTED_SKIP) Skipped"
