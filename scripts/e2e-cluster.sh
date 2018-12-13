@@ -7,22 +7,23 @@ KUBE_CONFIG="$KUBE_FOLDER/config"
 
 create_cluster() {
   docker pull jdrouet/kindest-node:$KUBE_VERSION
-  docker run --rm \
+  docker create \
     --name turkey-filling-$KUBE_VERSION \
     --network=host \
     -e KUBE_VERSION=$KUBE_VERSION \
     -e CLUSTER_NAME=$CLUSTER_NAME \
-    -v $GOPATH/src:/go/src \
     -v /var/run/docker.sock:/var/run/docker.sock \
     -v $HOME/.kube:/root/.kube \
     jdrouet/kind-testing
+  docker cp $GOPATH/src/github.com/docker/compose-on-kubernetes turkey-filling-$KUBE_VERSION:/go/src/github.com/docker/compose-on-kubernetes
+  docker start --attach turkey-filling-$KUBE_VERSION
 }
 
 delete_cluster() {
   docker rm -f kind-$CLUSTER_NAME-control-plane
 }
 
-docker-cmd() {
+docker_cmd() {
   KUBECONFIG=$KUBE_FOLDER DOCKER_STACK_ORCHESTRATOR=kubernetes "$@"
 }
 
@@ -34,7 +35,7 @@ case $1 in
     delete_cluster
     ;;
   docker)
-    docker-cmd "$@"
+    docker_cmd "$@"
     ;;
   *)
     echo $"Usage: $0 {create|docker|delete}"

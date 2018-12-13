@@ -18,10 +18,6 @@ aliases:
     - run:
         name: Deploy testkit cluster
         command: ./scripts/e2e-cluster.sh create
-    - persist_to_workspace:
-        root: /root/
-        paths:
-          - '.kube'
     - run:
         name: Tear down testkit cluster (on failure)
         command: |
