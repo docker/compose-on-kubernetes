@@ -1,28 +1,30 @@
 version: 2
 
 aliases:
-  docker-login: &docker-login
-    username: $DOCKER_USER
-    password: $DOCKER_PASS
-  compose-ci-docker: &compose-ci-docker
-    - image: dockereng/kube-compose-ci-docker
-      auth: *docker-login
-  compose-ci-golang: &compose-ci-golang
-    - image: dockereng/kube-compose-ci-golang
-      auth: *docker-login
-  cluster-setup-steps: &cluster-setup-steps
-    - attach_workspace:
-        at: /root
-    - setup_remote_docker:
-        version: 17.07.0-ce
-    - run:
-        name: Deploy testkit cluster
-        command: ./scripts/e2e-cluster.sh create
-    - run:
-        name: Tear down testkit cluster (on failure)
-        command: |
-          ./scripts/e2e-cluster.sh delete
-        when: on_fail
+  docker-image: &docker-image
+    - image: jdrouet/kube-compose-toolset
+      environment:
+        - GOPATH: /root
+
+  # cluster-setup-steps: &cluster-setup-steps
+  #   - attach_workspace:
+  #       at: /root
+  #   - setup_remote_docker:
+  #       version: 17.07.0-ce
+  #   - run:
+  #       name: Deploy testkit cluster
+  #       command: ./scripts/e2e-cluster.sh create
+  #       environment:
+  #         - GOPATH: /root
+  #   - persist_to_workspace:
+  #       root: /root/
+  #       paths:
+  #         - '.kube'
+  #   - run:
+  #       name: Tear down testkit cluster (on failure)
+  #       command: |
+  #         ./scripts/e2e-cluster.sh delete
+  #       when: on_fail
 
   deploy-images-steps: &deploy-images-steps
     - attach_workspace:
@@ -44,6 +46,13 @@ aliases:
   test-e2e-steps: &test-e2e-steps
     - attach_workspace:
         at: /root
+    - setup_remote_docker:
+        version: 17.07.0-ce
+    - run:
+        name: Deploy kind cluster
+        command: ./scripts/e2e-cluster.sh create
+        environment:
+          - GOPATH: /root
     - run:
         name: Run e2e tests
         command: |
@@ -51,9 +60,12 @@ aliases:
           export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
           export IMAGE_PREFIX=kube-compose-
           export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY}/${IMAGE_PREFIX}
-          KUBECONFIG=$HOME/.kube/${KUBE_VERSION}/config.testkit kubectl create namespace e2emigration
-          KUBECONFIG=$HOME/.kube/${KUBE_VERSION}/config.testkit kubectl -n e2emigration create secret docker-registry migration-pull-secret --docker-server=https://index.docker.io/v1/ --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS} --docker-email=noreply@docker.com
-          PATH="$PATH:$GOPATH/bin" make KUBECONFIG=$HOME/.kube/${KUBE_VERSION}/config.testkit TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e
+          export KUBECONFIG=${HOME}/.kube/kind-config-${CLUSTER_NAME}
+          ls -lha /root/.kube/*
+          docker ps
+          export KUBE_IP=$(docker inspect kind-${CLUSTER_NAME}-control-plane | jq --raw-output '.[0].NetworkSettings.IPAddress')
+          sed -i -e "s/localhost/$KUBE_IP/g" ~/.kube/kind-config-${CLUSTER_NAME}
+          PATH="$PATH:$GOPATH/bin" TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} make e2e-no-provisioning
     - persist_to_workspace:
         root: /root/
         paths:
@@ -66,7 +78,7 @@ aliases:
 
 jobs:
   checkout:
-    docker: *compose-ci-docker
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     steps:
       - checkout
@@ -87,7 +99,7 @@ jobs:
             - '.aws'
             - '.kube'
   validate:
-    docker: *compose-ci-docker
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     steps:
       - attach_workspace:
@@ -96,7 +108,7 @@ jobs:
           version: 17.07.0-ce
       - run: make -f docker.Makefile validate
   validate-vendor:
-    docker: *compose-ci-golang
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     steps:
       - attach_workspace:
@@ -105,14 +117,14 @@ jobs:
           name: Validate vendoring
           command: make validate-vendor
   check-licenses:
-    docker: *compose-ci-golang
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     steps:
       - attach_workspace:
           at: /root
       - run: make check-licenses
   images:
-    docker: *compose-ci-docker
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     steps:
       - attach_workspace:
@@ -147,7 +159,7 @@ jobs:
             - kube-compose-installer.tar
             - kube-compose-e2e-tests.tar
   test-unit:
-    docker: *compose-ci-docker
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     steps:
       - attach_workspace:
@@ -162,60 +174,61 @@ jobs:
           paths:
             - 'src/github.com/docker/compose-on-kubernetes/coverage.txt'
   # cluster-setup-1_10:
-  #   docker: *compose-ci-docker
+  #   docker: *docker-image
   #   working_directory: /root/src/github.com/docker/compose-on-kubernetes
   #   environment:
   #     - CLUSTER_NAME: oldest
   #     - KUBE_VERSION: 1.10.11
   #   steps: *cluster-setup-steps
-  cluster-setup-1_11:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - CLUSTER_NAME: latest
-      - KUBE_VERSION: 1.11.5
-    steps: *cluster-setup-steps
-  cluster-setup-benchmark:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - CLUSTER_NAME: latest
-      - KUBE_VERSION: 1.11.5
-      - KUBE_ENV_NAME: benchmark
-    steps: *cluster-setup-steps
+  # cluster-setup-1_11:
+  #   docker: *docker-image
+  #   working_directory: /root/src/github.com/docker/compose-on-kubernetes
+  #   environment:
+  #     - CLUSTER_NAME: latest
+  #     - KUBE_VERSION: 1.11.5
+  #   steps: *cluster-setup-steps
+  # cluster-setup-benchmark:
+  #   docker: *docker-image
+  #   working_directory: /root/src/github.com/docker/compose-on-kubernetes
+  #   environment:
+  #     - CLUSTER_NAME: latest
+  #     - KUBE_VERSION: 1.11.5
+  #     - KUBE_ENV_NAME: benchmark
+  #   steps: *cluster-setup-steps
   # deploy-images-1_10:
-  #   docker: *compose-ci-docker
+  #   docker: *docker-image
   #   working_directory: /root/src/github.com/docker/compose-on-kubernetes
   #   environment:
   #     - KUBE_VERSION: 1.10.11
   #   steps: *deploy-images-steps
   deploy-images-1_11:
-    docker: *compose-ci-docker
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       - KUBE_VERSION: 1.11.5
     steps: *deploy-images-steps
   deploy-images-benchmark:
-    docker: *compose-ci-docker
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       - KUBE_VERSION: 1.11.5
       - KUBE_ENV_NAME: benchmark
     steps: *deploy-images-steps
   # test-e2e-1_10:
-  #   docker: *compose-ci-golang
+  #   docker: *docker-image
   #   working_directory: /root/src/github.com/docker/compose-on-kubernetes
   #   environment:
   #     - KUBE_VERSION: 1.10.11
   #   steps: *test-e2e-steps
   test-e2e-1_11:
-    docker: *compose-ci-golang
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
+      - CLUSTER_NAME: latest
       - KUBE_VERSION: 1.11.5
     steps: *test-e2e-steps
   coverage-upload:
-    docker: *compose-ci-golang
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     steps:
       - attach_workspace:
@@ -224,7 +237,7 @@ jobs:
           name: Upload coverage
           command: bash <(curl -s https://codecov.io/bash) -t 7fee2328-dd39-4a6d-8a8c-130440d8c3e6
   push-to-hub:
-    docker: *compose-ci-docker
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     steps:
       - attach_workspace:
@@ -254,7 +267,7 @@ jobs:
               fi
             done
   build-and-release-installer:
-    docker: *compose-ci-golang
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     steps:
       - attach_workspace:
@@ -285,7 +298,7 @@ jobs:
             cd /root/src/github.com/docker/compose-on-kubernetes
             ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${TAG} ./bin/
   run-benchmark:
-    docker: *compose-ci-golang
+    docker: *docker-image
     working_directory: /root/src/github.com/docker/compose-on-kubernetes    
     environment:
       - KUBE_VERSION: 1.11.5
@@ -323,12 +336,12 @@ workflows:
       #     filters:
       #       tags:
       #         only: /v.*/
-      - cluster-setup-1_11:
-          requires:
-            - checkout
-          filters:
-            tags:
-              only: /v.*/
+      # - cluster-setup-1_11:
+      #     requires:
+      #       - checkout
+      #     filters:
+      #       tags:
+      #         only: /v.*/
       - test-unit:
           requires:
             - checkout
@@ -374,7 +387,7 @@ workflows:
       #         only: /v.*/
       - deploy-images-1_11:
           requires:
-            - cluster-setup-1_11
+            # - cluster-setup-1_11
             - images
           filters:
             tags:
@@ -399,15 +412,15 @@ workflows:
           filters:
             tags:
               only: /v.*/
-      - cluster-setup-benchmark:
-          requires:
-            - checkout
-          filters:
-            tags:
-              only: /v.*/
+      # - cluster-setup-benchmark:
+      #     requires:
+      #       - checkout
+      #     filters:
+      #       tags:
+      #         only: /v.*/
       - deploy-images-benchmark:
           requires:
-            - cluster-setup-benchmark
+            # - cluster-setup-benchmark
             - images
           filters:
             tags:

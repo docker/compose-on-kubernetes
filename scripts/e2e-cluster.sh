@@ -13,10 +13,11 @@ create_cluster() {
     -e KUBE_VERSION=$KUBE_VERSION \
     -e CLUSTER_NAME=$CLUSTER_NAME \
     -v /var/run/docker.sock:/var/run/docker.sock \
-    -v $HOME/.kube:/root/.kube \
     jdrouet/kind-testing
   docker cp $GOPATH/src/github.com/docker/compose-on-kubernetes turkey-filling-$KUBE_VERSION:/go/src/github.com/docker/compose-on-kubernetes
   docker start --attach turkey-filling-$KUBE_VERSION
+  mkdir -p $HOME/.kube
+  docker cp turkey-filling-$KUBE_VERSION:/root/.kube/kind-config-$CLUSTER_NAME $HOME/.kube/
 }
 
 delete_cluster() {
