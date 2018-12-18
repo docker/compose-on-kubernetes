@@ -156,7 +156,9 @@ func applyNetworkOptions(pod *corev1types.PodSpec, opts *NetworkOptions) {
 			ContainerPort: 9443,
 		})
 		pod.Containers[0].Args = append(pod.Containers[0].Args, "--secure-port", "9443")
-		pod.Containers[0].LivenessProbe.HTTPGet.Port = intstr.FromInt(9443)
+		if pod.Containers[0].LivenessProbe != nil {
+			pod.Containers[0].LivenessProbe.HTTPGet.Port = intstr.FromInt(9443)
+		}
 		return
 	}
 
@@ -172,7 +174,10 @@ func applyNetworkOptions(pod *corev1types.PodSpec, opts *NetworkOptions) {
 		})
 	}
 	pod.Containers[0].Args = append(pod.Containers[0].Args, fmt.Sprintf("--secure-port=%v", opts.Port))
-	pod.Containers[0].LivenessProbe.HTTPGet.Port = intstr.FromInt(int(opts.Port))
+
+	if pod.Containers[0].LivenessProbe != nil {
+		pod.Containers[0].LivenessProbe.HTTPGet.Port = intstr.FromInt(int(opts.Port))
+	}
 
 	if opts.CustomTLSBundle == nil {
 		return
