@@ -109,10 +109,6 @@
   name = "k8s.io/kube-openapi"
   branch = "master"
 
-[[override]]
-  name = "github.com/gotestyourself/gotestyourself"
-  revision = "v1.2.0"
-
 [prune]
   non-go = true
   unused-packages = true
