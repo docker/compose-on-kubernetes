@@ -25,6 +25,14 @@
   revision = "v1.3.1"
 
 [[projects]]
+  digest = "1:2be791e7b333ff7c06f8fb3dc18a7d70580e9399dbdffd352621d067ff260b6e"
+  name = "github.com/Microsoft/go-winio"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "97e4973ce50b2ff5f09635a57e2b88a037aae829"
+  version = "v0.4.11"
+
+[[projects]]
   digest = "1:76939b72b6b2012e9aca613f33d947099178c9f0d3be5522485701031ebf3e49"
   name = "github.com/NYTimes/gziphandler"
   packages = ["."]
@@ -63,6 +71,14 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "c12b1e7919c14469339a5d38f2f8ed9b64a9de23"
+
+[[projects]]
+  branch = "master"
+  digest = "1:e48c63e818c67fbf3d7afe20bba33134ab1a5bf384847385384fd027652a5a96"
+  name = "github.com/containerd/continuity"
+  packages = ["pathdriver"]
+  pruneopts = "NUT"
+  revision = "004b46473808b3e7a4a3049c20e4376c91eb966d"
 
 [[projects]]
   digest = "1:6da19299dce552d8b973276ad541df6c7611156f0cfcfe651d37dc20253db3fd"
@@ -125,7 +141,7 @@
   revision = "f5393c904aa24c1dae41e1112bf70d1ed5c6bb15"
 
 [[projects]]
-  digest = "1:dd41e1dd3e2297ead0f485f9300bd35e340ef405dd189935fc965fd1f4faa8cf"
+  digest = "1:7a8bf5ec9547d321cb497a4cddc25945d65b71368048824c35538414b38474aa"
   name = "github.com/docker/docker"
   packages = [
     "api/types",
@@ -139,6 +155,10 @@
     "api/types/swarm",
     "api/types/swarm/runtime",
     "api/types/versions",
+    "pkg/homedir",
+    "pkg/idtools",
+    "pkg/mount",
+    "pkg/system",
   ]
   pruneopts = "NUT"
   revision = "c752b0991e31ba9869ab6a0661af57e9423874fb"
@@ -276,6 +296,19 @@
   packages = ["."]
   pruneopts = "NUT"
   revision = "e89373fe6b4a7413d7acd6da1725b83ef713e6e4"
+
+[[projects]]
+  digest = "1:2e3c336fc7fde5c984d2841455a658a6d626450b1754a854b3b32e7a8f49a07a"
+  name = "github.com/google/go-cmp"
+  packages = [
+    "cmp",
+    "cmp/internal/diff",
+    "cmp/internal/function",
+    "cmp/internal/value",
+  ]
+  pruneopts = "NUT"
+  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
+  version = "v0.2.0"
 
 [[projects]]
   branch = "master"
@@ -493,6 +526,14 @@
   pruneopts = "NUT"
   revision = "d60099175f88c47cd379c4738d158884749ed235"
   version = "v1.0.1"
+
+[[projects]]
+  digest = "1:918dbd46ad099418ce9760291bb156ebf23d441aad4cb682dd9bf09e2d3c0c7b"
+  name = "github.com/opencontainers/runc"
+  packages = ["libcontainer/user"]
+  pruneopts = "NUT"
+  revision = "baf6536d6259209c3edfa2b22237af82942d3dfa"
+  version = "v0.1.1"
 
 [[projects]]
   digest = "1:93b1d84c5fa6d1ea52f4114c37714cddd84d5b78f151b62bb101128dd51399bf"
@@ -823,6 +864,20 @@
   pruneopts = "NUT"
   revision = "c86e64ed9581b7588e736f0c3e6ecc02cc22996e"
   source = "https://github.com/simonferquel/yaml"
+
+[[projects]]
+  digest = "1:96dd14a129cdd71b7e354dde14251546ab89523af2999c39db24ef74d4eaabf6"
+  name = "gotest.tools"
+  packages = [
+    "assert",
+    "assert/cmp",
+    "internal/difflib",
+    "internal/format",
+    "internal/source",
+  ]
+  pruneopts = "NUT"
+  revision = "7c797b5133e5460410dbb22ba779bf35e6975dea"
+  version = "v2.2.0"
 
 [[projects]]
   digest = "1:6dd53537a34d9b612e66acd39859953cf7ad70e5b5953937bed5ea998355e7b8"
@@ -1230,6 +1285,7 @@
     "github.com/docker/cli/cli/compose/types",
     "github.com/docker/cli/opts",
     "github.com/docker/docker/api/types/swarm",
+    "github.com/docker/docker/pkg/homedir",
     "github.com/go-openapi/spec",
     "github.com/golang/glog",
     "github.com/mitchellh/go-homedir",
@@ -1245,6 +1301,8 @@
     "github.com/stretchr/testify/assert",
     "golang.org/x/sync/errgroup",
     "gopkg.in/yaml.v2",
+    "gotest.tools/assert",
+    "gotest.tools/assert/cmp",
     "k8s.io/api/apps/v1beta2",
     "k8s.io/api/core/v1",
     "k8s.io/api/rbac/v1",
