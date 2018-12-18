@@ -180,3 +180,8 @@ time="2018-12-07T15:25:19Z" level=info msg="Controller ready"
 To reinstall the default Compose on Kubernetes on Docker Desktop, simply restart
 your Kubernetes cluster. You can do this by deactivating and then reactivating
 Kubernetes or by restarting Docker Desktop.
+See the [contributing](./CONTRIBUTING.md) and [debugging](./DEBUGGING.md) guides.
+
+# Deploying Compose on Kubernetes
+
+- Guide for [Azure AKS](./docs/install-on-aks.md).
