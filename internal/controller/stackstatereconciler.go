@@ -1,7 +1,7 @@
 package controller
 
 import (
-	v1beta2types "github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/api/labels"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	"github.com/pkg/errors"
@@ -22,7 +22,7 @@ func (n *NameAndNamespace) objKey() string {
 }
 
 func extractStackNameAndNamespace(obj interface{}) (NameAndNamespace, error) {
-	if stack, ok := obj.(*v1beta2types.Stack); ok {
+	if stack, ok := obj.(*latest.Stack); ok {
 		return NameAndNamespace{Name: stack.Name, Namespace: stack.Namespace}, nil
 	}
 	m, err := meta.Accessor(obj)
@@ -41,7 +41,7 @@ func extractStackNameAndNamespace(obj interface{}) (NameAndNamespace, error) {
 	return NameAndNamespace{Name: stackName, Namespace: namespace}, nil
 }
 
-func generateStatus(stack *v1beta2types.Stack, resources []interface{}) v1beta2types.StackStatus {
+func generateStatus(stack *latest.Stack, resources []interface{}) latest.StackStatus {
 	log.Debugf("Generating status for stack %s/%s", stack.Namespace, stack.Name)
 	remainingNames := make(map[string]struct{})
 	for _, svc := range stack.Spec.Services {
@@ -86,9 +86,9 @@ func generateStatus(stack *v1beta2types.Stack, resources []interface{}) v1beta2t
 	return statusAvailable()
 }
 
-func statusAvailable() v1beta2types.StackStatus {
-	return v1beta2types.StackStatus{
-		Phase:   v1beta2types.StackAvailable,
+func statusAvailable() latest.StackStatus {
+	return latest.StackStatus{
+		Phase:   latest.StackAvailable,
 		Message: "Stack is started",
 	}
 }

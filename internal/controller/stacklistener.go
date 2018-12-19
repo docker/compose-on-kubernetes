@@ -5,7 +5,7 @@ import (
 
 	"github.com/docker/compose-on-kubernetes/api/client/clientset"
 	"github.com/docker/compose-on-kubernetes/api/client/informers"
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/tools/cache"
@@ -15,7 +15,7 @@ import (
 type StackListener struct {
 	stacks                 stackIndexer
 	reconcileQueue         chan<- string
-	reconcileDeletionQueue chan<- *v1beta2.Stack
+	reconcileDeletionQueue chan<- *latest.Stack
 	ownerCache             StackOwnerCacher
 }
 
@@ -52,7 +52,7 @@ func (s *StackListener) onDelete(obj interface{}) {
 	if tombstone, ok := obj.(cache.DeletedFinalStateUnknown); ok {
 		obj = tombstone.Obj
 	}
-	stack, ok := obj.(*v1beta2.Stack)
+	stack, ok := obj.(*latest.Stack)
 	if !ok {
 		log.Warnf("StackListener: onDelete: unable to retrive deleted stack")
 		return
@@ -61,7 +61,7 @@ func (s *StackListener) onDelete(obj interface{}) {
 	s.reconcileDeletionQueue <- stack
 }
 
-func (s *StackListener) get(key string) (*v1beta2.Stack, error) {
+func (s *StackListener) get(key string) (*latest.Stack, error) {
 	res, exists, err := s.stacks.GetStore().GetByKey(key)
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func (s *StackListener) get(key string) (*v1beta2.Stack, error) {
 	if !exists {
 		return nil, errors.Errorf("not found: %s", key)
 	}
-	stack, ok := res.(*v1beta2.Stack)
+	stack, ok := res.(*latest.Stack)
 	if !ok {
 		return nil, errors.Errorf("object with key %s is not a stack: %T", key, res)
 	}
@@ -85,10 +85,10 @@ func (s *StackListener) Start(stop chan struct{}) {
 func NewStackListener(clientSet clientset.Interface,
 	reconciliationInterval time.Duration,
 	reconcileQueue chan<- string,
-	reconcileDeletionQueue chan<- *v1beta2.Stack,
+	reconcileDeletionQueue chan<- *latest.Stack,
 	ownerCache StackOwnerCacher) *StackListener {
 	informersFactory := informers.NewSharedInformerFactory(clientSet, reconciliationInterval)
-	stacksInformer := informersFactory.Compose().V1beta2().Stacks().Informer()
+	stacksInformer := informersFactory.Compose().V1alpha3().Stacks().Informer()
 	result := &StackListener{
 		stacks:                 stacksInformer,
 		reconcileQueue:         reconcileQueue,

@@ -30,38 +30,64 @@ import (
 
 func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenAPIDefinition {
 	return map[string]common.OpenAPIDefinition{
-		"github.com/docker/compose-on-kubernetes/api/compose/impersonation.Config":           schema_compose_for_kubernetes_api_compose_impersonation_Config(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.Owner":                  schema_compose_for_kubernetes_api_compose_v1beta1_Owner(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.Stack":                  schema_compose_for_kubernetes_api_compose_v1beta1_Stack(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackList":              schema_compose_for_kubernetes_api_compose_v1beta1_StackList(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackSpec":              schema_compose_for_kubernetes_api_compose_v1beta1_StackSpec(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackStatus":            schema_compose_for_kubernetes_api_compose_v1beta1_StackStatus(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ComposeFile":            schema_compose_for_kubernetes_api_compose_v1beta2_ComposeFile(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ConfigObjConfig":        schema_compose_for_kubernetes_api_compose_v1beta2_ConfigObjConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint":             schema_compose_for_kubernetes_api_compose_v1beta2_Constraint(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraints":            schema_compose_for_kubernetes_api_compose_v1beta2_Constraints(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.DeployConfig":           schema_compose_for_kubernetes_api_compose_v1beta2_DeployConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.External":               schema_compose_for_kubernetes_api_compose_v1beta2_External(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.FileObjectConfig":       schema_compose_for_kubernetes_api_compose_v1beta2_FileObjectConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.FileReferenceConfig":    schema_compose_for_kubernetes_api_compose_v1beta2_FileReferenceConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.HealthCheckConfig":      schema_compose_for_kubernetes_api_compose_v1beta2_HealthCheckConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Owner":                  schema_compose_for_kubernetes_api_compose_v1beta2_Owner(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Placement":              schema_compose_for_kubernetes_api_compose_v1beta2_Placement(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resource":               schema_compose_for_kubernetes_api_compose_v1beta2_Resource(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resources":              schema_compose_for_kubernetes_api_compose_v1beta2_Resources(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.RestartPolicy":          schema_compose_for_kubernetes_api_compose_v1beta2_RestartPolicy(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Scale":                  schema_compose_for_kubernetes_api_compose_v1beta2_Scale(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.SecretConfig":           schema_compose_for_kubernetes_api_compose_v1beta2_SecretConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ServiceConfig":          schema_compose_for_kubernetes_api_compose_v1beta2_ServiceConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ServiceConfigObjConfig": schema_compose_for_kubernetes_api_compose_v1beta2_ServiceConfigObjConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ServicePortConfig":      schema_compose_for_kubernetes_api_compose_v1beta2_ServicePortConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ServiceSecretConfig":    schema_compose_for_kubernetes_api_compose_v1beta2_ServiceSecretConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ServiceVolumeConfig":    schema_compose_for_kubernetes_api_compose_v1beta2_ServiceVolumeConfig(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Stack":                  schema_compose_for_kubernetes_api_compose_v1beta2_Stack(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.StackList":              schema_compose_for_kubernetes_api_compose_v1beta2_StackList(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.StackSpec":              schema_compose_for_kubernetes_api_compose_v1beta2_StackSpec(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.StackStatus":            schema_compose_for_kubernetes_api_compose_v1beta2_StackStatus(ref),
-		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.UpdateConfig":           schema_compose_for_kubernetes_api_compose_v1beta2_UpdateConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/impersonation.Config":            schema_compose_on_kubernetes_api_compose_impersonation_Config(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ComposeFile":            schema_compose_on_kubernetes_api_compose_v1alpha3_ComposeFile(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ConfigObjConfig":        schema_compose_on_kubernetes_api_compose_v1alpha3_ConfigObjConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Constraint":             schema_compose_on_kubernetes_api_compose_v1alpha3_Constraint(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Constraints":            schema_compose_on_kubernetes_api_compose_v1alpha3_Constraints(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.DeployConfig":           schema_compose_on_kubernetes_api_compose_v1alpha3_DeployConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.External":               schema_compose_on_kubernetes_api_compose_v1alpha3_External(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.FileObjectConfig":       schema_compose_on_kubernetes_api_compose_v1alpha3_FileObjectConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.FileReferenceConfig":    schema_compose_on_kubernetes_api_compose_v1alpha3_FileReferenceConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.HealthCheckConfig":      schema_compose_on_kubernetes_api_compose_v1alpha3_HealthCheckConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Owner":                  schema_compose_on_kubernetes_api_compose_v1alpha3_Owner(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Placement":              schema_compose_on_kubernetes_api_compose_v1alpha3_Placement(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Resource":               schema_compose_on_kubernetes_api_compose_v1alpha3_Resource(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Resources":              schema_compose_on_kubernetes_api_compose_v1alpha3_Resources(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.RestartPolicy":          schema_compose_on_kubernetes_api_compose_v1alpha3_RestartPolicy(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Scale":                  schema_compose_on_kubernetes_api_compose_v1alpha3_Scale(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.SecretConfig":           schema_compose_on_kubernetes_api_compose_v1alpha3_SecretConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceConfig":          schema_compose_on_kubernetes_api_compose_v1alpha3_ServiceConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceConfigObjConfig": schema_compose_on_kubernetes_api_compose_v1alpha3_ServiceConfigObjConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServicePortConfig":      schema_compose_on_kubernetes_api_compose_v1alpha3_ServicePortConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceSecretConfig":    schema_compose_on_kubernetes_api_compose_v1alpha3_ServiceSecretConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceVolumeConfig":    schema_compose_on_kubernetes_api_compose_v1alpha3_ServiceVolumeConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Stack":                  schema_compose_on_kubernetes_api_compose_v1alpha3_Stack(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.StackList":              schema_compose_on_kubernetes_api_compose_v1alpha3_StackList(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.StackSpec":              schema_compose_on_kubernetes_api_compose_v1alpha3_StackSpec(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.StackStatus":            schema_compose_on_kubernetes_api_compose_v1alpha3_StackStatus(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.UpdateConfig":           schema_compose_on_kubernetes_api_compose_v1alpha3_UpdateConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.Owner":                   schema_compose_on_kubernetes_api_compose_v1beta1_Owner(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.Stack":                   schema_compose_on_kubernetes_api_compose_v1beta1_Stack(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackList":               schema_compose_on_kubernetes_api_compose_v1beta1_StackList(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackSpec":               schema_compose_on_kubernetes_api_compose_v1beta1_StackSpec(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackStatus":             schema_compose_on_kubernetes_api_compose_v1beta1_StackStatus(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ComposeFile":             schema_compose_on_kubernetes_api_compose_v1beta2_ComposeFile(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ConfigObjConfig":         schema_compose_on_kubernetes_api_compose_v1beta2_ConfigObjConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint":              schema_compose_on_kubernetes_api_compose_v1beta2_Constraint(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraints":             schema_compose_on_kubernetes_api_compose_v1beta2_Constraints(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.DeployConfig":            schema_compose_on_kubernetes_api_compose_v1beta2_DeployConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.External":                schema_compose_on_kubernetes_api_compose_v1beta2_External(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.FileObjectConfig":        schema_compose_on_kubernetes_api_compose_v1beta2_FileObjectConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.FileReferenceConfig":     schema_compose_on_kubernetes_api_compose_v1beta2_FileReferenceConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.HealthCheckConfig":       schema_compose_on_kubernetes_api_compose_v1beta2_HealthCheckConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Owner":                   schema_compose_on_kubernetes_api_compose_v1beta2_Owner(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Placement":               schema_compose_on_kubernetes_api_compose_v1beta2_Placement(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resource":                schema_compose_on_kubernetes_api_compose_v1beta2_Resource(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resources":               schema_compose_on_kubernetes_api_compose_v1beta2_Resources(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.RestartPolicy":           schema_compose_on_kubernetes_api_compose_v1beta2_RestartPolicy(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Scale":                   schema_compose_on_kubernetes_api_compose_v1beta2_Scale(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.SecretConfig":            schema_compose_on_kubernetes_api_compose_v1beta2_SecretConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ServiceConfig":           schema_compose_on_kubernetes_api_compose_v1beta2_ServiceConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ServiceConfigObjConfig":  schema_compose_on_kubernetes_api_compose_v1beta2_ServiceConfigObjConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ServicePortConfig":       schema_compose_on_kubernetes_api_compose_v1beta2_ServicePortConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ServiceSecretConfig":     schema_compose_on_kubernetes_api_compose_v1beta2_ServiceSecretConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.ServiceVolumeConfig":     schema_compose_on_kubernetes_api_compose_v1beta2_ServiceVolumeConfig(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Stack":                   schema_compose_on_kubernetes_api_compose_v1beta2_Stack(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.StackList":               schema_compose_on_kubernetes_api_compose_v1beta2_StackList(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.StackSpec":               schema_compose_on_kubernetes_api_compose_v1beta2_StackSpec(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.StackStatus":             schema_compose_on_kubernetes_api_compose_v1beta2_StackStatus(ref),
+		"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.UpdateConfig":            schema_compose_on_kubernetes_api_compose_v1beta2_UpdateConfig(ref),
 		"k8s.io/apimachinery/pkg/apis/meta/v1.APIGroup":                                       schema_pkg_apis_meta_v1_APIGroup(ref),
 		"k8s.io/apimachinery/pkg/apis/meta/v1.APIGroupList":                                   schema_pkg_apis_meta_v1_APIGroupList(ref),
 		"k8s.io/apimachinery/pkg/apis/meta/v1.APIResource":                                    schema_pkg_apis_meta_v1_APIResource(ref),
@@ -106,7 +132,7 @@ func GetOpenAPIDefinitions(ref common.ReferenceCallback) map[string]common.OpenA
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_impersonation_Config(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_impersonation_Config(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -162,180 +188,7 @@ func schema_compose_for_kubernetes_api_compose_impersonation_Config(ref common.R
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta1_Owner(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Owner defines the owner of a stack. It is used to impersonate the controller calls to kubernetes api.",
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
-						},
-					},
-					"owner": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/impersonation.Config"),
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"github.com/docker/compose-on-kubernetes/api/compose/impersonation.Config", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
-	}
-}
-
-func schema_compose_for_kubernetes_api_compose_v1beta1_Stack(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "Stack defines a stack object to be register in the kubernetes API",
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
-						},
-					},
-					"spec": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackSpec"),
-						},
-					},
-					"status": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackStatus"),
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{
-			"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackSpec", "github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
-	}
-}
-
-func schema_compose_for_kubernetes_api_compose_v1beta1_StackList(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "StackList defines a list of stacks",
-				Properties: map[string]spec.Schema{
-					"kind": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"apiVersion": {
-						SchemaProps: spec.SchemaProps{
-							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"metadata": {
-						SchemaProps: spec.SchemaProps{
-							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
-						},
-					},
-					"items": {
-						SchemaProps: spec.SchemaProps{
-							Type: []string{"array"},
-							Items: &spec.SchemaOrArray{
-								Schema: &spec.Schema{
-									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta1.Stack"),
-									},
-								},
-							},
-						},
-					},
-				},
-				Required: []string{"items"},
-			},
-		},
-		Dependencies: []string{
-			"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.Stack", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
-	}
-}
-
-func schema_compose_for_kubernetes_api_compose_v1beta1_StackSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "StackSpec defines the desired state of Stack",
-				Properties: map[string]spec.Schema{
-					"composeFile": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"string"},
-							Format: "",
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{},
-	}
-}
-
-func schema_compose_for_kubernetes_api_compose_v1beta1_StackStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
-	return common.OpenAPIDefinition{
-		Schema: spec.Schema{
-			SchemaProps: spec.SchemaProps{
-				Description: "StackStatus defines the observed state of Stack",
-				Properties: map[string]spec.Schema{
-					"phase": {
-						SchemaProps: spec.SchemaProps{
-							Description: "Current condition of the stack.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-					"message": {
-						SchemaProps: spec.SchemaProps{
-							Description: "A human readable message indicating details about the stack.",
-							Type:        []string{"string"},
-							Format:      "",
-						},
-					},
-				},
-			},
-		},
-		Dependencies: []string{},
-	}
-}
-
-func schema_compose_for_kubernetes_api_compose_v1beta2_ComposeFile(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_ComposeFile(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -374,7 +227,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_ComposeFile(ref common.Re
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_ConfigObjConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_ConfigObjConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -394,7 +247,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_ConfigObjConfig(ref commo
 					},
 					"external": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.External"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.External"),
 						},
 					},
 					"labels": {
@@ -414,11 +267,11 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_ConfigObjConfig(ref commo
 			},
 		},
 		Dependencies: []string{
-			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.External"},
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.External"},
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_Constraint(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_Constraint(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -444,7 +297,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_Constraint(ref common.Ref
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_Constraints(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_Constraints(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -452,17 +305,17 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_Constraints(ref common.Re
 				Properties: map[string]spec.Schema{
 					"OperatingSystem": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Constraint"),
 						},
 					},
 					"Architecture": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Constraint"),
 						},
 					},
 					"Hostname": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Constraint"),
 						},
 					},
 					"MatchLabels": {
@@ -471,7 +324,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_Constraints(ref common.Re
 							AdditionalProperties: &spec.SchemaOrBool{
 								Schema: &spec.Schema{
 									SchemaProps: spec.SchemaProps{
-										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint"),
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Constraint"),
 									},
 								},
 							},
@@ -482,11 +335,11 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_Constraints(ref common.Re
 			},
 		},
 		Dependencies: []string{
-			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint"},
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Constraint"},
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_DeployConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_DeployConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -519,33 +372,33 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_DeployConfig(ref common.R
 					},
 					"update_config": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.UpdateConfig"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.UpdateConfig"),
 						},
 					},
 					"resources": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resources"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Resources"),
 						},
 					},
 					"restart_policy": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.RestartPolicy"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.RestartPolicy"),
 						},
 					},
 					"placement": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Placement"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Placement"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Placement", "github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resources", "github.com/docker/compose-on-kubernetes/api/compose/v1beta2.RestartPolicy", "github.com/docker/compose-on-kubernetes/api/compose/v1beta2.UpdateConfig"},
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Placement", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Resources", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.RestartPolicy", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.UpdateConfig"},
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_External(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_External(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -570,7 +423,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_External(ref common.Refer
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_FileObjectConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_FileObjectConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -590,7 +443,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_FileObjectConfig(ref comm
 					},
 					"external": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.External"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.External"),
 						},
 					},
 					"labels": {
@@ -610,11 +463,11 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_FileObjectConfig(ref comm
 			},
 		},
 		Dependencies: []string{
-			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.External"},
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.External"},
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_FileReferenceConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_FileReferenceConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -657,7 +510,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_FileReferenceConfig(ref c
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_HealthCheckConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_HealthCheckConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -701,7 +554,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_HealthCheckConfig(ref com
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_Owner(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_Owner(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -739,7 +592,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_Owner(ref common.Referenc
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_Placement(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_Placement(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -747,18 +600,18 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_Placement(ref common.Refe
 				Properties: map[string]spec.Schema{
 					"constraints": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraints"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Constraints"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraints"},
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Constraints"},
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_Resource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_Resource(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -783,7 +636,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_Resource(ref common.Refer
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_Resources(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_Resources(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -791,23 +644,23 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_Resources(ref common.Refe
 				Properties: map[string]spec.Schema{
 					"limits": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resource"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Resource"),
 						},
 					},
 					"reservations": {
 						SchemaProps: spec.SchemaProps{
-							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resource"),
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Resource"),
 						},
 					},
 				},
 			},
 		},
 		Dependencies: []string{
-			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resource"},
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Resource"},
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_RestartPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_RestartPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -826,7 +679,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_RestartPolicy(ref common.
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_Scale(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_Scale(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -885,7 +738,1367 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_Scale(ref common.Referenc
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_SecretConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1alpha3_SecretConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "SecretConfig for a secret",
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"file": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"external": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.External"),
+						},
+					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.External"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1alpha3_ServiceConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ServiceConfig is the configuration of one service",
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"cap_add": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"cap_drop": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"command": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"configs": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceConfigObjConfig"),
+									},
+								},
+							},
+						},
+					},
+					"deploy": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.DeployConfig"),
+						},
+					},
+					"entrypoint": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"environment": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"extra_hosts": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"hostname": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"health_check": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.HealthCheckConfig"),
+						},
+					},
+					"image": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"ipc": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"pid": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"ports": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServicePortConfig"),
+									},
+								},
+							},
+						},
+					},
+					"privileged": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
+					"read_only": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
+					"secrets": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceSecretConfig"),
+									},
+								},
+							},
+						},
+					},
+					"stdin_open": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
+					"stop_grace_period": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+					"tmpfs": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"tty": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
+					"user": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+					"volumes": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceVolumeConfig"),
+									},
+								},
+							},
+						},
+					},
+					"working_dir": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.DeployConfig", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.HealthCheckConfig", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceConfigObjConfig", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServicePortConfig", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceSecretConfig", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceVolumeConfig"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1alpha3_ServiceConfigObjConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ServiceConfigObjConfig is the config obj configuration for a service",
+				Properties: map[string]spec.Schema{
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"target": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"uid": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"gid": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"mode": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1alpha3_ServicePortConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ServicePortConfig is the port configuration for a service",
+				Properties: map[string]spec.Schema{
+					"mode": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"target": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+					"published": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+					"protocol": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1alpha3_ServiceSecretConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ServiceSecretConfig is the secret configuration for a service",
+				Properties: map[string]spec.Schema{
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"target": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"uid": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"gid": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"mode": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1alpha3_ServiceVolumeConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ServiceVolumeConfig are references to a volume used by a service",
+				Properties: map[string]spec.Schema{
+					"type": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"target": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"read_only": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1alpha3_Stack(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Stack is v1alpha3's representation of a Stack",
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.StackSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.StackStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.StackSpec", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.StackStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1alpha3_StackList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "StackList is a list of stacks",
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Stack"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.Stack", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1alpha3_StackSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "StackSpec defines the desired state of Stack",
+				Properties: map[string]spec.Schema{
+					"services": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceConfig"),
+									},
+								},
+							},
+						},
+					},
+					"secrets": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.SecretConfig"),
+									},
+								},
+							},
+						},
+					},
+					"configs": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ConfigObjConfig"),
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ConfigObjConfig", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.SecretConfig", "github.com/docker/compose-on-kubernetes/api/compose/v1alpha3.ServiceConfig"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1alpha3_StackStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "StackStatus defines the observed state of Stack",
+				Properties: map[string]spec.Schema{
+					"phase": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Current condition of the stack.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "A human readable message indicating details about the stack.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1alpha3_UpdateConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "UpdateConfig is the service update configuration",
+				Properties: map[string]spec.Schema{
+					"paralellism": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta1_Owner(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Owner defines the owner of a stack. It is used to impersonate the controller calls to kubernetes api.",
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"owner": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/impersonation.Config"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/impersonation.Config", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta1_Stack(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Stack defines a stack object to be register in the kubernetes API",
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackSpec"),
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackStatus"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackSpec", "github.com/docker/compose-on-kubernetes/api/compose/v1beta1.StackStatus", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta1_StackList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "StackList defines a list of stacks",
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"),
+						},
+					},
+					"items": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta1.Stack"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"items"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1beta1.Stack", "k8s.io/apimachinery/pkg/apis/meta/v1.ListMeta"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta1_StackSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "StackSpec defines the desired state of Stack",
+				Properties: map[string]spec.Schema{
+					"composeFile": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta1_StackStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "StackStatus defines the observed state of Stack",
+				Properties: map[string]spec.Schema{
+					"phase": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Current condition of the stack.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"message": {
+						SchemaProps: spec.SchemaProps{
+							Description: "A human readable message indicating details about the stack.",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_ComposeFile(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ComposeFile is the content of a stack's compose file if any",
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"composeFile": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_ConfigObjConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "ConfigObjConfig is the config for the swarm \"Config\" object",
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"file": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"external": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.External"),
+						},
+					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.External"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_Constraint(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Constraint defines a constraint and it's operator (== or !=)",
+				Properties: map[string]spec.Schema{
+					"Value": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"Operator": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+				Required: []string{"Value", "Operator"},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_Constraints(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Constraints lists constraints that can be set on the service",
+				Properties: map[string]spec.Schema{
+					"OperatingSystem": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint"),
+						},
+					},
+					"Architecture": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint"),
+						},
+					},
+					"Hostname": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint"),
+						},
+					},
+					"MatchLabels": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint"),
+									},
+								},
+							},
+						},
+					},
+				},
+				Required: []string{"OperatingSystem", "Architecture", "Hostname", "MatchLabels"},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraint"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_DeployConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "DeployConfig is the deployment configuration for a service",
+				Properties: map[string]spec.Schema{
+					"mode": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"replicas": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"update_config": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.UpdateConfig"),
+						},
+					},
+					"resources": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resources"),
+						},
+					},
+					"restart_policy": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.RestartPolicy"),
+						},
+					},
+					"placement": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Placement"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Placement", "github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resources", "github.com/docker/compose-on-kubernetes/api/compose/v1beta2.RestartPolicy", "github.com/docker/compose-on-kubernetes/api/compose/v1beta2.UpdateConfig"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_External(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "External identifies a Volume or Network as a reference to a resource that is not managed, and should already exist. External.name is deprecated and replaced by Volume.name",
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"external": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"boolean"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_FileObjectConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "FileObjectConfig is a config type for a file used by a service",
+				Properties: map[string]spec.Schema{
+					"name": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"file": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"external": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.External"),
+						},
+					},
+					"labels": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.External"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_FileReferenceConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "FileReferenceConfig for a reference to a swarm file object",
+				Properties: map[string]spec.Schema{
+					"source": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"target": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"uid": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"gid": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"mode": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_HealthCheckConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "HealthCheckConfig the healthcheck configuration for a service",
+				Properties: map[string]spec.Schema{
+					"test": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"array"},
+							Items: &spec.SchemaOrArray{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"string"},
+										Format: "",
+									},
+								},
+							},
+						},
+					},
+					"timeout": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+					"interval": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+					"retries": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_Owner(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Owner describes the user who created the stack",
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"owner": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/impersonation.Config"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/impersonation.Config", "k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_Placement(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Placement constraints for the service",
+				Properties: map[string]spec.Schema{
+					"constraints": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraints"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Constraints"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_Resource(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Resource is a resource to be limited or reserved",
+				Properties: map[string]spec.Schema{
+					"cpus": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+					"memory": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"integer"},
+							Format: "int64",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_Resources(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Resources the resource limits and reservations",
+				Properties: map[string]spec.Schema{
+					"limits": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resource"),
+						},
+					},
+					"reservations": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resource"),
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"github.com/docker/compose-on-kubernetes/api/compose/v1beta2.Resource"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_RestartPolicy(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "RestartPolicy is the service restart policy",
+				Properties: map[string]spec.Schema{
+					"condition": {
+						SchemaProps: spec.SchemaProps{
+							Type:   []string{"string"},
+							Format: "",
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_Scale(ref common.ReferenceCallback) common.OpenAPIDefinition {
+	return common.OpenAPIDefinition{
+		Schema: spec.Schema{
+			SchemaProps: spec.SchemaProps{
+				Description: "Scale contains the current/desired replica count for services in a stack.",
+				Properties: map[string]spec.Schema{
+					"kind": {
+						SchemaProps: spec.SchemaProps{
+							Description: "Kind is a string value representing the REST resource this object represents. Servers may infer this from the endpoint the client submits requests to. Cannot be updated. In CamelCase. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#types-kinds",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"apiVersion": {
+						SchemaProps: spec.SchemaProps{
+							Description: "APIVersion defines the versioned schema of this representation of an object. Servers should convert recognized schemas to the latest internal value, and may reject unrecognized values. More info: https://git.k8s.io/community/contributors/devel/api-conventions.md#resources",
+							Type:        []string{"string"},
+							Format:      "",
+						},
+					},
+					"metadata": {
+						SchemaProps: spec.SchemaProps{
+							Ref: ref("k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"),
+						},
+					},
+					"spec": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"integer"},
+										Format: "int32",
+									},
+								},
+							},
+						},
+					},
+					"status": {
+						SchemaProps: spec.SchemaProps{
+							Type: []string{"object"},
+							AdditionalProperties: &spec.SchemaOrBool{
+								Schema: &spec.Schema{
+									SchemaProps: spec.SchemaProps{
+										Type:   []string{"integer"},
+										Format: "int32",
+									},
+								},
+							},
+						},
+					},
+				},
+			},
+		},
+		Dependencies: []string{
+			"k8s.io/apimachinery/pkg/apis/meta/v1.ObjectMeta"},
+	}
+}
+
+func schema_compose_on_kubernetes_api_compose_v1beta2_SecretConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -929,7 +2142,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_SecretConfig(ref common.R
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_ServiceConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1beta2_ServiceConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -1177,7 +2390,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_ServiceConfig(ref common.
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_ServiceConfigObjConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1beta2_ServiceConfigObjConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -1220,7 +2433,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_ServiceConfigObjConfig(re
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_ServicePortConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1beta2_ServicePortConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -1257,7 +2470,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_ServicePortConfig(ref com
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_ServiceSecretConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1beta2_ServiceSecretConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -1300,7 +2513,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_ServiceSecretConfig(ref c
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_ServiceVolumeConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1beta2_ServiceVolumeConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -1337,7 +2550,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_ServiceVolumeConfig(ref c
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_Stack(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1beta2_Stack(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -1380,7 +2593,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_Stack(ref common.Referenc
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_StackList(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1beta2_StackList(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -1426,7 +2639,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_StackList(ref common.Refe
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_StackSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1beta2_StackSpec(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -1476,7 +2689,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_StackSpec(ref common.Refe
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_StackStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1beta2_StackStatus(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{
@@ -1496,12 +2709,6 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_StackStatus(ref common.Re
 							Format:      "",
 						},
 					},
-					"observed_generation": {
-						SchemaProps: spec.SchemaProps{
-							Type:   []string{"integer"},
-							Format: "int64",
-						},
-					},
 				},
 			},
 		},
@@ -1509,7 +2716,7 @@ func schema_compose_for_kubernetes_api_compose_v1beta2_StackStatus(ref common.Re
 	}
 }
 
-func schema_compose_for_kubernetes_api_compose_v1beta2_UpdateConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
+func schema_compose_on_kubernetes_api_compose_v1beta2_UpdateConfig(ref common.ReferenceCallback) common.OpenAPIDefinition {
 	return common.OpenAPIDefinition{
 		Schema: spec.Schema{
 			SchemaProps: spec.SchemaProps{

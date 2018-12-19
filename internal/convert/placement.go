@@ -1,7 +1,7 @@
 package convert
 
 import (
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/pkg/errors"
 	apiv1 "k8s.io/api/core/v1"
 )
@@ -17,9 +17,9 @@ const (
 // node.role	Node role	node.role == manager
 // node.labels	user defined node labels	node.labels.security == high
 // engine.labels	Docker Engine's labels	engine.labels.operatingsystem == ubuntu 14.04
-func toNodeAffinity(constraints *v1beta2.Constraints) (*apiv1.Affinity, error) {
+func toNodeAffinity(constraints *latest.Constraints) (*apiv1.Affinity, error) {
 	if constraints == nil {
-		constraints = &v1beta2.Constraints{}
+		constraints = &latest.Constraints{}
 	}
 	requirements := []apiv1.NodeSelectorRequirement{}
 	if constraints.OperatingSystem != nil {

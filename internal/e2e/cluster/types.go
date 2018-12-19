@@ -5,11 +5,12 @@ import (
 	"fmt"
 	"strings"
 
+	composev1alpha3 "github.com/docker/compose-on-kubernetes/api/client/clientset/typed/compose/v1alpha3"
 	composev1beta1 "github.com/docker/compose-on-kubernetes/api/client/clientset/typed/compose/v1beta1"
 	composev1beta2 "github.com/docker/compose-on-kubernetes/api/client/clientset/typed/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3"
 	"github.com/docker/compose-on-kubernetes/api/compose/v1beta1"
 	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
-	apiv1beta2 "github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
 	"github.com/docker/compose-on-kubernetes/internal/conversions"
 	"github.com/docker/compose-on-kubernetes/internal/parsing"
 	"github.com/docker/compose-on-kubernetes/internal/patch"
@@ -29,19 +30,21 @@ import (
 
 // Namespace is a test dedicated namespace
 type Namespace struct {
-	name             string
-	stackREST        rest.Interface
-	stacks           composev1beta2.StackInterface
-	stacks1          composev1beta1.StackInterface
-	pods             corev1.PodInterface
-	deployments      typesappsv1beta2.DeploymentInterface
-	services         corev1.ServiceInterface
-	nodes            corev1.NodeInterface
-	servicesSupplier func() *rest.Request
-	storageClasses   storagev1.StorageClassInterface
-	configMaps       corev1.ConfigMapInterface
-	secrets          corev1.SecretInterface
-	config           *rest.Config
+	name              string
+	stackRESTv1beta2  rest.Interface
+	stackRESTv1alpha3 rest.Interface
+	stacks            composev1beta2.StackInterface
+	stacksv1alpha3    composev1alpha3.StackInterface
+	stacks1           composev1beta1.StackInterface
+	pods              corev1.PodInterface
+	deployments       typesappsv1beta2.DeploymentInterface
+	services          corev1.ServiceInterface
+	nodes             corev1.NodeInterface
+	servicesSupplier  func() *rest.Request
+	storageClasses    storagev1.StorageClassInterface
+	configMaps        corev1.ConfigMapInterface
+	secrets           corev1.SecretInterface
+	config            *rest.Config
 }
 
 // StackOperationStrategy is the strategy for a stack create/update
@@ -54,6 +57,8 @@ const (
 	StackOperationV1beta2Compose
 	//StackOperationV1beta2Stack will use v1beta2 structured stack
 	StackOperationV1beta2Stack
+	//StackOperationV1alpha3 will use a v1alpha3 structured stack
+	StackOperationV1alpha3
 )
 
 // PodPredicate returns true when a predicate is verified on a pod and an optional message indicating why the predicate is false
@@ -65,6 +70,10 @@ func newNamespace(config *rest.Config, namespace string) (*Namespace, error) {
 		return nil, err
 	}
 	composeClientSet1, err := composev1beta1.NewForConfig(config)
+	if err != nil {
+		return nil, err
+	}
+	composeClientSetv1alpha3, err := composev1alpha3.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
@@ -84,15 +93,17 @@ func newNamespace(config *rest.Config, namespace string) (*Namespace, error) {
 	}
 
 	return &Namespace{
-		name:           namespace,
-		stackREST:      composeClientSet.RESTClient(),
-		stacks:         composeClientSet.Stacks(namespace),
-		stacks1:        composeClientSet1.Stacks(namespace),
-		pods:           coreClientSet.Pods(namespace),
-		deployments:    appsClientSet.Deployments(namespace),
-		services:       coreClientSet.Services(namespace),
-		nodes:          coreClientSet.Nodes(),
-		storageClasses: storageClientSet.StorageClasses(),
+		name:              namespace,
+		stackRESTv1beta2:  composeClientSet.RESTClient(),
+		stackRESTv1alpha3: composeClientSetv1alpha3.RESTClient(),
+		stacks:            composeClientSet.Stacks(namespace),
+		stacks1:           composeClientSet1.Stacks(namespace),
+		stacksv1alpha3:    composeClientSetv1alpha3.Stacks(namespace),
+		pods:              coreClientSet.Pods(namespace),
+		deployments:       appsClientSet.Deployments(namespace),
+		services:          coreClientSet.Services(namespace),
+		nodes:             coreClientSet.Nodes(),
+		storageClasses:    storageClientSet.StorageClasses(),
 		servicesSupplier: func() *rest.Request {
 			return coreClientSet.RESTClient().Get().Resource("services").Namespace(namespace)
 		},
@@ -124,9 +135,14 @@ func defaultStorageClass(classes []storagetypes.StorageClass) *storagetypes.Stor
 	return nil
 }
 
-// RESTClient returns a RESTClient for the stacks
-func (ns *Namespace) RESTClient() rest.Interface {
-	return ns.stackREST
+// RESTClientV1beta2 returns a RESTClient for the stacks
+func (ns *Namespace) RESTClientV1beta2() rest.Interface {
+	return ns.stackRESTv1beta2
+}
+
+// RESTClientV1alpha3 returns a RESTClient for the stacks
+func (ns *Namespace) RESTClientV1alpha3() rest.Interface {
+	return ns.stackRESTv1alpha3
 }
 
 // Name returns the name of the namespace.
@@ -150,7 +166,7 @@ func (ns *Namespace) StacksV1beta1() composev1beta1.StackInterface {
 }
 
 // CreateStack creates a stack.
-func (ns *Namespace) CreateStack(strategy StackOperationStrategy, name, composeFile string) (*apiv1beta2.Stack, error) {
+func (ns *Namespace) CreateStack(strategy StackOperationStrategy, name, composeFile string) (*v1alpha3.Stack, error) {
 	switch strategy {
 	case StackOperationV1beta2Compose:
 		compose := &v1beta2.ComposeFile{
@@ -159,9 +175,9 @@ func (ns *Namespace) CreateStack(strategy StackOperationStrategy, name, composeF
 			},
 			ComposeFile: composeFile,
 		}
-		return nil, ns.stackREST.Post().Namespace(ns.name).Name(name).Resource("stacks").SubResource("composefile").Body(compose).Do().Error()
+		return nil, ns.stackRESTv1beta2.Post().Namespace(ns.name).Name(name).Resource("stacks").SubResource("composefile").Body(compose).Do().Error()
 	case StackOperationV1beta2Stack:
-		var stack *apiv1beta2.Stack
+		var stack *v1beta2.Stack
 		var err error
 		config, err := parsing.LoadStackData([]byte(composeFile), map[string]string{})
 		if err != nil {
@@ -171,9 +187,33 @@ func (ns *Namespace) CreateStack(strategy StackOperationStrategy, name, composeF
 			ObjectMeta: metav1.ObjectMeta{
 				Name: name,
 			},
+			Spec: &v1beta2.StackSpec{},
+		}
+		spec := conversions.FromComposeConfig(config)
+		if err := v1alpha3.Convert_v1alpha3_StackSpec_To_v1beta2_StackSpec(spec, stack.Spec, nil); err != nil {
+			return nil, err
+		}
+		res, err := ns.stacks.Create(stack)
+		if err != nil {
+			return nil, err
+		}
+		var aslatest v1alpha3.Stack
+		err = v1alpha3.Convert_v1beta2_Stack_To_v1alpha3_Stack(res, &aslatest, nil)
+		return &aslatest, err
+	case StackOperationV1alpha3:
+		var stack *v1alpha3.Stack
+		var err error
+		config, err := parsing.LoadStackData([]byte(composeFile), map[string]string{})
+		if err != nil {
+			return nil, err
+		}
+		stack = &v1alpha3.Stack{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: name,
+			},
 			Spec: conversions.FromComposeConfig(config),
 		}
-		return ns.stacks.Create(stack)
+		return ns.stacksv1alpha3.Create(stack)
 	case StackOperationV1beta1:
 		stack := &v1beta1.Stack{
 			ObjectMeta: metav1.ObjectMeta{
@@ -210,7 +250,7 @@ func (ns *Namespace) DeleteStackv1(name string) error {
 }
 
 // UpdateStack updates a stack.
-func (ns *Namespace) UpdateStack(strategy StackOperationStrategy, name, composeFile string) (*apiv1beta2.Stack, error) {
+func (ns *Namespace) UpdateStack(strategy StackOperationStrategy, name, composeFile string) (*v1alpha3.Stack, error) {
 	switch strategy {
 	case StackOperationV1beta2Compose:
 		compose := &v1beta2.ComposeFile{
@@ -219,14 +259,14 @@ func (ns *Namespace) UpdateStack(strategy StackOperationStrategy, name, composeF
 			},
 			ComposeFile: composeFile,
 		}
-		return nil, ns.stackREST.Put().Namespace(ns.name).Name(name).Resource("stacks").SubResource("composefile").Body(compose).Do().Error()
-	case StackOperationV1beta2Stack:
+		return nil, ns.stackRESTv1beta2.Put().Namespace(ns.name).Name(name).Resource("stacks").SubResource("composefile").Body(compose).Do().Error()
+	case StackOperationV1alpha3:
 		p := patch.New()
 		config, err := parsing.LoadStackData([]byte(composeFile), map[string]string{})
 		if err != nil {
 			return nil, err
 		}
-		newStack := &v1beta2.Stack{
+		newStack := &v1alpha3.Stack{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: name,
 			},
@@ -241,7 +281,39 @@ func (ns *Namespace) UpdateStack(strategy StackOperationStrategy, name, composeF
 		if err != nil {
 			return nil, err
 		}
-		return ns.stacks.Patch(name, apitypes.JSONPatchType, buf)
+		return ns.stacksv1alpha3.Patch(name, apitypes.JSONPatchType, buf)
+	case StackOperationV1beta2Stack:
+		p := patch.New()
+		config, err := parsing.LoadStackData([]byte(composeFile), map[string]string{})
+		if err != nil {
+			return nil, err
+		}
+		newStack := &v1beta2.Stack{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: name,
+			},
+			Spec: &v1beta2.StackSpec{},
+		}
+		spec := conversions.FromComposeConfig(config)
+		if err := v1alpha3.Convert_v1alpha3_StackSpec_To_v1beta2_StackSpec(spec, newStack.Spec, nil); err != nil {
+			return nil, err
+		}
+		if err != nil {
+			return nil, err
+		}
+		p = p.Replace("/spec", newStack.Spec)
+
+		buf, err := p.ToJSON()
+		if err != nil {
+			return nil, err
+		}
+		res, err := ns.stacks.Patch(name, apitypes.JSONPatchType, buf)
+		if err != nil {
+			return nil, err
+		}
+		var aslatest v1alpha3.Stack
+		err = v1alpha3.Convert_v1beta2_Stack_To_v1alpha3_Stack(res, &aslatest, nil)
+		return &aslatest, err
 	case StackOperationV1beta1:
 		p := patch.New()
 		p = p.Replace("/spec/composeFile", composeFile)
@@ -256,25 +328,25 @@ func (ns *Namespace) UpdateStack(strategy StackOperationStrategy, name, composeF
 }
 
 // UpdateStackFromSpec updates a stack from a Spec.
-func (ns *Namespace) UpdateStackFromSpec(name string, newStack *apiv1beta2.Stack) (*apiv1beta2.Stack, error) {
-	filtered := &apiv1beta2.Stack{
+func (ns *Namespace) UpdateStackFromSpec(name string, newStack *v1alpha3.Stack) (*v1alpha3.Stack, error) {
+	filtered := &v1alpha3.Stack{
 		Spec: newStack.Spec,
 	}
 	buf, err := json.Marshal(filtered)
 	if err != nil {
 		return nil, errors.Wrap(err, "stack marshaling error")
 	}
-	return ns.stacks.Patch(name, apitypes.MergePatchType, buf)
+	return ns.stacksv1alpha3.Patch(name, apitypes.MergePatchType, buf)
 }
 
 // GetStack gets a stack.
-func (ns *Namespace) GetStack(name string) (*apiv1beta2.Stack, error) {
-	return ns.stacks.Get(name, metav1.GetOptions{IncludeUninitialized: true})
+func (ns *Namespace) GetStack(name string) (*v1alpha3.Stack, error) {
+	return ns.stacksv1alpha3.Get(name, metav1.GetOptions{IncludeUninitialized: true})
 }
 
 // ListStacks lists the stacks.
-func (ns *Namespace) ListStacks() ([]apiv1beta2.Stack, error) {
-	stacks, err := ns.stacks.List(metav1.ListOptions{IncludeUninitialized: true})
+func (ns *Namespace) ListStacks() ([]v1alpha3.Stack, error) {
+	stacks, err := ns.stacksv1alpha3.List(metav1.ListOptions{IncludeUninitialized: true})
 	if err != nil {
 		return nil, err
 	}
@@ -370,7 +442,7 @@ func (ns *Namespace) IsStackAvailable(name string) wait.ConditionFunc {
 			return false, err
 		}
 
-		if stack.Status == nil || stack.Status.Phase != apiv1beta2.StackAvailable {
+		if stack.Status == nil || stack.Status.Phase != v1alpha3.StackAvailable {
 			return false, nil
 		}
 
@@ -386,7 +458,7 @@ func (ns *Namespace) IsStackFailed(name string, errorSubstr string) wait.Conditi
 			return false, err
 		}
 
-		if stack.Status == nil || stack.Status.Phase != apiv1beta2.StackFailure {
+		if stack.Status == nil || stack.Status.Phase != v1alpha3.StackFailure {
 			return false, nil
 		}
 

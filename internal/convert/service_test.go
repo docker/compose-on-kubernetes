@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	. "github.com/docker/compose-on-kubernetes/internal/test/builders"
 	"github.com/stretchr/testify/assert"
@@ -14,7 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
-func services(t *testing.T, stack *v1beta2.Stack, strategy ServiceStrategy) (*apiv1.Service, *apiv1.Service, *apiv1.Service) {
+func services(t *testing.T, stack *latest.Stack, strategy ServiceStrategy) (*apiv1.Service, *apiv1.Service, *apiv1.Service) {
 	s, err := StackToStack(*stack, strategy, stackresources.EmptyStackState)
 	assert.NoError(t, err)
 	var (

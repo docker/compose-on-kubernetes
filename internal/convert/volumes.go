@@ -6,7 +6,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/pkg/errors"
 	apiv1 "k8s.io/api/core/v1"
 )
@@ -18,7 +18,7 @@ type volumeSpec struct {
 	source *apiv1.VolumeSource
 }
 
-func hasPersistentVolumes(s v1beta2.ServiceConfig) bool {
+func hasPersistentVolumes(s latest.ServiceConfig) bool {
 	for _, volume := range s.Volumes {
 		if volume.Type == "volume" {
 			return true
@@ -28,7 +28,7 @@ func hasPersistentVolumes(s v1beta2.ServiceConfig) bool {
 	return false
 }
 
-func toVolumeSpecs(s v1beta2.ServiceConfig, configuration *v1beta2.StackSpec) ([]volumeSpec, error) {
+func toVolumeSpecs(s latest.ServiceConfig, configuration *latest.StackSpec) ([]volumeSpec, error) {
 	var specs []volumeSpec
 	for i, m := range s.Volumes {
 		var source *apiv1.VolumeSource
@@ -112,7 +112,7 @@ func or(v string, defaultValue string) string {
 	return defaultValue
 }
 
-func toVolumeMounts(s v1beta2.ServiceConfig, configuration *v1beta2.StackSpec) ([]apiv1.VolumeMount, error) {
+func toVolumeMounts(s latest.ServiceConfig, configuration *latest.StackSpec) ([]apiv1.VolumeMount, error) {
 	var mounts []apiv1.VolumeMount
 	specs, err := toVolumeSpecs(s, configuration)
 	if err != nil {
@@ -124,7 +124,7 @@ func toVolumeMounts(s v1beta2.ServiceConfig, configuration *v1beta2.StackSpec) (
 	return mounts, nil
 }
 
-func toVolumes(s v1beta2.ServiceConfig, configuration *v1beta2.StackSpec) ([]apiv1.Volume, error) {
+func toVolumes(s latest.ServiceConfig, configuration *latest.StackSpec) ([]apiv1.Volume, error) {
 	var volumes []apiv1.Volume
 	specs, err := toVolumeSpecs(s, configuration)
 	if err != nil {
@@ -169,7 +169,7 @@ func defaultMode(mode *uint32) *int32 {
 	return defaultMode
 }
 
-func secretVolume(config v1beta2.ServiceSecretConfig, topLevelSecret v1beta2.SecretConfig, subPath string) *apiv1.VolumeSource {
+func secretVolume(config latest.ServiceSecretConfig, topLevelSecret latest.SecretConfig, subPath string) *apiv1.VolumeSource {
 	return &apiv1.VolumeSource{
 		Secret: &apiv1.SecretVolumeSource{
 			SecretName: config.Source,
@@ -193,7 +193,7 @@ func volumeMount(name, path string, readOnly bool, subPath string) apiv1.VolumeM
 	}
 }
 
-func configVolume(config v1beta2.ServiceConfigObjConfig, topLevelConfig v1beta2.ConfigObjConfig, subPath string) *apiv1.VolumeSource {
+func configVolume(config latest.ServiceConfigObjConfig, topLevelConfig latest.ConfigObjConfig, subPath string) *apiv1.VolumeSource {
 	return &apiv1.VolumeSource{
 		ConfigMap: &apiv1.ConfigMapVolumeSource{
 			LocalObjectReference: apiv1.LocalObjectReference{

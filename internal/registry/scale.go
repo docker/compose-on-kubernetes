@@ -4,7 +4,7 @@ import (
 	"context"
 	"fmt"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/conversions"
 	"github.com/docker/compose-on-kubernetes/internal/convert"
 	iv "github.com/docker/compose-on-kubernetes/internal/internalversion"
@@ -34,7 +34,7 @@ func NewStackScaleRest(store stackRESTStore, config *restclient.Config) rest.Sto
 }
 
 func (r *stackScaleRest) New() runtime.Object {
-	return &v1beta2.Scale{}
+	return &latest.Scale{}
 }
 
 func (r *stackScaleRest) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
@@ -42,7 +42,7 @@ func (r *stackScaleRest) Get(ctx context.Context, name string, options *metav1.G
 	if err != nil {
 		return nil, err
 	}
-	res := v1beta2.Scale{
+	res := latest.Scale{
 		Spec:   make(map[string]int),
 		Status: make(map[string]int),
 	}
@@ -63,7 +63,7 @@ func (r *stackScaleRest) Get(ctx context.Context, name string, options *metav1.G
 		log.Errorf("Failed to get apps: %s", err)
 		return nil, err
 	}
-	stackBeta2, err := conversions.StackFromInternalV1beta2(stack)
+	stackLatest, err := conversions.StackFromInternalV1alpha3(stack)
 	if err != nil {
 		log.Errorf("Failed to convert to StackDefinition: %s", err)
 		return nil, err
@@ -73,7 +73,7 @@ func (r *stackScaleRest) Get(ctx context.Context, name string, options *metav1.G
 		log.Errorf("Failed to convert to StackDefinition: %s", err)
 		return nil, err
 	}
-	stackDef, err := convert.StackToStack(*stackBeta2, strategy, stackresources.EmptyStackState)
+	stackDef, err := convert.StackToStack(*stackLatest, strategy, stackresources.EmptyStackState)
 	if err != nil {
 		log.Errorf("Failed to convert to StackDefinition: %s", err)
 		return nil, err
@@ -115,7 +115,7 @@ func (r *stackScaleRest) Update(ctx context.Context, name string, objInfo rest.U
 	if err != nil {
 		return nil, false, err
 	}
-	newScale := newScalero.(*v1beta2.Scale)
+	newScale := newScalero.(*latest.Scale)
 	log.Infof("Scale update %s: %v", name, newScale.Spec)
 
 	return r.storage.UpdateStack(ctx, name, func(ctx context.Context, newObj *iv.Stack, oldObj *iv.Stack) (transformedNewObj *iv.Stack, err error) {

@@ -5,7 +5,7 @@ import (
 	"sort"
 	"testing"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	. "github.com/docker/compose-on-kubernetes/internal/test/builders"
 	"github.com/stretchr/testify/assert"
@@ -83,7 +83,7 @@ func makeExpectedAffinity(kvs ...keyValue) *apiv1.Affinity {
 func TestNodeAfinity(t *testing.T) {
 	cases := []struct {
 		name     string
-		source   *v1beta2.Constraints
+		source   *latest.Constraints
 		expected *apiv1.Affinity
 	}{
 		{
@@ -95,8 +95,8 @@ func TestNodeAfinity(t *testing.T) {
 		},
 		{
 			name: "hostname",
-			source: &v1beta2.Constraints{
-				Hostname: &v1beta2.Constraint{
+			source: &latest.Constraints{
+				Hostname: &latest.Constraint{
 					Operator: "==",
 					Value:    "test",
 				},
@@ -109,8 +109,8 @@ func TestNodeAfinity(t *testing.T) {
 		},
 		{
 			name: "os",
-			source: &v1beta2.Constraints{
-				OperatingSystem: &v1beta2.Constraint{
+			source: &latest.Constraints{
+				OperatingSystem: &latest.Constraint{
 					Operator: "==",
 					Value:    "windows",
 				},
@@ -122,8 +122,8 @@ func TestNodeAfinity(t *testing.T) {
 		},
 		{
 			name: "arch",
-			source: &v1beta2.Constraints{
-				Architecture: &v1beta2.Constraint{
+			source: &latest.Constraints{
+				Architecture: &latest.Constraint{
 					Operator: "==",
 					Value:    "arm64",
 				},
@@ -135,8 +135,8 @@ func TestNodeAfinity(t *testing.T) {
 		},
 		{
 			name: "custom-labels",
-			source: &v1beta2.Constraints{
-				MatchLabels: map[string]v1beta2.Constraint{
+			source: &latest.Constraints{
+				MatchLabels: map[string]latest.Constraint{
 					kubernetesArch: {
 						Operator: "==",
 						Value:    "arm64",

@@ -8,7 +8,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources/diff"
 	. "github.com/docker/compose-on-kubernetes/internal/test/builders"
@@ -33,23 +33,23 @@ func newTestChildrenStore(objects ...interface{}) (*testChildrenStore, error) {
 }
 
 type testStackStore struct {
-	originalStack *v1beta2.Stack
+	originalStack *latest.Stack
 }
 
-func (s *testStackStore) get(_ string) (*v1beta2.Stack, error) {
+func (s *testStackStore) get(_ string) (*latest.Stack, error) {
 	return s.originalStack, nil
 }
 
-func newTestStackStore(originalStack *v1beta2.Stack) *testStackStore {
+func newTestStackStore(originalStack *latest.Stack) *testStackStore {
 	return &testStackStore{originalStack: originalStack}
 }
 
 type testResourceUpdaterProvider struct {
 	diffs    chan<- *diff.StackStateDiff
-	statuses chan<- *v1beta2.Stack
+	statuses chan<- *latest.Stack
 }
 
-func (p *testResourceUpdaterProvider) getUpdater(stack *v1beta2.Stack, _ bool) (resourceUpdater, error) {
+func (p *testResourceUpdaterProvider) getUpdater(stack *latest.Stack, _ bool) (resourceUpdater, error) {
 	return &testResourceUpdater{
 		diffs:    p.diffs,
 		statuses: p.statuses,
@@ -57,21 +57,21 @@ func (p *testResourceUpdaterProvider) getUpdater(stack *v1beta2.Stack, _ bool) (
 	}, nil
 }
 
-func newTestResourceUpdaterProvider(diffs chan<- *diff.StackStateDiff, statuses chan<- *v1beta2.Stack) *testResourceUpdaterProvider {
+func newTestResourceUpdaterProvider(diffs chan<- *diff.StackStateDiff, statuses chan<- *latest.Stack) *testResourceUpdaterProvider {
 	return &testResourceUpdaterProvider{diffs: diffs, statuses: statuses}
 }
 
 type testResourceUpdater struct {
 	diffs    chan<- *diff.StackStateDiff
-	statuses chan<- *v1beta2.Stack
-	stack    *v1beta2.Stack
+	statuses chan<- *latest.Stack
+	stack    *latest.Stack
 }
 
 func (u *testResourceUpdater) applyStackDiff(diff *diff.StackStateDiff) error {
 	u.diffs <- diff
 	return nil
 }
-func (u *testResourceUpdater) updateStackStatus(status v1beta2.StackStatus) (*v1beta2.Stack, error) {
+func (u *testResourceUpdater) updateStackStatus(status latest.StackStatus) (*latest.Stack, error) {
 	if u.stack.Status != nil && *u.stack.Status == status {
 		return u.stack, nil
 	}
@@ -85,8 +85,8 @@ func (u *testResourceUpdater) deleteSecretsAndConfigMaps() error {
 	return nil
 }
 
-func runReconcilierTestCase(originalStack *v1beta2.Stack, defaultServiceType coretypes.ServiceType, operation func(*StackReconciler),
-	originalState ...interface{}) ([]*diff.StackStateDiff, []*v1beta2.Stack, error) {
+func runReconcilierTestCase(originalStack *latest.Stack, defaultServiceType coretypes.ServiceType, operation func(*StackReconciler),
+	originalState ...interface{}) ([]*diff.StackStateDiff, []*latest.Stack, error) {
 	cache := &dummyOwnerCache{
 		data: make(map[string]stackOwnerCacheEntry),
 	}
@@ -96,7 +96,7 @@ func runReconcilierTestCase(originalStack *v1beta2.Stack, defaultServiceType cor
 	}
 	stackStore := newTestStackStore(originalStack)
 	chDiffs := make(chan *diff.StackStateDiff)
-	chStatusUpdates := make(chan *v1beta2.Stack)
+	chStatusUpdates := make(chan *latest.Stack)
 	var wg sync.WaitGroup
 	wg.Add(2)
 	var producedDiffs []*diff.StackStateDiff
@@ -106,7 +106,7 @@ func runReconcilierTestCase(originalStack *v1beta2.Stack, defaultServiceType cor
 			producedDiffs = append(producedDiffs, d)
 		}
 	}()
-	var producedStatusUpdates []*v1beta2.Stack
+	var producedStatusUpdates []*latest.Stack
 	go func() {
 		defer wg.Done()
 		for s := range chStatusUpdates {
@@ -129,15 +129,15 @@ func runReconcilierTestCase(originalStack *v1beta2.Stack, defaultServiceType cor
 	return producedDiffs, producedStatusUpdates, nil
 }
 
-func runReconciliationTestCase(originalStack *v1beta2.Stack, defaultServiceType coretypes.ServiceType,
-	originalState ...interface{}) (producedDiffs []*diff.StackStateDiff, producedStatusUpdates []*v1beta2.Stack, err error) {
+func runReconciliationTestCase(originalStack *latest.Stack, defaultServiceType coretypes.ServiceType,
+	originalState ...interface{}) (producedDiffs []*diff.StackStateDiff, producedStatusUpdates []*latest.Stack, err error) {
 	return runReconcilierTestCase(originalStack, defaultServiceType, func(testee *StackReconciler) {
 		testee.reconcileStack(stackresources.ObjKey(originalStack.Namespace, originalStack.Name))
 	}, originalState...)
 }
 
-func runRemoveStackTestCase(originalStack *v1beta2.Stack, defaultServiceType coretypes.ServiceType,
-	originalState ...interface{}) (producedDiffs []*diff.StackStateDiff, producedStatusUpdates []*v1beta2.Stack, err error) {
+func runRemoveStackTestCase(originalStack *latest.Stack, defaultServiceType coretypes.ServiceType,
+	originalState ...interface{}) (producedDiffs []*diff.StackStateDiff, producedStatusUpdates []*latest.Stack, err error) {
 	return runReconcilierTestCase(originalStack, defaultServiceType, func(testee *StackReconciler) {
 		testee.deleteStackChildren(originalStack)
 	}, originalState...)

@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"strconv"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	iv "github.com/docker/compose-on-kubernetes/internal/internalversion"
 	metav1beta1 "k8s.io/apimachinery/pkg/apis/meta/v1beta1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -64,7 +64,7 @@ func (c stackTableConvertor) ConvertToTable(ctx context.Context, object runtime.
 	return &table, nil
 }
 
-func extractPortsSummary(s *v1beta2.StackSpec) string {
+func extractPortsSummary(s *latest.StackSpec) string {
 	ports := ""
 	for _, svc := range s.Services {
 		if len(svc.Ports) > 0 {

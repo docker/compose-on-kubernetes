@@ -2,7 +2,7 @@ package internalversion
 
 import (
 	"github.com/docker/compose-on-kubernetes/api/compose/impersonation"
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -50,7 +50,7 @@ func (s *StackStatus) clone() *StackStatus {
 // StackSpec is the Spec field of a Stack
 type StackSpec struct {
 	ComposeFile string               `json:"composeFile,omitempty"`
-	Stack       *v1beta2.StackSpec   `json:"stack,omitempty"`
+	Stack       *latest.StackSpec    `json:"stack,omitempty"`
 	Owner       impersonation.Config `json:"owner,omitempty"`
 }
 

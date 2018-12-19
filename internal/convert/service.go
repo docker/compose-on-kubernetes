@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"strings"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -26,7 +26,7 @@ const (
 type ServiceStrategy interface {
 	randomServiceType() apiv1.ServiceType
 	publishedServiceType() apiv1.ServiceType
-	convertServicePort(config v1beta2.ServicePortConfig, originalPublished, originalRandom []apiv1.ServicePort) (port apiv1.ServicePort, published bool)
+	convertServicePort(config latest.ServicePortConfig, originalPublished, originalRandom []apiv1.ServicePort) (port apiv1.ServicePort, published bool)
 }
 
 // ServiceStrategyFor returns the correct strategy for a desired publishServiceType
@@ -61,7 +61,7 @@ func (loadBalancerServiceStrategy) publishedServiceType() apiv1.ServiceType {
 	return apiv1.ServiceTypeLoadBalancer
 }
 
-func (loadBalancerServiceStrategy) convertServicePort(source v1beta2.ServicePortConfig, originalPublished, originalRandom []apiv1.ServicePort) (port apiv1.ServicePort, published bool) {
+func (loadBalancerServiceStrategy) convertServicePort(source latest.ServicePortConfig, originalPublished, originalRandom []apiv1.ServicePort) (port apiv1.ServicePort, published bool) {
 	proto := toProtocol(source.Protocol)
 	protoLower := strings.ToLower(string(proto))
 	if source.Published != 0 {
@@ -90,7 +90,7 @@ func (nodePortServiceStrategy) publishedServiceType() apiv1.ServiceType {
 	return apiv1.ServiceTypeNodePort
 }
 
-func (nodePortServiceStrategy) convertServicePort(source v1beta2.ServicePortConfig, originalPublished, originalRandom []apiv1.ServicePort) (port apiv1.ServicePort, published bool) {
+func (nodePortServiceStrategy) convertServicePort(source latest.ServicePortConfig, originalPublished, originalRandom []apiv1.ServicePort) (port apiv1.ServicePort, published bool) {
 	proto := toProtocol(source.Protocol)
 	protoLower := strings.ToLower(string(proto))
 	if source.Published != 0 {
@@ -110,7 +110,7 @@ func (nodePortServiceStrategy) convertServicePort(source v1beta2.ServicePortConf
 
 // toServices converts a Compose Service to a Kubernetes headless service as
 // well as a normal service if it requires published ports.
-func toServices(s v1beta2.ServiceConfig, objectMeta metav1.ObjectMeta, labelSelector map[string]string,
+func toServices(s latest.ServiceConfig, objectMeta metav1.ObjectMeta, labelSelector map[string]string,
 	strategy ServiceStrategy, original *stackresources.StackState) (*apiv1.Service, *apiv1.Service, *apiv1.Service) {
 	headlessMeta := objectMeta
 	publishedMeta := publishedObjectMeta(objectMeta)

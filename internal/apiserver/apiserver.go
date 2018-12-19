@@ -3,6 +3,7 @@ package apiserver
 import (
 	"net/http"
 
+	"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3"
 	"github.com/docker/compose-on-kubernetes/api/compose/v1beta1"
 	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
 	"github.com/docker/compose-on-kubernetes/internal/conversions"
@@ -39,10 +40,14 @@ func init() {
 	)
 	v1beta1.AddToScheme(Scheme)
 	v1beta2.AddToScheme(Scheme)
-	Scheme.SetVersionPriority(v1beta2.SchemeGroupVersion, v1beta1.SchemeGroupVersion)
+	v1alpha3.AddToScheme(Scheme)
+	Scheme.SetVersionPriority(v1alpha3.SchemeGroupVersion, v1beta2.SchemeGroupVersion, v1beta1.SchemeGroupVersion)
 	internalversion.AddStorageToScheme(Scheme)
 	internalversion.AddInternalToScheme(Scheme)
 	if err := conversions.RegisterV1beta1Conversions(Scheme); err != nil {
+		panic(err)
+	}
+	if err := conversions.RegisterV1alpha3Conversions(Scheme); err != nil {
 		panic(err)
 	}
 	if err := conversions.RegisterV1beta2Conversions(Scheme); err != nil {
@@ -132,6 +137,9 @@ func (c completedConfig) New(kubeconfig string) (*ComposeServer, error) {
 	v1beta2storage["stacks/scale"] = stackScaleRegistry
 	v1beta2storage["stacks/log"] = stackLogRegistry
 	apiGroupInfo.VersionedResourcesStorageMap["v1beta2"] = v1beta2storage
+
+	// v1alpha3 has exactly the same implementation as v1beta2
+	apiGroupInfo.VersionedResourcesStorageMap["v1alpha3"] = v1beta2storage
 
 	if err := s.GenericAPIServer.InstallAPIGroup(&apiGroupInfo); err != nil {
 		return nil, err
