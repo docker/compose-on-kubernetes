@@ -113,6 +113,13 @@ func Image(reference string) func(*latest.ServiceConfig) {
 	}
 }
 
+// PullSecret specifies the name of the pull secret used for this service
+func PullSecret(name string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
+		c.PullSecret = name
+	}
+}
+
 // StopGracePeriod specifies the stop-grace-period duration of a service
 func StopGracePeriod(duration time.Duration) func(*latest.ServiceConfig) {
 	return func(c *latest.ServiceConfig) {

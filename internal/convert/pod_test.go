@@ -864,3 +864,18 @@ func TestToPodWithTwoExternalConfigsSameMountPoint(t *testing.T) {
 	assert.Equal(t, expectedVolumes, podTemplate.Spec.Volumes)
 	assert.Equal(t, expectedMounts, podTemplate.Spec.Containers[0].VolumeMounts)
 }
+
+func TestToPodWithPullSecret(t *testing.T) {
+	podTemplateWithSecret := podTemplate(t, Stack("demo",
+		WithService("nginx",
+			Image("nginx"),
+			PullSecret("test-pull-secret"),
+		)))
+	assert.Equal(t, 1, len(podTemplateWithSecret.Spec.ImagePullSecrets))
+	assert.Equal(t, "test-pull-secret", podTemplateWithSecret.Spec.ImagePullSecrets[0].Name)
+	podTemplateNoSecret := podTemplate(t, Stack("demo",
+		WithService("nginx",
+			Image("nginx"),
+		)))
+	assert.Nil(t, podTemplateNoSecret.Spec.ImagePullSecrets)
+}
