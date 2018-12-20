@@ -7,9 +7,6 @@ import (
 	discovery "k8s.io/client-go/discovery"
 	rest "k8s.io/client-go/rest"
 	flowcontrol "k8s.io/client-go/util/flowcontrol"
-
-	// For GKE authentication
-	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 // Interface defines the methods a compose kube client should have
