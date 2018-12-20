@@ -323,6 +323,114 @@ var composeRoleRules = []rbacv1types.PolicyRule{
 	},
 }
 
+func viewStackRole() *rbacv1types.ClusterRole {
+	return &rbacv1types.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "compose-stack-view",
+			Labels: map[string]string{
+				"rbac.authorization.k8s.io/aggregate-to-view": "true",
+			},
+		},
+		Rules: []rbacv1types.PolicyRule{
+			{
+				APIGroups: []string{composeGroupName},
+				Resources: []string{"stacks", "stacks/scale", "stacks/log", "stacks/composeFile"},
+				Verbs:     []string{"get", "list", "watch"},
+			},
+		},
+	}
+}
+
+func editStackRole() *rbacv1types.ClusterRole {
+	return &rbacv1types.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "compose-stack-edit",
+			Labels: map[string]string{
+				"rbac.authorization.k8s.io/aggregate-to-edit": "true",
+			},
+		},
+		Rules: []rbacv1types.PolicyRule{
+			{
+				APIGroups: []string{composeGroupName},
+				Resources: []string{"stacks", "stacks/scale", "stacks/log", "stacks/composeFile"},
+				Verbs: []string{
+					"create",
+					"delete",
+					"deletecollection",
+					"get",
+					"list",
+					"patch",
+					"update",
+					"watch",
+				},
+			},
+		},
+	}
+}
+
+func adminStackRole() *rbacv1types.ClusterRole {
+	return &rbacv1types.ClusterRole{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: "compose-stack-admin",
+			Labels: map[string]string{
+				"rbac.authorization.k8s.io/aggregate-to-admin": "true",
+			},
+		},
+		Rules: []rbacv1types.PolicyRule{
+			{
+				APIGroups: []string{composeGroupName},
+				Resources: []string{"stacks", "stacks/scale", "stacks/log", "stacks/composeFile"},
+				Verbs: []string{
+					"create",
+					"delete",
+					"deletecollection",
+					"get",
+					"list",
+					"patch",
+					"update",
+					"watch",
+				},
+			},
+			{
+				APIGroups: []string{composeGroupName},
+				Resources: []string{"stacks/owner"},
+				Verbs:     []string{"get"},
+			},
+		},
+	}
+}
+
+func (c *installer) createDefaultClusterRoles(ctx *installerContext) error {
+	var shouldDo bool
+	roles := []*rbacv1types.ClusterRole{viewStackRole(), editStackRole(), adminStackRole()}
+	for _, r := range roles {
+		existing, err := c.rbacClient.ClusterRoles().Get(r.Name, metav1.GetOptions{})
+		if apierrors.IsNotFound(err) {
+			if shouldDo, err = c.objectFilter.filter(r); err != nil {
+				return err
+			}
+			if shouldDo {
+				if _, err := c.rbacClient.ClusterRoles().Create(r); err != nil {
+					return err
+				}
+			}
+		} else if err != nil {
+			return err
+		} else {
+			r.ResourceVersion = existing.ResourceVersion
+			if shouldDo, err = c.objectFilter.filter(r); err != nil {
+				return err
+			}
+			if shouldDo {
+				if _, err := c.rbacClient.ClusterRoles().Update(r); err != nil {
+					return err
+				}
+			}
+		}
+	}
+	return nil
+}
+
 func (c *installer) createSAClusterRole() error {
 	role, err := c.rbacClient.ClusterRoles().Get("compose-service", metav1.GetOptions{})
 	var shouldDo bool

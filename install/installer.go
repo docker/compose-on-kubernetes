@@ -382,6 +382,7 @@ func (c *installer) install(ctx context.Context) error {
 			steps = append(steps, c.createController)
 		}
 	}
+	steps = append(steps, c.createDefaultClusterRoles)
 	for _, step := range steps {
 		if err := step(ictx); err != nil {
 			return err
