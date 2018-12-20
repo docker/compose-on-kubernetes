@@ -7,6 +7,9 @@ import (
 	runtime "k8s.io/apimachinery/pkg/runtime"
 	schema "k8s.io/apimachinery/pkg/runtime/schema"
 	serializer "k8s.io/apimachinery/pkg/runtime/serializer"
+
+	// For GKE authentication
+	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 )
 
 // Variables required for registration
