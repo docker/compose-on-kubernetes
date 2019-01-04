@@ -17,6 +17,7 @@ type OptionsCommon struct {
 	APIServerAffinity      *corev1types.Affinity
 	ControllerAffinity     *corev1types.Affinity
 	SkipLivenessProbes     bool
+	PullPolicy             corev1types.PullPolicy
 }
 
 // UnsafeOptions holds install options for the api extension

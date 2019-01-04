@@ -524,7 +524,7 @@ func (c *installer) configureAPIServerImage() (image string, args []string, env 
 			"--service-namespace", c.commonOptions.Namespace,
 		},
 		[]corev1types.EnvVar{},
-		corev1types.PullAlways
+		c.commonOptions.PullPolicy
 }
 
 func (c *installer) createAPIServer(ctx *installerContext) error {
@@ -688,7 +688,7 @@ func (c *installer) configureControllerImage() (image string, args []string, pul
 	return imagePrefix + "controller:" + c.commonOptions.Tag, []string{
 		"--kubeconfig", "",
 		"--reconciliation-interval", c.commonOptions.ReconciliationInterval.String(),
-	}, corev1types.PullAlways
+	}, c.commonOptions.PullPolicy
 }
 
 func (c *installer) createController(ctx *installerContext) error {

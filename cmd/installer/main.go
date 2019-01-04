@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"flag"
+	"fmt"
 	"io/ioutil"
 
 	"github.com/docker/compose-on-kubernetes/api/constants"
@@ -10,6 +11,7 @@ import (
 	customflags "github.com/docker/compose-on-kubernetes/internal/flags"
 	homedir "github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
+	corev1types "k8s.io/api/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // For Google Kubernetes Engine authentication
 	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
@@ -18,10 +20,12 @@ import (
 func parseOptions(uninstall *bool, options *install.SafeOptions) *rest.Config {
 	var etcdCA, etcdCert, etcdKey, tlsCA, tlsCert, tlsKey string
 	var logLevel string
+	var pullPolicy string
 	flag.BoolVar(&options.Network.ShouldUseHost, "network-host", false, "Use network host")
 	flag.StringVar(&options.OptionsCommon.Namespace, "namespace", "docker", "Namespace in which to deploy")
 	flag.DurationVar(&options.OptionsCommon.ReconciliationInterval, "reconciliation-interval", constants.DefaultFullSyncInterval, "Interval of reconciliation loop")
 	flag.StringVar(&options.OptionsCommon.Tag, "tag", "latest", "Image tag")
+	flag.StringVar(&pullPolicy, "pull-policy", string(corev1types.PullAlways), fmt.Sprintf("Image pull policy (%q|%q|%q)", corev1types.PullAlways, corev1types.PullNever, corev1types.PullIfNotPresent))
 	flag.StringVar(&options.Etcd.Servers, "etcd-servers", "", "etcd server addresses")
 	flag.BoolVar(&options.SkipLivenessProbes, "skip-liveness-probes", false, "Disable liveness probe on Controller and API server deployments. Use this when HTTPS liveness probe fails.")
 
@@ -43,6 +47,12 @@ func parseOptions(uninstall *bool, options *install.SafeOptions) *rest.Config {
 		panic(err)
 	}
 	log.SetLevel(loggerLevel)
+
+	pp, err := parsePullPolicy(pullPolicy)
+	if err != nil {
+		panic(err)
+	}
+	options.OptionsCommon.PullPolicy = pp
 
 	if etcdCA != "" || etcdCert != "" || etcdKey != "" {
 		if etcdCA == "" || etcdCert == "" || etcdKey == "" {
@@ -67,6 +77,15 @@ func parseOptions(uninstall *bool, options *install.SafeOptions) *rest.Config {
 		panic(err)
 	}
 	return config
+}
+
+func parsePullPolicy(pullPolicy string) (corev1types.PullPolicy, error) {
+	switch pp := corev1types.PullPolicy(pullPolicy); pp {
+	case corev1types.PullAlways, corev1types.PullNever, corev1types.PullIfNotPresent:
+		return pp, nil
+	default:
+		return "", fmt.Errorf("invalid pull policy: %q", pullPolicy)
+	}
 }
 
 func loadTLSBundle(caFile, certFile, keyFile string) *install.TLSBundle {
