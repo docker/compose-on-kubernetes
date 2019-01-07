@@ -7,7 +7,6 @@ import (
 	corev1types "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/apimachinery/pkg/util/intstr"
 	"k8s.io/client-go/rest"
 )
 
@@ -156,9 +155,6 @@ func applyNetworkOptions(pod *corev1types.PodSpec, opts *NetworkOptions) {
 			ContainerPort: 9443,
 		})
 		pod.Containers[0].Args = append(pod.Containers[0].Args, "--secure-port", "9443")
-		if pod.Containers[0].LivenessProbe != nil {
-			pod.Containers[0].LivenessProbe.HTTPGet.Port = intstr.FromInt(9443)
-		}
 		return
 	}
 
@@ -174,10 +170,6 @@ func applyNetworkOptions(pod *corev1types.PodSpec, opts *NetworkOptions) {
 		})
 	}
 	pod.Containers[0].Args = append(pod.Containers[0].Args, fmt.Sprintf("--secure-port=%v", opts.Port))
-
-	if pod.Containers[0].LivenessProbe != nil {
-		pod.Containers[0].LivenessProbe.HTTPGet.Port = intstr.FromInt(int(opts.Port))
-	}
 
 	if opts.CustomTLSBundle == nil {
 		return

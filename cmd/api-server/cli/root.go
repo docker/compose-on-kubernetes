@@ -7,6 +7,7 @@ import (
 	"io/ioutil"
 	"math/rand"
 	"net"
+	"net/http"
 	"os"
 	"path/filepath"
 	"strings"
@@ -22,6 +23,7 @@ import (
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
 	genericopenapi "k8s.io/apiserver/pkg/endpoints/openapi"
 	genericapiserver "k8s.io/apiserver/pkg/server"
+	"k8s.io/apiserver/pkg/server/healthz"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
 	certutil "k8s.io/client-go/util/cert"
 	apiregistrationv1beta1types "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1"
@@ -188,6 +190,22 @@ func runComposeServer(o *apiServerOptions, stopCh <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
+	server.GenericAPIServer.AddPostStartHook("start-compose-server-healthz-endpoint", func(context genericapiserver.PostStartHookContext) error {
+		m := http.NewServeMux()
+		healthz.InstallHandler(m, server.GenericAPIServer.HealthzChecks()...)
+		srv := &http.Server{
+			Addr:    ":8080",
+			Handler: m,
+		}
+		go func() {
+			srv.ListenAndServe()
+		}()
+		go func() {
+			<-context.StopCh
+			srv.Close()
+		}()
+		return nil
+	})
 	server.GenericAPIServer.AddPostStartHook("start-compose-server-informers", func(context genericapiserver.PostStartHookContext) error {
 		config.GenericConfig.SharedInformerFactory.Start(context.StopCh)
 		apiServiceV1beta1 := &apiregistrationv1beta1types.APIService{

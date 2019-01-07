@@ -569,7 +569,8 @@ func (c *installer) createAPIServer(ctx *installerContext) error {
 								Handler: corev1types.Handler{
 									HTTPGet: &corev1types.HTTPGetAction{
 										Path:   "/healthz",
-										Scheme: corev1types.URISchemeHTTPS,
+										Port:   intstr.FromInt(8080),
+										Scheme: corev1types.URISchemeHTTP,
 									},
 								},
 								InitialDelaySeconds: 15,

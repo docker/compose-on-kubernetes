@@ -133,8 +133,6 @@ func start(opts *controllerOptions) error {
 		log.Infof("Received signal: %v", sig)
 		close(stop)
 	}()
-	healthz.DefaultHealthz()
-	go http.ListenAndServe(":8080", nil)
 	reconcileQueue := deduplication.NewStringChan(reconcileQueueLength)
 	deletionQueue := make(chan *v1beta2.Stack, deletionChannelSize)
 	childrenStore, err := controller.NewChildrenListener(k8sClientSet, *opts.reconciliationInterval.Value(), reconcileQueue.In())
@@ -158,6 +156,9 @@ func start(opts *controllerOptions) error {
 	}
 	stackReconciler.Start(reconcileQueue.Out(), deletionQueue, stop)
 	log.Infof("Controller ready")
+
+	healthz.DefaultHealthz()
+	go http.ListenAndServe(":8080", nil)
 	<-stop
 	return nil
 }
