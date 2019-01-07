@@ -40,6 +40,7 @@ type Namespace struct {
 	storageClasses   storagev1.StorageClassInterface
 	configMaps       corev1.ConfigMapInterface
 	secrets          corev1.SecretInterface
+	config           *rest.Config
 }
 
 // StackOperationStrategy is the strategy for a stack create/update
@@ -96,6 +97,7 @@ func newNamespace(config *rest.Config, namespace string) (*Namespace, error) {
 		},
 		secrets:    coreClientSet.Secrets(namespace),
 		configMaps: coreClientSet.ConfigMaps(namespace),
+		config:     config,
 	}, nil
 }
 
@@ -514,4 +516,11 @@ func (ns *Namespace) ConfigMaps() corev1.ConfigMapInterface {
 // Secrets returns a Secrets client for the namespace
 func (ns *Namespace) Secrets() corev1.SecretInterface {
 	return ns.secrets
+}
+
+// As returns the same namespace with an impersonated config
+func (ns *Namespace) As(user rest.ImpersonationConfig) (*Namespace, error) {
+	cfg := *ns.config
+	cfg.Impersonate = user
+	return newNamespace(&cfg, ns.name)
 }

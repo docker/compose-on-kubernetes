@@ -3,29 +3,26 @@ package e2e
 import (
 	"errors"
 	"fmt"
-	"math/rand"
-	"strings"
 
 	apiv1beta2 "github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
 	"github.com/docker/compose-on-kubernetes/internal/e2e/cluster"
+	. "github.com/onsi/ginkgo" // Import ginkgo to simplify test code
+	. "github.com/onsi/gomega" // Import gomega to simplify test code
 	rbacv1 "k8s.io/api/rbac/v1"
-	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	typedrbacv1 "k8s.io/client-go/kubernetes/typed/rbac/v1"
-
-	// Import ginkgo to simplify test code
-	. "github.com/onsi/ginkgo"
+	"k8s.io/client-go/rest"
 )
 
 var _ = Describe("Compose fry with permission", func() {
 
 	var (
-		ns      *cluster.Namespace
-		cleanup func()
+		originNS *cluster.Namespace
+		cleanup  func()
 	)
 
 	BeforeEach(func() {
-		ns, cleanup = createNamespaceWithImpersonation()
+		originNS, cleanup = createNamespace()
 	})
 
 	AfterEach(func() {
@@ -33,6 +30,14 @@ var _ = Describe("Compose fry with permission", func() {
 	})
 
 	It("Should allow user to create stack", func() {
+		ns, err := originNS.As(rest.ImpersonationConfig{
+			UserName: "employee",
+			Groups:   []string{"test-group"},
+			Extra: map[string][]string{
+				"test-extra": {"test-value"},
+			},
+		})
+		expectNoError(err)
 		rbac, err := typedrbacv1.NewForConfig(config)
 		expectNoError(err)
 		// allow employee stack and kube access on namespace
@@ -85,6 +90,14 @@ services:
 	})
 
 	It("Should deny user to create stack", func() {
+		ns, err := originNS.As(rest.ImpersonationConfig{
+			UserName: "employee",
+			Groups:   []string{"test-group"},
+			Extra: map[string][]string{
+				"test-extra": {"test-value"},
+			},
+		})
+		expectNoError(err)
 		rbac, err := typedrbacv1.NewForConfig(config)
 		expectNoError(err)
 		// allow employee stack access on denied namespace
@@ -149,25 +162,92 @@ services:
 		})
 	})
 
+	It("Should respect view/edit/admin cluster roles", func() {
+		viewer, err := originNS.As(rest.ImpersonationConfig{
+			UserName: "viewer",
+		})
+		expectNoError(err)
+		editor, err := originNS.As(rest.ImpersonationConfig{
+			UserName: "editor",
+		})
+		expectNoError(err)
+		admin, err := originNS.As(rest.ImpersonationConfig{
+			UserName: "admin",
+		})
+		expectNoError(err)
+		rbac, err := typedrbacv1.NewForConfig(config)
+		expectNoError(err)
+		_, err = rbac.RoleBindings(originNS.Name()).Create(&rbacv1.RoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "viewer-role-binding",
+				Namespace: originNS.Name(),
+			},
+			RoleRef: rbacv1.RoleRef{
+				Kind: "ClusterRole",
+				Name: "view",
+			},
+			Subjects: []rbacv1.Subject{
+				{
+					Kind: "User",
+					Name: "viewer",
+				},
+			},
+		})
+		expectNoError(err)
+		_, err = rbac.RoleBindings(originNS.Name()).Create(&rbacv1.RoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "editor-role-binding",
+				Namespace: originNS.Name(),
+			},
+			RoleRef: rbacv1.RoleRef{
+				Kind: "ClusterRole",
+				Name: "edit",
+			},
+			Subjects: []rbacv1.Subject{
+				{
+					Kind: "User",
+					Name: "editor",
+				},
+			},
+		})
+		expectNoError(err)
+		_, err = rbac.RoleBindings(originNS.Name()).Create(&rbacv1.RoleBinding{
+			ObjectMeta: metav1.ObjectMeta{
+				Name:      "admin-role-binding",
+				Namespace: originNS.Name(),
+			},
+			RoleRef: rbacv1.RoleRef{
+				Kind: "ClusterRole",
+				Name: "admin",
+			},
+			Subjects: []rbacv1.Subject{
+				{
+					Kind: "User",
+					Name: "admin",
+				},
+			},
+		})
+		expectNoError(err)
+		spec := `version: '3.2'
+services:
+  back:
+    image: nginx:1.12.1-alpine`
+		_, err = originNS.CreateStack(cluster.StackOperationV1beta2Stack, "by-cluster-admin", spec)
+		expectNoError(err)
+		_, err = editor.CreateStack(cluster.StackOperationV1beta2Stack, "by-editor", spec)
+		expectNoError(err)
+		_, err = admin.CreateStack(cluster.StackOperationV1beta2Stack, "by-admin", spec)
+		expectNoError(err)
+		_, err = viewer.CreateStack(cluster.StackOperationV1beta2Stack, "by-viewer", spec)
+		Expect(err).To(HaveOccurred())
+		stacks, err := viewer.ListStacks()
+		expectNoError(err)
+		Expect(stacks).To(HaveLen(3))
+		stacks, err = editor.ListStacks()
+		expectNoError(err)
+		Expect(stacks).To(HaveLen(3))
+		stacks, err = admin.ListStacks()
+		expectNoError(err)
+		Expect(stacks).To(HaveLen(3))
+	})
 })
-
-// helpers
-
-func createNamespaceWithImpersonation() (*cluster.Namespace, func()) {
-	cfg := *config
-	cfg.Impersonate.UserName = "employee"
-	cfg.Impersonate.Groups = []string{"test-group"}
-	cfg.Impersonate.Extra = map[string][]string{
-		"test-extra": {"test-value"},
-	}
-	namespaceName := strings.ToLower(fmt.Sprintf("%s-office-%d", deployNamespace, rand.Int63()))
-
-	ns, cleanup, err := cluster.CreateNamespace(config, &cfg, namespaceName)
-	if apierrors.IsAlreadyExists(err) {
-		// retry with another "random" namespace name
-		return createNamespaceWithImpersonation()
-	}
-	expectNoError(err)
-
-	return ns, cleanup
-}
