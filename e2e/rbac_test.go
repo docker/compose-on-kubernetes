@@ -3,7 +3,6 @@ package e2e
 import (
 	"errors"
 	"fmt"
-	"k8s.io/client-go/rest"
 
 	apiv1beta2 "github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
 	"github.com/docker/compose-on-kubernetes/internal/e2e/cluster"
@@ -12,6 +11,7 @@ import (
 	rbacv1 "k8s.io/api/rbac/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	typedrbacv1 "k8s.io/client-go/kubernetes/typed/rbac/v1"
+	"k8s.io/client-go/rest"
 )
 
 var _ = Describe("Compose fry with permission", func() {
@@ -229,9 +229,9 @@ services:
 		})
 		expectNoError(err)
 		spec := `version: '3.2'
-		services:
-		  back:
-			image: nginx:1.12.1-alpine`
+services:
+  back:
+    image: nginx:1.12.1-alpine`
 		_, err = originNS.CreateStack(cluster.StackOperationV1beta2Stack, "by-cluster-admin", spec)
 		expectNoError(err)
 		_, err = editor.CreateStack(cluster.StackOperationV1beta2Stack, "by-editor", spec)

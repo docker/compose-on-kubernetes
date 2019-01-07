@@ -400,7 +400,7 @@ func adminStackRole() *rbacv1types.ClusterRole {
 	}
 }
 
-func (c *installer) createDefaultClusterRoles(ctx *installerContext) error {
+func (c *installer) createDefaultClusterRoles(_ *installerContext) error {
 	var shouldDo bool
 	roles := []*rbacv1types.ClusterRole{viewStackRole(), editStackRole(), adminStackRole()}
 	for _, r := range roles {
