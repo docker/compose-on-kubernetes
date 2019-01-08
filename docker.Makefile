@@ -5,6 +5,10 @@ TEST_BASE_IMAGE = golang:1.11.1
 RUN_BASE_IMAGE = alpine:3.8
 IMAGES = ${IMAGE_REPO_PREFIX}controller ${IMAGE_REPO_PREFIX}controller-coverage ${IMAGE_REPO_PREFIX}e2e-tests ${IMAGE_REPO_PREFIX}api-server ${IMAGE_REPO_PREFIX}api-server-coverage ${IMAGE_REPO_PREFIX}installer
 PUSH_IMAGES = push/${IMAGE_REPO_PREFIX}controller push/${IMAGE_REPO_PREFIX}api-server push/${IMAGE_REPO_PREFIX}installer
+DOCKERFILE = Dockerfile
+ifneq ($(DOCKER_BUILDKIT),)
+  override DOCKERFILE := Dockerfile.buildkit
+endif
 
 BUILD_ARGS = \
   --build-arg BUILD_BASE=${BUILD_BASE_IMAGE} \
@@ -15,7 +19,7 @@ BUILD_ARGS = \
   --build-arg IMAGE_REPO_PREFIX=${IMAGE_REPO_PREFIX}
 
 build-validate-image: ## create the image used for validation
-	@tar cf - Dockerfile doc.go Makefile common.mk cmd install api internal vendor e2e dockerfiles scripts gometalinter.json | docker build --build-arg BUILD_BASE=${BUILD_BASE_IMAGE} -t kube-compose-validate -f ./dockerfiles/Dockerfile.lint -
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e dockerfiles scripts gometalinter.json | docker build --build-arg BUILD_BASE=${BUILD_BASE_IMAGE} -t kube-compose-validate -f ./dockerfiles/Dockerfile.lint -
 
 validate: validate-lint validate-pkg ## validate lint and package dependencies
 
@@ -27,30 +31,47 @@ validate-pkg: build-validate-image ## validate that no public package used in th
 
 ${IMAGE_REPO_PREFIX}e2e-tests:
 	@echo "🌟 build ${IMAGE_REPO_PREFIX}e2e-tests:${TAG}"
-	@tar cf - Dockerfile doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}e2e-tests:$(TAG) --target compose-e2e-tests  -
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}e2e-tests:$(TAG) --target compose-e2e-tests -f ${DOCKERFILE}  -
 
 ${IMAGE_REPO_PREFIX}api-server:
 	@echo "🌟 build ${IMAGE_REPO_PREFIX}api-server:${TAG}"
-	@tar cf - Dockerfile doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}api-server:$(TAG) --target compose-api-server  -
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}api-server:$(TAG) --target compose-api-server -f ${DOCKERFILE} -
 
 ${IMAGE_REPO_PREFIX}api-server-coverage:
 	@echo "🌟 build ${IMAGE_REPO_PREFIX}api-server-coverage:${TAG}"
-	@tar cf - Dockerfile doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) --target compose-api-server-coverage -
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) --target compose-api-server-coverage -f ${DOCKERFILE} -
 
 ${IMAGE_REPO_PREFIX}controller:
 	@echo "🌟 build ${IMAGE_REPO_PREFIX}controller:${TAG}"
-	@tar cf - Dockerfile doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}controller:$(TAG) -
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}controller:$(TAG) -f ${DOCKERFILE} -
 
 ${IMAGE_REPO_PREFIX}controller-coverage:
 	@echo "🌟 build ${IMAGE_REPO_PREFIX}controller-coverage:${TAG}"
-	@tar cf - Dockerfile doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG) --target compose-controller-coverage -
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG) --target compose-controller-coverage -f ${DOCKERFILE} -
 
 ${IMAGE_REPO_PREFIX}installer:
 	@echo "🌟 build ${IMAGE_REPO_PREFIX}installer:${TAG}"
-	@tar cf - Dockerfile doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}installer:$(TAG) --target compose-installer  -
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}installer:$(TAG) --target compose-installer -f ${DOCKERFILE}  -
 
 images: $(IMAGES) ## build images
 	@echo $(IMAGES)
+
+save-coverage-images: 
+	@echo "🌟 save ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG)"
+	@mkdir -p coverage-enabled-images
+	@docker save -o coverage-enabled-images/coverage-enabled-images.tar ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG)
+
+build-kind-image:
+	@echo "🌟 build ${IMAGE_REPO_PREFIX}e2e-kind-node:${TAG}"
+	@tar cf - Dockerfile.kind coverage-enabled-images | docker build -t ${IMAGE_REPO_PREFIX}e2e-kind-node:${TAG} -f Dockerfile.kind -
+
+create-kind-cluster: build-kind-image
+	@echo "🌟 Create kind cluster"
+	@kind create cluster --name compose-on-kube --image ${IMAGE_REPO_PREFIX}e2e-kind-node:${TAG}
+
+delete-kind-cluster:
+	@echo "🌟 Delete kind cluster"
+	kind delete cluster --name compose-on-kube
 
 push/%:
 	@echo "🌟 push $@ ($*:$(TAG))"
@@ -71,7 +92,7 @@ help: ## this help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 test-unit:
-	@tar cf - Dockerfile doc.go Makefile common.mk cmd install api internal vendor e2e dockerfiles/Dockerfile.test | docker build -t docker/kube-compose-unit-test-base --build-arg TEST_BASE=$(TEST_BASE_IMAGE) -f dockerfiles/Dockerfile.test -
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e dockerfiles/Dockerfile.test | docker build -t docker/kube-compose-unit-test-base --build-arg TEST_BASE=$(TEST_BASE_IMAGE) -f dockerfiles/Dockerfile.test -
 	docker rm -f kube-compose-unit-test || exit 0
 	docker create --name kube-compose-unit-test docker/kube-compose-unit-test-base
 	@docker cp kube-compose-unit-test:/go/src/github.com/docker/compose-on-kubernetes/coverage.txt ./coverage.txt

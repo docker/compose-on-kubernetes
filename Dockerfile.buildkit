@@ -1,3 +1,4 @@
+# syntax = docker/dockerfile-upstream:1.0.1-experimental
 ARG BUILD_BASE
 ARG RUN_BASE
 
@@ -19,7 +20,7 @@ ARG VERSION
 ARG IMAGE_REPO_PREFIX
 ENV GITCOMMIT=$GITCOMMIT VERSION=$VERSION BUILDTIME=$BUILDTIME IMAGE_REPO_PREFIX=$IMAGE_REPO_PREFIX
 ENV CGO_ENABLED=0
-RUN make bin/compose-controller bin/compose-controller.test e2e-binary bin/installer bin/api-server bin/api-server.test
+RUN --mount=target=/root/.cache,type=cache make bin/compose-controller bin/compose-controller.test e2e-binary bin/installer bin/api-server bin/api-server.test
 RUN go get github.com/onsi/ginkgo/ginkgo
 
 # e2e-tests (retrieved with --target=compose-e2e-tests)

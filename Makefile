@@ -53,7 +53,7 @@ bin/%: cmd/% FORCE
 	@go build $(VERBOSE_GO) $(GOBUILD_FLAGS) -ldflags=$(LDFLAGS) -o $@$(EXEC_EXT) ./$<
 
 e2e-binary: ## make the end to end test binary
-	@echo "🌟 $@"
+	@echo " $@"
 	@go test -c ./e2e $(VERBOSE_GO) -ldflags=$(LDFLAGS) -o e2e/e2e.test$(EXEC_EXT)
 
 bin/%.test: cmd/% FORCE
@@ -78,9 +78,19 @@ install-ginkgo:
 	go get -u github.com/onsi/ginkgo/ginkgo
 	go get -u github.com/onsi/gomega/...
 
-e2e: e2e-binary ## Run the e2e tests
-	ginkgo -v -p e2e/e2e.test -- -tag "$(TAG)" 2>&1 | tee e2e-test-output.txt
+e2e: ## Run the e2e tests
+	IMAGE_REPO_PREFIX=$(IMAGE_REPO_PREFIX) ginkgo -v -p e2e/ -- -tag "$(TAG)" 2>&1 | tee e2e-test-output.txt
 	grep SUCCESS e2e-test-output.txt | grep  -q "$(E2E_EXPECTED_SKIP) Skipped"
+
+e2e-kind: ## Run the e2e tests
+	KUBECONFIG="$(shell kind get kubeconfig-path --name="compose-on-kube")" IMAGE_REPO_PREFIX=$(IMAGE_REPO_PREFIX) ginkgo -v -p e2e/ -- -tag "$(TAG)" 2>&1 | tee e2e-test-output.txt
+	grep SUCCESS e2e-test-output.txt | grep  -q "$(E2E_EXPECTED_SKIP) Skipped"
+
+e2e-kind-circleci:
+	docker rm compose-on-kube-e2e || echo "no existing compose-on-kube e2e container"
+	docker create --name compose-on-kube-e2e -e IMAGE_REPO_PREFIX=$(IMAGE_REPO_PREFIX) -e KUBECONFIG=/kind-config --network=host ${IMAGE_REPO_PREFIX}e2e-tests:${TAG} -ginkgo.v -tag "$(TAG)"
+	docker cp $(shell kind get kubeconfig-path --name="compose-on-kube") compose-on-kube-e2e:/kind-config
+	docker start -a -i compose-on-kube-e2e
 
 e2e-no-provisioning: e2e-binary ## run the e2e tests on an already provisionned cluster
 	ginkgo -v -p e2e/e2e.test -- --skip-provisioning $(TEST_ARGS) 2>&1 | tee e2e-test-output.txt
