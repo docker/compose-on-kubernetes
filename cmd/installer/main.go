@@ -2,9 +2,11 @@ package main
 
 import (
 	"context"
+	"errors"
 	"flag"
 	"fmt"
 	"io/ioutil"
+	"os"
 
 	"github.com/docker/compose-on-kubernetes/api/constants"
 	"github.com/docker/compose-on-kubernetes/install"
@@ -17,66 +19,71 @@ import (
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-func parseOptions(uninstall *bool, options *install.SafeOptions) *rest.Config {
-	var etcdCA, etcdCert, etcdKey, tlsCA, tlsCert, tlsKey string
-	var logLevel string
-	var pullPolicy string
-	flag.BoolVar(&options.Network.ShouldUseHost, "network-host", false, "Use network host")
-	flag.StringVar(&options.OptionsCommon.Namespace, "namespace", "docker", "Namespace in which to deploy")
-	flag.DurationVar(&options.OptionsCommon.ReconciliationInterval, "reconciliation-interval", constants.DefaultFullSyncInterval, "Interval of reconciliation loop")
-	flag.StringVar(&options.OptionsCommon.Tag, "tag", "latest", "Image tag")
-	flag.StringVar(&pullPolicy, "pull-policy", string(corev1types.PullAlways), fmt.Sprintf("Image pull policy (%q|%q|%q)", corev1types.PullAlways, corev1types.PullNever, corev1types.PullIfNotPresent))
-	flag.StringVar(&options.Etcd.Servers, "etcd-servers", "", "etcd server addresses")
-	flag.BoolVar(&options.SkipLivenessProbes, "skip-liveness-probes", false, "Disable liveness probe on Controller and API server deployments. Use this when HTTPS liveness probe fails.")
+func main() {
+	if err := do(); err != nil {
+		fmt.Fprintf(os.Stderr, "Installation failed: %s", err)
+		os.Exit(1)
+	}
+}
 
-	flag.StringVar(&etcdCA, "etcd-ca-file", "", "CA of etcd TLS certificate")
-	flag.StringVar(&etcdCert, "etcd-cert-file", "", "TLS client certificate for accessing etcd")
-	flag.StringVar(&etcdKey, "etcd-key-file", "", "TLS client private key for accessing etcd")
-
-	flag.StringVar(&tlsCA, "tls-ca-file", "", "CA used to generate the TLS certificate")
-	flag.StringVar(&tlsCert, "tls-cert-file", "", "Server TLS certificate (must be valid for name compose-api.<namespace>.svc)")
-	flag.StringVar(&tlsKey, "tls-key-file", "", "Server TLS private key")
-	flag.BoolVar(uninstall, "uninstall", false, "Uninstall")
-	flag.StringVar(&logLevel, "log-level", "info", `Set the log level ("debug"|"info"|"warn"|"error"|"fatal")`)
-	kubeconfigFlag := customflags.EnvString("kubeconfig", "~/.kube/config", "KUBECONFIG", "Path to a kubeconfig file (set to \"\" to use incluster config)")
-	flag.Parse()
-	kubeconfig := kubeconfigFlag.String()
-
-	loggerLevel, err := log.ParseLevel(logLevel)
+func do() error {
+	installerConfig, err := parseOptions()
 	if err != nil {
-		panic(err)
+		return err
+	}
+	if installerConfig.uninstall {
+		err := install.Uninstall(installerConfig.restConfig, installerConfig.options.Namespace, false)
+		if err != nil {
+			return err
+		}
+		return install.WaitForUninstallCompletion(context.Background(), installerConfig.restConfig, installerConfig.options.Namespace, false)
+	}
+	return install.Safe(context.Background(), installerConfig.restConfig, installerConfig.options)
+}
+
+type installerConfig struct {
+	uninstall  bool
+	options    install.SafeOptions
+	restConfig *rest.Config
+}
+
+func parseOptions() (installerConfig, error) {
+	var flags additionalFlags
+	var options install.SafeOptions
+	parseFlags(&flags, &options)
+	loggerLevel, err := log.ParseLevel(flags.logLevel)
+	if err != nil {
+		return installerConfig{}, err
 	}
 	log.SetLevel(loggerLevel)
 
-	pp, err := parsePullPolicy(pullPolicy)
+	pp, err := parsePullPolicy(flags.pullPolicy)
 	if err != nil {
-		panic(err)
+		return installerConfig{}, err
 	}
 	options.OptionsCommon.PullPolicy = pp
 
-	if etcdCA != "" || etcdCert != "" || etcdKey != "" {
-		if etcdCA == "" || etcdCert == "" || etcdKey == "" {
-			panic("etcd-ca-file, etcd-cert-file and etcd-key-file must be set altogether or not at all")
-		}
-	}
-	if tlsCA != "" || tlsCert != "" || tlsKey != "" {
-		if tlsCA == "" || tlsCert == "" || tlsKey == "" {
-			panic("tls-ca-file, tls-cert-file and tls-key-file must be set altogether or not at all")
-		}
-	}
-
-	options.Etcd.ClientTLSBundle = loadTLSBundle(etcdCA, etcdCert, etcdKey)
-	options.Network.CustomTLSBundle = loadTLSBundle(tlsCA, tlsCert, tlsKey)
-
-	configFile, err := homedir.Expand(kubeconfig)
+	options.Etcd.ClientTLSBundle, err = flags.etcdBundle.load()
 	if err != nil {
-		panic(err)
+		return installerConfig{}, err
+	}
+	options.Network.CustomTLSBundle, err = flags.tlsBundle.load()
+	if err != nil {
+		return installerConfig{}, err
+	}
+	configFile, err := homedir.Expand(flags.kubeconfig)
+	if err != nil {
+		return installerConfig{}, err
 	}
 	config, err := clientcmd.BuildConfigFromFlags("", configFile)
 	if err != nil {
-		panic(err)
+		return installerConfig{}, err
 	}
-	return config
+	return installerConfig{
+		options:    options,
+		restConfig: config,
+		uninstall:  flags.uninstall,
+	}, nil
 }
 
 func parsePullPolicy(pullPolicy string) (corev1types.PullPolicy, error) {
@@ -88,51 +95,69 @@ func parsePullPolicy(pullPolicy string) (corev1types.PullPolicy, error) {
 	}
 }
 
-func loadTLSBundle(caFile, certFile, keyFile string) *install.TLSBundle {
-	var caBytes, certBytes, keyBytes []byte
-	loadFile(caFile, &caBytes)
-	loadFile(certFile, &certBytes)
-	loadFile(keyFile, &keyBytes)
-	if caBytes == nil {
-		return nil
+type additionalFlags struct {
+	etcdBundle certBundleSource
+	tlsBundle  certBundleSource
+	logLevel   string
+	pullPolicy string
+	kubeconfig string
+	uninstall  bool
+}
+
+func parseFlags(customFlags *additionalFlags, options *install.SafeOptions) {
+	flag.BoolVar(&options.Network.ShouldUseHost, "network-host", false, "Use network host")
+	flag.StringVar(&options.OptionsCommon.Namespace, "namespace", "docker", "Namespace in which to deploy")
+	flag.DurationVar(&options.OptionsCommon.ReconciliationInterval, "reconciliation-interval", constants.DefaultFullSyncInterval, "Interval of reconciliation loop")
+	flag.StringVar(&options.OptionsCommon.Tag, "tag", "latest", "Image tag")
+	pullPolicyDescription := fmt.Sprintf("Image pull policy (%q|%q|%q)", corev1types.PullAlways, corev1types.PullNever, corev1types.PullIfNotPresent)
+	flag.StringVar(&customFlags.pullPolicy, "pull-policy", string(corev1types.PullAlways), pullPolicyDescription)
+	flag.StringVar(&options.Etcd.Servers, "etcd-servers", "", "etcd server addresses")
+	flag.BoolVar(&options.SkipLivenessProbes, "skip-liveness-probes", false, "Disable liveness probe on Controller and API server deployments. Use this when HTTPS liveness probe fails.")
+
+	flag.StringVar(&customFlags.etcdBundle.ca, "etcd-ca-file", "", "CA of etcd TLS certificate")
+	flag.StringVar(&customFlags.etcdBundle.cert, "etcd-cert-file", "", "TLS client certificate for accessing etcd")
+	flag.StringVar(&customFlags.etcdBundle.key, "etcd-key-file", "", "TLS client private key for accessing etcd")
+
+	flag.StringVar(&customFlags.tlsBundle.ca, "tls-ca-file", "", "CA used to generate the TLS certificate")
+	flag.StringVar(&customFlags.tlsBundle.cert, "tls-cert-file", "", "Server TLS certificate (must be valid for name compose-api.<namespace>.svc)")
+	flag.StringVar(&customFlags.tlsBundle.key, "tls-key-file", "", "Server TLS private key")
+	flag.BoolVar(&customFlags.uninstall, "uninstall", false, "Uninstall")
+	flag.StringVar(&customFlags.logLevel, "log-level", "info", `Set the log level ("debug"|"info"|"warn"|"error"|"fatal")`)
+	kubeconfigFlag := customflags.EnvString("kubeconfig", "~/.kube/config", "KUBECONFIG", "Path to a kubeconfig file (set to \"\" to use incluster config)")
+	flag.Parse()
+	customFlags.kubeconfig = kubeconfigFlag.String()
+}
+
+type certBundleSource struct {
+	ca, cert, key string
+}
+
+func (s certBundleSource) empty() bool {
+	return s.ca == "" && s.cert == "" && s.key == ""
+}
+
+func (s certBundleSource) load() (*install.TLSBundle, error) {
+	if s.empty() {
+		return nil, nil
+	}
+	if s.ca == "" || s.cert == "" || s.key == "" {
+		return nil, errors.New("ca-file, cert-file and key-file must be set altogether or not at all")
+	}
+	caBytes, err := ioutil.ReadFile(s.ca)
+	if err != nil {
+		return nil, err
+	}
+	certBytes, err := ioutil.ReadFile(s.cert)
+	if err != nil {
+		return nil, err
+	}
+	keyBytes, err := ioutil.ReadFile(s.key)
+	if err != nil {
+		return nil, err
 	}
 	bundle, err := install.NewTLSBundle(caBytes, certBytes, keyBytes)
 	if err != nil {
-		panic(err)
+		return nil, err
 	}
-	return bundle
-}
-
-func main() {
-	var uninstall bool
-	var options install.SafeOptions
-
-	config := parseOptions(&uninstall, &options)
-
-	if uninstall {
-		err := install.Uninstall(config, options.Namespace, false)
-		if err != nil {
-			panic(err)
-		}
-		err = install.WaitForUninstallCompletion(context.Background(), config, options.Namespace, false)
-		if err != nil {
-			panic(err)
-		}
-		return
-	}
-	err := install.Safe(context.Background(), config, options)
-	if err != nil {
-		panic(err)
-	}
-}
-
-func loadFile(filePath string, tofill *[]byte) {
-	if filePath == "" {
-		return
-	}
-	res, err := ioutil.ReadFile(filePath)
-	if err != nil {
-		panic(err)
-	}
-	*tofill = res
+	return bundle, nil
 }
