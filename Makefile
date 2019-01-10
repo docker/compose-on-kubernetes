@@ -44,6 +44,10 @@ FORCE:
 clean: ## clean the binaries
 	rm -Rf ./bin
 
+bin/installer: cmd/installer FORCE
+	@echo "🌟 $@"
+	@CGO_ENABLED=0 go build $(VERBOSE_GO) $(GOBUILD_FLAGS) -ldflags=$(LDFLAGS) -o $@$(EXEC_EXT) ./$<
+
 bin/%: cmd/% FORCE
 	@echo "🌟 $@"
 	@go build $(VERBOSE_GO) $(GOBUILD_FLAGS) -ldflags=$(LDFLAGS) -o $@$(EXEC_EXT) ./$<
