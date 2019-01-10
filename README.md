@@ -185,3 +185,4 @@ See the [contributing](./CONTRIBUTING.md) and [debugging](./DEBUGGING.md) guides
 # Deploying Compose on Kubernetes
 
 - Guide for [Azure AKS](./docs/install-on-aks.md).
+- Guide for [Minikube](./docs/install-on-minikube.md).
