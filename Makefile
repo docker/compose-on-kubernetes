@@ -91,6 +91,7 @@ e2e-kind-circleci:
 	docker create --name compose-on-kube-e2e -e IMAGE_REPO_PREFIX=$(IMAGE_REPO_PREFIX) -e KUBECONFIG=/kind-config --network=host ${IMAGE_REPO_PREFIX}e2e-tests:${TAG} -ginkgo.v -tag "$(TAG)"
 	docker cp $(shell kind get kubeconfig-path --name="compose-on-kube") compose-on-kube-e2e:/kind-config
 	docker start -a -i compose-on-kube-e2e
+	docker cp compose-on-kube-e2e:/e2e ./e2e-coverage
 
 e2e-no-provisioning: e2e-binary ## run the e2e tests on an already provisionned cluster
 	ginkgo -v -p e2e/e2e.test -- --skip-provisioning $(TEST_ARGS) 2>&1 | tee e2e-test-output.txt
