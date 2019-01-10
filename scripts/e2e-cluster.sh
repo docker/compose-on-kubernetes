@@ -9,6 +9,7 @@ TEST_CLUSTER_NAME="testkit-compose-on-kube-${KUBE_ENV_NAME:-${KUBE_VERSION//./}}
 CLUSTER_NODES=2
 KUBE_CONFIG="$HOME/.kube/${KUBE_ENV_NAME:-${KUBE_VERSION}}/config"
 TESTKIT_CMD=$(which testkit || echo $HOME/testkit)
+export TESTKIT_AWS_PURCHASE_TYPE=ondemand
 
 auth() {
   test -e "$HOME/.testkit" || {
