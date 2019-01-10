@@ -1,6 +1,7 @@
 .idea/*
 !./idea/runConfigurations/
 bin
+coverage-enabled-images/
 apiserver.local.config/
 kubeconfig
 default.etcd

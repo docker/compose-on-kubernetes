@@ -16,6 +16,7 @@ import (
 	"github.com/pkg/errors"
 	appsv1beta2 "k8s.io/api/apps/v1beta2"
 	apiv1 "k8s.io/api/core/v1"
+	storagetypes "k8s.io/api/storage/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apitypes "k8s.io/apimachinery/pkg/types"
@@ -103,8 +104,24 @@ func newNamespace(config *rest.Config, namespace string) (*Namespace, error) {
 
 // HasStorageClass returns true if cluster has at least one StorageClass defined
 func (ns *Namespace) HasStorageClass() (bool, error) {
-	sc, err := ns.storageClasses.List(metav1.ListOptions{})
-	return len(sc.Items) != 0, err
+	storageClasses, err := ns.storageClasses.List(metav1.ListOptions{})
+	if err != nil {
+		return false, err
+	}
+	sc := defaultStorageClass(storageClasses.Items)
+	if sc == nil || sc.Provisioner == "kubernetes.io/host-path" {
+		return false, nil
+	}
+	return true, nil
+}
+
+func defaultStorageClass(classes []storagetypes.StorageClass) *storagetypes.StorageClass {
+	for _, c := range classes {
+		if c.Annotations != nil && c.Annotations["storageclass.beta.kubernetes.io/is-default-class"] == "true" {
+			return &c
+		}
+	}
+	return nil
 }
 
 // RESTClient returns a RESTClient for the stacks

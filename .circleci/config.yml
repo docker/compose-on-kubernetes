@@ -10,6 +10,9 @@ aliases:
   compose-ci-golang: &compose-ci-golang
     - image: dockereng/kube-compose-ci-golang
       auth: *docker-login
+  public-golang: &public-golang
+    - image: circleci/golang:1.11
+      user: root
   cluster-setup-steps: &cluster-setup-steps
     - attach_workspace:
         at: /root
@@ -86,18 +89,33 @@ jobs:
             - '.testkit'
             - '.aws'
             - '.kube'
-  validate:
-    docker: *compose-ci-docker
+  
+  checkout-pr:
+    docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    steps:
+    - checkout
+    - persist_to_workspace:
+        root: /root/
+        paths:
+          - 'src'
+    
+  validate:
+    docker: *public-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
     steps:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 17.07.0-ce
+          version: 18.06.0-ce
       - run: make -f docker.Makefile validate
   validate-vendor:
-    docker: *compose-ci-golang
+    docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
     steps:
       - attach_workspace:
           at: /root
@@ -105,20 +123,24 @@ jobs:
           name: Validate vendoring
           command: make validate-vendor
   check-licenses:
-    docker: *compose-ci-golang
+    docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
     steps:
       - attach_workspace:
           at: /root
       - run: make check-licenses
   images:
-    docker: *compose-ci-docker
+    docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
     steps:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 17.07.0-ce
+          version: 18.06.0-ce
       - run:
           name: Build images
           command: |
@@ -146,14 +168,44 @@ jobs:
             - kube-compose-controller-coverage.tar
             - kube-compose-installer.tar
             - kube-compose-e2e-tests.tar
-  test-unit:
-    docker: *compose-ci-docker
+  e2e-kind:
+    docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
     steps:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 17.07.0-ce
+          version: 18.06.0-ce
+      - run:
+          name: "Prepare Kind and run E2E tests"
+          command: |
+            git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
+            cd /root/src/sigs.k8s.io/kind
+            git reset --hard 302bb7dbb611236aeadd6d1741c9f237d1ec28d2
+            go install
+            cd -        
+            export PATH="$PATH:/root/bin"
+            export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
+            export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
+            export IMAGE_PREFIX=kube-compose-
+            export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
+            mkdir -p ./coverage-enabled-images
+            cp /root/kube-compose-api-server-coverage.tar /root/kube-compose-controller-coverage.tar ./coverage-enabled-images/
+            make -f docker.Makefile TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
+            docker load -i /root/kube-compose-e2e-tests.tar
+            make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-kind-circleci
+  test-unit:
+    docker: *public-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
+    steps:
+      - attach_workspace:
+          at: /root
+      - setup_remote_docker:
+          version: 18.06.0-ce
       - run:
           name: Run unit tests
           command: make -f docker.Makefile test-unit
@@ -212,14 +264,16 @@ jobs:
       - KUBE_VERSION: 1.11.5
     steps: *test-e2e-steps
   coverage-upload:
-    docker: *compose-ci-golang
+    docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
     steps:
       - attach_workspace:
           at: /root
       - run:
           name: Upload coverage
-          command: bash <(curl -s https://codecov.io/bash) -t 7fee2328-dd39-4a6d-8a8c-130440d8c3e6
+          command: bash <(curl -s https://codecov.io/bash) -t 30879c0b-96d4-4dec-bb62-b053f96b8726
   push-to-hub:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -308,60 +362,120 @@ jobs:
           when: always
 workflows:
   version: 2
-  build:
+  pr:
+    jobs:
+      - checkout-pr:
+          filters:
+            branches:
+              only: /^pull\/.*$/
+      - test-unit:
+          requires:
+            - checkout-pr
+          filters:
+            branches:
+              only: /^pull\/.*$/
+      - validate:
+          requires:
+            - checkout-pr
+          filters:
+            branches:
+              only: /^pull\/.*$/
+      - validate-vendor:
+          requires:
+            - checkout-pr
+          filters:
+            branches:
+              only: /^pull\/.*$/
+      - check-licenses:
+          requires:
+            - checkout-pr
+          filters:
+            branches:
+              only: /^pull\/.*$/
+      - images:
+          requires:
+            - checkout-pr
+          filters:
+            branches:
+              only: /^pull\/.*$/
+      - e2e-kind:
+          requires:
+            - images
+          filters:
+            branches:
+              only: /^pull\/.*$/
+  master-or-tag:
     jobs:
       - checkout:
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - cluster-setup-1_10:
           requires:
             - checkout
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - cluster-setup-1_11:
           requires:
             - checkout
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - test-unit:
           requires:
             - checkout
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - validate:
           requires:
             - images
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - validate-vendor:
           requires:
             - deploy-images-1_11
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - check-licenses:
           requires:
             - deploy-images-1_10
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - images:
           requires:
             - checkout
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - test-unit:
           requires:
             - images
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - deploy-images-1_10:
           requires:
             - cluster-setup-1_10
@@ -369,6 +483,8 @@ workflows:
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - deploy-images-1_11:
           requires:
             - cluster-setup-1_11
@@ -376,18 +492,24 @@ workflows:
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - test-e2e-1_10:
           requires:
             - deploy-images-1_10
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - test-e2e-1_11:
           requires:
             - deploy-images-1_11
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - coverage-upload:
           requires:
             - test-unit
@@ -396,12 +518,16 @@ workflows:
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - cluster-setup-benchmark:
           requires:
             - checkout
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - deploy-images-benchmark:
           requires:
             - cluster-setup-benchmark
@@ -409,12 +535,16 @@ workflows:
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - run-benchmark:
           requires:
             - deploy-images-benchmark
           filters:
             tags:
               only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
           
       - push-to-hub:
           requires:

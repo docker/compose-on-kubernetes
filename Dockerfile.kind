@@ -1,0 +1,3 @@
+ARG BASE_IMAGE=kindest/node:v1.12.3
+FROM ${BASE_IMAGE}
+COPY coverage-enabled-images/*.tar kind/images/
