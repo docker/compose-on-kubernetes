@@ -196,6 +196,10 @@ jobs:
             make -f docker.Makefile TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
             docker load -i /root/kube-compose-e2e-tests.tar
             make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-kind-circleci
+      - persist_to_workspace:
+          root: /root/
+          paths:
+            - 'src/github.com/docker/compose-on-kubernetes/e2e-coverage/compose-*/coverage.txt'
   test-unit:
     docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -401,6 +405,13 @@ workflows:
       - e2e-kind:
           requires:
             - images
+          filters:
+            branches:
+              only: /^pull\/.*$/
+      - coverage-upload:
+          requires:
+            - e2e-kind
+            - test-unit
           filters:
             branches:
               only: /^pull\/.*$/

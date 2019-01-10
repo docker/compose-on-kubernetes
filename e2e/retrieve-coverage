@@ -1,8 +1,7 @@
 #!/bin/sh -xe
-
 kubectlx ()
 {
-    kubectl --kubeconfig "$HOME/.kube/${KUBE_VERSION}/config.testkit" -n e2e "$@"
+    kubectl -n e2e "$@"
 }
 
 PODS=$(kubectlx get pods -o json | jq ".items[].metadata.name" | tr -d '"')
