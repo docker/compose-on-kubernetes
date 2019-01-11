@@ -55,3 +55,22 @@ func TestUpdateDeleteSequence(t *testing.T) {
 	testee.remove(stackresources.ObjKey(testStack.Namespace, testStack.Name))
 
 }
+
+// this is a test to reproduce the hang of DockerCon EU 2018
+// that occurred because of an informer's "delete" event missed triggered by
+// the demo machine going to sleep at a particularly bad time, and etcd compaction occurring
+// just after.
+func TestStackOwnerCachePanicOnUnresolvableOwner(t *testing.T) {
+	getter := &ownerGetterFunc{
+		getFunc: func(stack *v1beta2.Stack) (*v1beta2.Owner, error) {
+			return nil, kerrors.NewNotFound(v1beta2.GroupResource("stacks"), stack.Name)
+		},
+	}
+	testee := &stackOwnerCache{data: make(map[string]stackOwnerCacheEntry), getter: getter}
+	testStack := &v1beta2.Stack{}
+	testStack.Name = "test"
+	testStack.Namespace = "ns"
+	assert.Panics(t, func() {
+		testee.get(testStack, true)
+	})
+}

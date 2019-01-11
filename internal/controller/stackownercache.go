@@ -114,10 +114,17 @@ func (s *stackOwnerCache) get(stack *v1beta2.Stack, acceptDirty bool) rest.Imper
 		Steps:    4,
 	}, func() (done bool, err error) {
 		res, err := s.getWithError(stack, acceptDirty)
-		if err == nil || kerrors.IsNotFound(err) {
-			// is not found is acceptable: stack seems to have been deleted
+		if err == nil {
 			ic = res
 			return true, nil
+		}
+		if kerrors.IsNotFound(err) {
+			// stack has been removed and we don't have anything in cache, but still the reconciler wants to update
+			// this can happen when a stack is removed while the controller is starting, or when an informer
+			// somehow fails to watch an event (which seems to be possible on Docker Desktop after a machine gets to sleep and a compaction
+			// occurs immediately after)
+			// So here we pass the error to the caller to let the process crash and be re-scheduled
+			return false, err
 		}
 		return false, nil
 	}); err != nil {
