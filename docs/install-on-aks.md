@@ -16,8 +16,6 @@ Otherwise, please follow [How to deploy etcd](./deploy-etcd.md).
 
 ## Deploy Compose on Kubernetes
 
-Run `installer-[darwin|linux|windows.exe] -namespace=compose -etcd-servers=http://compose-etcd-client:2379 -tag=v0.4.16 -skip-liveness-probes=true`.
-
-**Note: There is currently an issue with AKS where the API Server Liveness Probe always fails due to a TLS issue. We'll get in touch with Microsoft to try to solve the issue in the future.**
+Run `installer-[darwin|linux|windows.exe] -namespace=compose -etcd-servers=http://compose-etcd-client:2379 -tag=v0.4.18`.
 
 **Note: To setup Mutual TLS with the etcd instance, you can use `etcd-ca-file`, `etcd-key-file` and `etcd-cert-file` flags.**
