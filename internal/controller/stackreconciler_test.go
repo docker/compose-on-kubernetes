@@ -49,15 +49,7 @@ type testResourceUpdaterProvider struct {
 	statuses chan<- *v1beta2.Stack
 }
 
-func (p *testResourceUpdaterProvider) getUpdaterForMutation(stack *v1beta2.Stack) (resourceUpdater, error) {
-	return &testResourceUpdater{
-		diffs:    p.diffs,
-		statuses: p.statuses,
-		stack:    stack,
-	}, nil
-}
-
-func (p *testResourceUpdaterProvider) getUpdaterForDeletion(stack *v1beta2.Stack) (resourceUpdater, error) {
+func (p *testResourceUpdaterProvider) getUpdater(stack *v1beta2.Stack, _ bool) (resourceUpdater, error) {
 	return &testResourceUpdater{
 		diffs:    p.diffs,
 		statuses: p.statuses,

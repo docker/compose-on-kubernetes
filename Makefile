@@ -83,7 +83,7 @@ e2e: ## Run the e2e tests
 	grep SUCCESS e2e-test-output.txt | grep  -q "$(E2E_EXPECTED_SKIP) Skipped"
 
 e2e-kind: ## Run the e2e tests
-	KUBECONFIG="$(shell kind get kubeconfig-path --name="compose-on-kube")" IMAGE_REPO_PREFIX=$(IMAGE_REPO_PREFIX) ginkgo -v -p e2e/ -- -tag "$(TAG)" 2>&1 | tee e2e-test-output.txt
+	KUBECONFIG="$(shell kind get kubeconfig-path --name="compose-on-kube")" IMAGE_REPO_PREFIX=$(IMAGE_REPO_PREFIX) ginkgo -v -p $(GINKGO_FLAGS) e2e/ -- -tag "$(TAG)" 2>&1 | tee e2e-test-output.txt
 	grep SUCCESS e2e-test-output.txt | grep  -q "$(E2E_EXPECTED_SKIP) Skipped"
 
 e2e-kind-circleci:

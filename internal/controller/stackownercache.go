@@ -85,7 +85,7 @@ func (s *stackOwnerCache) getWithError(stack *v1beta2.Stack, acceptDirty bool) (
 	}
 	owner, err := s.getter.get(stack)
 	if err != nil {
-		log.Errorf("Unable to get stack owner: %s", err)
+		log.Errorf("Unable to get stack %q owner: %s", objKey, err)
 		if kerrors.IsNotFound(err) {
 			if v, ok := s.data[objKey]; ok {
 				log.Infof("Stack %q seem to have been deleted. Fallback to dirty impersonation config", objKey)

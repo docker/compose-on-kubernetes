@@ -32,8 +32,7 @@ type resourceUpdater interface {
 
 // ResourceUpdaterProvider is a factory providing resource updaters for a given stack (default implementation generates an impersonating clientset)
 type ResourceUpdaterProvider interface {
-	getUpdaterForMutation(stack *v1beta2.Stack) (resourceUpdater, error)
-	getUpdaterForDeletion(stack *v1beta2.Stack) (resourceUpdater, error)
+	getUpdater(stack *v1beta2.Stack, isDirty bool) (resourceUpdater, error)
 }
 
 // StackReconciler reconciles stack into children objects
@@ -90,7 +89,7 @@ func (r *StackReconciler) reconcileStack(key string) {
 		log.Errorf("Cannot reconcile stack %s: %s", key, err)
 		return
 	}
-	updater, err := r.resourceUpdater.getUpdaterForMutation(stack)
+	updater, err := r.resourceUpdater.getUpdater(stack, convert.IsStackDirty(stack))
 	if err != nil {
 		log.Errorf("Updater resolution failed: %s", err)
 		return
@@ -107,7 +106,7 @@ func (r *StackReconciler) deleteStackChildren(stack *v1beta2.Stack) {
 		log.Errorf("Failed to resolve current state for %s/%s: %s", stack.Namespace, stack.Name, err)
 		return
 	}
-	updater, err := r.resourceUpdater.getUpdaterForDeletion(stack)
+	updater, err := r.resourceUpdater.getUpdater(stack, false)
 	if err != nil {
 		log.Errorf("Updater resolution failed: %s", err)
 		return
