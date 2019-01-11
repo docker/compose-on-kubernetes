@@ -20,16 +20,8 @@ type impersonatingResourceUpdaterProvider struct {
 	ownerCache StackOwnerCacher
 }
 
-func (p *impersonatingResourceUpdaterProvider) getUpdaterForMutation(stack *v1beta2.Stack) (resourceUpdater, error) {
-	return p.getUpdater(stack, false)
-}
-
-func (p *impersonatingResourceUpdaterProvider) getUpdaterForDeletion(stack *v1beta2.Stack) (resourceUpdater, error) {
-	return p.getUpdater(stack, true)
-}
-
-func (p *impersonatingResourceUpdaterProvider) getUpdater(stack *v1beta2.Stack, acceptDirtyImpersonation bool) (resourceUpdater, error) {
-	ic := p.ownerCache.get(stack, acceptDirtyImpersonation)
+func (p *impersonatingResourceUpdaterProvider) getUpdater(stack *v1beta2.Stack, isDirty bool) (resourceUpdater, error) {
+	ic := p.ownerCache.get(stack, !isDirty)
 	localConfig := p.config
 	localConfig.Impersonate = ic
 	result := &k8sResourceUpdater{

@@ -228,17 +228,25 @@ services:
 			},
 		})
 		expectNoError(err)
-		spec := `version: '3.2'
+		_, err = originNS.CreateStack(cluster.StackOperationV1beta2Stack, "by-cluster-admin", `version: '3.2'
 services:
-  back:
-    image: nginx:1.12.1-alpine`
-		_, err = originNS.CreateStack(cluster.StackOperationV1beta2Stack, "by-cluster-admin", spec)
+  back-cluster-admin:
+    image: nginx:1.12.1-alpine`)
 		expectNoError(err)
-		_, err = editor.CreateStack(cluster.StackOperationV1beta2Stack, "by-editor", spec)
+		_, err = editor.CreateStack(cluster.StackOperationV1beta2Stack, "by-editor", `version: '3.2'
+services:
+  back-editor:
+    image: nginx:1.12.1-alpine`)
 		expectNoError(err)
-		_, err = admin.CreateStack(cluster.StackOperationV1beta2Stack, "by-admin", spec)
+		_, err = admin.CreateStack(cluster.StackOperationV1beta2Stack, "by-admin", `version: '3.2'
+services:
+  back-admin:
+    image: nginx:1.12.1-alpine`)
 		expectNoError(err)
-		_, err = viewer.CreateStack(cluster.StackOperationV1beta2Stack, "by-viewer", spec)
+		_, err = viewer.CreateStack(cluster.StackOperationV1beta2Stack, "by-viewer", `version: '3.2'
+services:
+  back-viewer:
+    image: nginx:1.12.1-alpine`)
 		Expect(err).To(HaveOccurred())
 		stacks, err := viewer.ListStacks()
 		expectNoError(err)
@@ -249,5 +257,8 @@ services:
 		stacks, err = admin.ListStacks()
 		expectNoError(err)
 		Expect(stacks).To(HaveLen(3))
+		waitUntil(originNS.IsStackAvailable("by-cluster-admin"))
+		waitUntil(originNS.IsStackAvailable("by-editor"))
+		waitUntil(originNS.IsStackAvailable("by-admin"))
 	})
 })

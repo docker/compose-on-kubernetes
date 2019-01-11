@@ -17,7 +17,8 @@ const (
 	expectedGenerationAnnotation = "com.docker.stack.expected-generation"
 )
 
-func isStackDirty(stack *v1beta2.Stack) bool {
+// IsStackDirty indicates if the stack is pending reconciliation
+func IsStackDirty(stack *v1beta2.Stack) bool {
 	if stack.Status == nil {
 		return true
 	}
@@ -36,7 +37,7 @@ func StackToStack(stack v1beta2.Stack, strategy ServiceStrategy, original *stack
 	if len(composeServices) == 0 {
 		return nil, errors.New("this stack has no service")
 	}
-	stackDirty := isStackDirty(&stack)
+	stackDirty := IsStackDirty(&stack)
 
 	log.Debugf("Stack dirtyness check: %v\nStack object: %#v", stackDirty, stack)
 
