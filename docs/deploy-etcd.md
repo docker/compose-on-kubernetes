@@ -9,6 +9,7 @@ kube-system:tiller`.
 
 ### Deploy etcd operator and create an etcd cluster
 
+- Make sure the `compose` namespace exists on your cluster.
 - Run `helm install --name etcd-operator stable/etcd-operator --namespace compose` to install the etcd-operator chart.
 - Create an etcd cluster definition like this one in a file named compose-etcd.yaml:
 
