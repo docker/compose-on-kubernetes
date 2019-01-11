@@ -257,5 +257,8 @@ services:
 		stacks, err = admin.ListStacks()
 		expectNoError(err)
 		Expect(stacks).To(HaveLen(3))
+		waitUntil(originNS.IsStackAvailable("by-cluster-admin"))
+		waitUntil(originNS.IsStackAvailable("by-editor"))
+		waitUntil(originNS.IsStackAvailable("by-admin"))
 	})
 })
