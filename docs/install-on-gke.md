@@ -5,6 +5,8 @@
 - To install etcd using these instructions, you must have [Helm](https://helm.sh) in your client environment.
 - [Download the Compose on Kubernetes installer](https://github.com/docker/compose-on-kubernetes/releases).
 
+**Important:** You will need a custom build of Docker CLI to deploy stacks onto GKE. The build must include [this PR](https://github.com/docker/cli/pull/1583) which has been merged onto the master branch.
+
 ## Create compose namespace
 
 Just run `kubectl create namespace compose`.
