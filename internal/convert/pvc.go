@@ -3,13 +3,13 @@ package convert
 import (
 	"fmt"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func toPersistentVolumeClaims(srv v1beta2.ServiceConfig, original []apiv1.PersistentVolumeClaim) []apiv1.PersistentVolumeClaim {
+func toPersistentVolumeClaims(srv latest.ServiceConfig, original []apiv1.PersistentVolumeClaim) []apiv1.PersistentVolumeClaim {
 	originalMap := make(map[string]apiv1.PersistentVolumeClaim)
 	for _, c := range original {
 		originalMap[c.Name] = c

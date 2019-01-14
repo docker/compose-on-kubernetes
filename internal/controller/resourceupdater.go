@@ -2,7 +2,7 @@ package controller
 
 import (
 	"github.com/docker/compose-on-kubernetes/api/client/clientset"
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/api/labels"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources/diff"
@@ -20,7 +20,7 @@ type impersonatingResourceUpdaterProvider struct {
 	ownerCache StackOwnerCacher
 }
 
-func (p *impersonatingResourceUpdaterProvider) getUpdater(stack *v1beta2.Stack, isDirty bool) (resourceUpdater, error) {
+func (p *impersonatingResourceUpdaterProvider) getUpdater(stack *latest.Stack, isDirty bool) (resourceUpdater, error) {
 	ic := p.ownerCache.get(stack, !isDirty)
 	localConfig := p.config
 	localConfig.Impersonate = ic
@@ -50,7 +50,7 @@ var deleteOptions = metav1.DeleteOptions{
 type k8sResourceUpdater struct {
 	stackClient   clientset.Interface
 	k8sclient     k8sclientset.Interface
-	originalStack *v1beta2.Stack
+	originalStack *latest.Stack
 }
 
 func (u *k8sResourceUpdater) applyDaemonsets(toAdd, toUpdate, toDelete []appstypes.DaemonSet) error {
@@ -145,13 +145,13 @@ func (u *k8sResourceUpdater) applyStackDiff(d *diff.StackStateDiff) error {
 	return nil
 }
 
-func (u *k8sResourceUpdater) updateStackStatus(status v1beta2.StackStatus) (*v1beta2.Stack, error) {
+func (u *k8sResourceUpdater) updateStackStatus(status latest.StackStatus) (*latest.Stack, error) {
 	if u.originalStack.Status != nil && *u.originalStack.Status == status {
 		return u.originalStack, nil
 	}
 	newStack := u.originalStack.Clone()
 	newStack.Status = &status
-	updated, err := u.stackClient.ComposeV1beta2().Stacks(u.originalStack.Namespace).WithSkipValidation().Update(newStack)
+	updated, err := u.stackClient.ComposeLatest().Stacks(u.originalStack.Namespace).WithSkipValidation().Update(newStack)
 	if err != nil {
 		return nil, errors.Wrapf(err, "k8sResourceUpdater: error while patching stack %s", stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
 	}

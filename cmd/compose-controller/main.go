@@ -14,7 +14,7 @@ import (
 
 	cliopts "github.com/docker/cli/opts"
 	"github.com/docker/compose-on-kubernetes/api/client/clientset"
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/api/constants"
 	"github.com/docker/compose-on-kubernetes/internal"
 	"github.com/docker/compose-on-kubernetes/internal/check"
@@ -134,7 +134,7 @@ func start(opts *controllerOptions) error {
 		close(stop)
 	}()
 	reconcileQueue := deduplication.NewStringChan(reconcileQueueLength)
-	deletionQueue := make(chan *v1beta2.Stack, deletionChannelSize)
+	deletionQueue := make(chan *latest.Stack, deletionChannelSize)
 	childrenStore, err := controller.NewChildrenListener(k8sClientSet, *opts.reconciliationInterval.Value(), reconcileQueue.In())
 	if err != nil {
 		return err

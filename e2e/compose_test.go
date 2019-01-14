@@ -9,8 +9,9 @@ import (
 	"strings"
 	"time"
 
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/api/compose/v1beta1"
-	apiv1beta2 "github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
 	"github.com/docker/compose-on-kubernetes/api/labels"
 	"github.com/docker/compose-on-kubernetes/internal/e2e/cluster"
 	. "github.com/onsi/ginkgo" // Import ginkgo to simplify test code
@@ -44,7 +45,7 @@ const deployNamespace = "e2e-tests"
 
 const defaultStrategy = cluster.StackOperationV1beta2Compose
 
-func scaleStack(s *apiv1beta2.Stack, service string, replicas int) (*apiv1beta2.Stack, error) {
+func scaleStack(s *latest.Stack, service string, replicas int) (*latest.Stack, error) {
 	stack := s.Clone()
 	for i, svc := range stack.Spec.Services {
 		if svc.Name != service {
@@ -125,8 +126,8 @@ services:
 		expectNoError(err)
 		Expect(items).To(HaveLen(1))
 		Expect(items[0].Name).To(Equal("app"))
-		var cf apiv1beta2.ComposeFile
-		err = ns.RESTClient().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("composefile").Do().Into(&cf)
+		var cf latest.ComposeFile
+		err = ns.RESTClientV1alpha3().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("composefile").Do().Into(&cf)
 		expectNoError(err)
 		Expect(cf.ComposeFile).To(Equal(composeFile))
 
@@ -157,6 +158,9 @@ services:
 	It("Should update a stack (yaml stack)", func() { testUpdate(ns, cluster.StackOperationV1beta2Compose, cluster.StackOperationV1beta2Stack) })
 	It("Should update a stack (stack yaml)", func() { testUpdate(ns, cluster.StackOperationV1beta2Stack, cluster.StackOperationV1beta2Compose) })
 	It("Should update a stack (stack stack)", func() { testUpdate(ns, cluster.StackOperationV1beta2Stack, cluster.StackOperationV1beta2Stack) })
+	It("Should update a stack (v1alpha3 v1alpha3)", func() { testUpdate(ns, cluster.StackOperationV1alpha3, cluster.StackOperationV1alpha3) })
+	It("Should update a stack (v1beta2 v1alpha3)", func() { testUpdate(ns, cluster.StackOperationV1beta2Stack, cluster.StackOperationV1alpha3) })
+	It("Should update a stack (v1beta1 v1alpha3)", func() { testUpdate(ns, cluster.StackOperationV1beta1, cluster.StackOperationV1alpha3) })
 
 	It("Should update a stack with orphans", func() {
 		_, err := ns.CreateStack(defaultStrategy, "app", `version: '3.2'
@@ -273,23 +277,28 @@ services:
 		expectNoError(err)
 
 		waitUntil(ns.ContainsNPods(1))
-		scaler := apiv1beta2.Scale{
+		scalerV1beta2 := v1beta2.Scale{
 			ObjectMeta: metav1.ObjectMeta{
 				Name: "app",
 			},
 			Spec: map[string]int{"back": 2},
 		}
-		err = ns.RESTClient().Put().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("scale").Body(&scaler).Do().Error()
+		err = ns.RESTClientV1beta2().Put().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("scale").Body(&scalerV1beta2).Do().Error()
 		expectNoError(err)
 		waitUntil(ns.ContainsNPods(2))
 
-		scaler.Spec["back"] = 1
-		err = ns.RESTClient().Put().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("scale").Body(&scaler).Do().Error()
+		scalerV1alpha3 := latest.Scale{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "app",
+			},
+			Spec: map[string]int{"back": 1},
+		}
+		err = ns.RESTClientV1alpha3().Put().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("scale").Body(&scalerV1alpha3).Do().Error()
 		expectNoError(err)
 		waitUntil(ns.ContainsNPods(1))
 
-		scaler.Spec["nope"] = 1
-		err = ns.RESTClient().Put().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("scale").Body(&scaler).Do().Error()
+		scalerV1alpha3.Spec["nope"] = 1
+		err = ns.RESTClientV1alpha3().Put().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("scale").Body(&scalerV1alpha3).Do().Error()
 		Expect(err).To(HaveOccurred())
 	})
 
@@ -465,7 +474,7 @@ services:
 
 		s, err := ns.GetStack("app")
 		expectNoError(err)
-		Expect(s.Status.Phase).NotTo(Equal(apiv1beta2.StackFailure))
+		Expect(s.Status.Phase).NotTo(Equal(latest.StackFailure))
 		waitUntil(ns.IsStackAvailable("app"))
 	})
 
@@ -635,7 +644,7 @@ services:
 		Expect(err).To(HaveOccurred())
 	})
 
-	It("Should read logs correctly", func() {
+	It("Should read logs correctly v1beta2", func() {
 		port := getRandomPort()
 		_, err := ns.CreateStack(cluster.StackOperationV1beta1, "app", fmt.Sprintf(`version: '3.2'
 services:
@@ -647,7 +656,7 @@ services:
 		waitUntil(ns.IsStackAvailable("app"))
 		waitUntil(ns.IsServiceResponding(fmt.Sprintf("front-published:%d-tcp", port), "proxy/index.html", "Welcome to nginx!"))
 		ns.IsServiceResponding(fmt.Sprintf("front-published:%d-tcp", port), "proxy/nope.html", "nope")
-		s, err := ns.RESTClient().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
+		s, err := ns.RESTClientV1beta2().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
 		expectNoError(err)
 		data, err := ioutil.ReadAll(s)
 		expectNoError(err)
@@ -656,7 +665,7 @@ services:
 		Expect(len(strings.Split(sdata, "\n"))).To(BeNumerically(">=", 2))
 		Expect(strings.Contains(sdata, "GET")).To(BeTrue())
 		// try with filter
-		s, err = ns.RESTClient().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Param("filter", "404").Stream()
+		s, err = ns.RESTClientV1beta2().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Param("filter", "404").Stream()
 		expectNoError(err)
 		data, err = ioutil.ReadAll(s)
 		expectNoError(err)
@@ -665,7 +674,37 @@ services:
 		Expect(len(strings.Split(sdata, "\n"))).To(Equal(1))
 	})
 
-	It("Should follow logs correctly", func() {
+	It("Should read logs correctly v1alpha3", func() {
+		port := getRandomPort()
+		_, err := ns.CreateStack(cluster.StackOperationV1beta1, "app", fmt.Sprintf(`version: '3.2'
+services:
+  front:
+    image: nginx:1.12.1-alpine
+    ports:
+    - %d:80`, port))
+		expectNoError(err)
+		waitUntil(ns.IsStackAvailable("app"))
+		waitUntil(ns.IsServiceResponding(fmt.Sprintf("front-published:%d-tcp", port), "proxy/index.html", "Welcome to nginx!"))
+		ns.IsServiceResponding(fmt.Sprintf("front-published:%d-tcp", port), "proxy/nope.html", "nope")
+		s, err := ns.RESTClientV1alpha3().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
+		expectNoError(err)
+		data, err := ioutil.ReadAll(s)
+		expectNoError(err)
+		s.Close()
+		sdata := string(data)
+		Expect(len(strings.Split(sdata, "\n"))).To(BeNumerically(">=", 2))
+		Expect(strings.Contains(sdata, "GET")).To(BeTrue())
+		// try with filter
+		s, err = ns.RESTClientV1alpha3().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Param("filter", "404").Stream()
+		expectNoError(err)
+		data, err = ioutil.ReadAll(s)
+		expectNoError(err)
+		s.Close()
+		sdata = string(data)
+		Expect(len(strings.Split(sdata, "\n"))).To(Equal(1))
+	})
+
+	It("Should follow logs correctly v1beta2", func() {
 		port := getRandomPort()
 		_, err := ns.CreateStack(cluster.StackOperationV1beta1, "app", fmt.Sprintf(`version: '3.2'
 services:
@@ -677,7 +716,55 @@ services:
 		waitUntil(ns.IsStackAvailable("app"))
 		waitUntil(ns.IsServiceResponding(fmt.Sprintf("front-published:%d-tcp", port), "proxy/index.html", "Welcome to nginx!"))
 
-		s, err := ns.RESTClient().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Param("follow", "true").Stream()
+		s, err := ns.RESTClientV1beta2().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Param("follow", "true").Stream()
+		expectNoError(err)
+		reader := bufio.NewReader(s)
+		lineStream := make(chan string, 100)
+		go func() {
+			for {
+				line, err := reader.ReadString('\n')
+				if err != nil {
+					lineStream <- "EOF"
+					break
+				}
+				lineStream <- line
+			}
+		}()
+		ok, _ := ns.IsServiceResponding(fmt.Sprintf("front-published:%d-tcp", port), "proxy/notexisting.html", "nope")()
+		Expect(ok).To(BeFalse()) // 404
+		ok = drainUntil(lineStream, "notexisting.html")
+		Expect(ok).To(BeTrue())
+
+		// shoot the pod
+		pods, err := ns.ListAllPods()
+		expectNoError(err)
+		Expect(len(pods)).To(Equal(1))
+		originalPodName := pods[0].Name
+		ns.Pods().Delete(originalPodName, &metav1.DeleteOptions{})
+		waitUntil(ns.PodIsActuallyRemoved(originalPodName))
+
+		// check we get logs from the new pod
+		waitUntil(ns.IsServiceResponding(fmt.Sprintf("front-published:%d-tcp", port), "proxy/index.html", "Welcome to nginx!"))
+		ok, _ = ns.IsServiceResponding(fmt.Sprintf("front-published:%d-tcp", port), "proxy/notexisting2.html", "nope")()
+		Expect(ok).To(BeFalse()) // 404
+		ok = drainUntil(lineStream, "notexisting2.html")
+		Expect(ok).To(BeTrue())
+		s.Close()
+	})
+
+	It("Should follow logs correctly v1alpha3", func() {
+		port := getRandomPort()
+		_, err := ns.CreateStack(cluster.StackOperationV1beta1, "app", fmt.Sprintf(`version: '3.2'
+services:
+  front:
+    image: nginx:1.12.1-alpine
+    ports:
+    - %d:80`, port))
+		expectNoError(err)
+		waitUntil(ns.IsStackAvailable("app"))
+		waitUntil(ns.IsServiceResponding(fmt.Sprintf("front-published:%d-tcp", port), "proxy/index.html", "Welcome to nginx!"))
+
+		s, err := ns.RESTClientV1alpha3().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Param("follow", "true").Stream()
 		expectNoError(err)
 		reader := bufio.NewReader(s)
 		lineStream := make(chan string, 100)
@@ -799,7 +886,7 @@ services:
         target: /tmp/hostetc`)
 		expectNoError(err)
 		waitUntil(ns.IsStackAvailable("app"))
-		s, err := ns.RESTClient().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
+		s, err := ns.RESTClientV1alpha3().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
 		expectNoError(err)
 		defer s.Close()
 		data, err := ioutil.ReadAll(s)
@@ -824,7 +911,7 @@ volumes:
   myvolume:`)
 		expectNoError(err)
 		waitUntil(ns.IsStackAvailable("app"))
-		s, err := ns.RESTClient().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
+		s, err := ns.RESTClientV1alpha3().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
 		expectNoError(err)
 		defer s.Close()
 		data, err := ioutil.ReadAll(s)
@@ -847,7 +934,7 @@ services:
       - /tmp/mountvolume`)
 		expectNoError(err)
 		waitUntil(ns.IsStackAvailable("app"))
-		s, err := ns.RESTClient().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
+		s, err := ns.RESTClientV1alpha3().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
 		expectNoError(err)
 		defer s.Close()
 		data, err := ioutil.ReadAll(s)

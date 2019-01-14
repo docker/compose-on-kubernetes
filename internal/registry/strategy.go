@@ -20,7 +20,7 @@ type APIVersion string
 const (
 	// APIV1beta1 represents v1beta1 API level
 	APIV1beta1 = APIVersion("v1beta1")
-	// APIV1beta2 represents v1beta2 API level
+	// APIV1beta2 represents v1beta2 API level or later
 	APIV1beta2 = APIVersion("v1beta2")
 )
 

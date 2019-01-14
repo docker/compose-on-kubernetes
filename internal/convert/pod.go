@@ -6,7 +6,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/docker/api/types/swarm"
 	"github.com/pkg/errors"
 	apiv1 "k8s.io/api/core/v1"
@@ -14,7 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-func toPodTemplate(serviceConfig v1beta2.ServiceConfig, labels map[string]string, configuration *v1beta2.StackSpec, original apiv1.PodTemplateSpec) (apiv1.PodTemplateSpec, error) {
+func toPodTemplate(serviceConfig latest.ServiceConfig, labels map[string]string, configuration *latest.StackSpec, original apiv1.PodTemplateSpec) (apiv1.PodTemplateSpec, error) {
 	tpl := *original.DeepCopy()
 	nodeAffinity, err := toNodeAffinity(serviceConfig.Deploy.Placement.Constraints)
 	if err != nil {
@@ -149,7 +149,7 @@ func toTerminationGracePeriodSeconds(duration *time.Duration, original *int64) *
 	return &gracePeriod
 }
 
-func toLivenessProbe(hc *v1beta2.HealthCheckConfig) *apiv1.Probe {
+func toLivenessProbe(hc *latest.HealthCheckConfig) *apiv1.Probe {
 	if hc == nil || len(hc.Test) < 1 || hc.Test[0] == "NONE" {
 		return nil
 	}
@@ -191,7 +191,7 @@ func toEnvVar(key, value string) apiv1.EnvVar {
 	}
 }
 
-func toPorts(list []v1beta2.ServicePortConfig) []apiv1.ContainerPort {
+func toPorts(list []latest.ServicePortConfig) []apiv1.ContainerPort {
 	var ports []apiv1.ContainerPort
 
 	for _, v := range list {
@@ -211,7 +211,7 @@ func toProtocol(value string) apiv1.Protocol {
 	return apiv1.ProtocolTCP
 }
 
-func toRestartPolicy(s v1beta2.ServiceConfig, original apiv1.RestartPolicy) (apiv1.RestartPolicy, error) {
+func toRestartPolicy(s latest.ServiceConfig, original apiv1.RestartPolicy) (apiv1.RestartPolicy, error) {
 	policy := s.Deploy.RestartPolicy
 	if policy == nil {
 		return original, nil
@@ -229,7 +229,7 @@ func toRestartPolicy(s v1beta2.ServiceConfig, original apiv1.RestartPolicy) (api
 	}
 }
 
-func toResource(res *v1beta2.Resource) (apiv1.ResourceList, error) {
+func toResource(res *latest.Resource) (apiv1.ResourceList, error) {
 	if res == nil {
 		return nil, nil
 	}
@@ -251,7 +251,7 @@ func toResource(res *v1beta2.Resource) (apiv1.ResourceList, error) {
 	return list, nil
 }
 
-func toSecurityContext(s v1beta2.ServiceConfig) *apiv1.SecurityContext {
+func toSecurityContext(s latest.ServiceConfig) *apiv1.SecurityContext {
 	isPrivileged := toBoolPointer(s.Privileged)
 	isReadOnly := toBoolPointer(s.ReadOnly)
 

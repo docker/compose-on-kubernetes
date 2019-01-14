@@ -6,7 +6,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	. "github.com/docker/compose-on-kubernetes/internal/test/builders"
 	"github.com/stretchr/testify/assert"
@@ -14,7 +14,7 @@ import (
 	"k8s.io/apimachinery/pkg/api/resource"
 )
 
-func podTemplate(t *testing.T, stack *v1beta2.Stack) apiv1.PodTemplateSpec {
+func podTemplate(t *testing.T, stack *latest.Stack) apiv1.PodTemplateSpec {
 	s, err := StackToStack(*stack, loadBalancerServiceStrategy{}, stackresources.EmptyStackState)
 	assert.NoError(t, err)
 	for _, r := range s.Deployments {

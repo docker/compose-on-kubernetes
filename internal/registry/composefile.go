@@ -3,7 +3,7 @@ package registry
 import (
 	"context"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	iv "github.com/docker/compose-on-kubernetes/internal/internalversion"
 	log "github.com/sirupsen/logrus"
 	apiequality "k8s.io/apimachinery/pkg/api/equality"
@@ -27,7 +27,7 @@ func NewStackComposeFileRest(storev1beta1 stackRESTStore) rest.Storage {
 }
 
 func (r *stackComposeFileRest) New() runtime.Object {
-	return &v1beta2.ComposeFile{}
+	return &latest.ComposeFile{}
 }
 
 func (r *stackComposeFileRest) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
@@ -35,13 +35,13 @@ func (r *stackComposeFileRest) Get(ctx context.Context, name string, options *me
 	if err != nil {
 		return nil, err
 	}
-	var res v1beta2.ComposeFile
+	var res latest.ComposeFile
 	res.ComposeFile = stack.Spec.ComposeFile
 	return &res, nil
 }
 
 func (r *stackComposeFileRest) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, includeUninitialized bool) (runtime.Object, error) {
-	compose := obj.(*v1beta2.ComposeFile)
+	compose := obj.(*latest.ComposeFile)
 	n, _ := genericapirequest.NamespaceFrom(ctx)
 	log.Infof("Compose create from compose file %s/%s", n, compose.Name)
 	var stack iv.Stack
@@ -58,14 +58,14 @@ func (r *stackComposeFileRest) Update(ctx context.Context, name string, objInfo 
 	n, _ := genericapirequest.NamespaceFrom(ctx)
 	log.Infof("Compose update from compose file %s/%s", n, name)
 	return r.storage.UpdateStack(ctx, name, func(ctx context.Context, newObj *iv.Stack, oldObj *iv.Stack) (transformedNewObj *iv.Stack, err error) {
-		composefile := v1beta2.ComposeFile{
+		composefile := latest.ComposeFile{
 			ComposeFile: oldObj.Spec.ComposeFile,
 		}
 		newCompose, err := objInfo.UpdatedObject(ctx, &composefile)
 		if err != nil {
 			return nil, err
 		}
-		newObj.Spec.ComposeFile = newCompose.(*v1beta2.ComposeFile).ComposeFile
+		newObj.Spec.ComposeFile = newCompose.(*latest.ComposeFile).ComposeFile
 		newObj.Spec.Stack = nil
 		if !apiequality.Semantic.DeepEqual(oldObj.Spec, newObj.Spec) {
 			newObj.Generation = oldObj.Generation + 1

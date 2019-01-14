@@ -137,9 +137,9 @@ func validateDryRun() validateStep {
 }
 
 func convertToStackDefinition(stack *iv.Stack) (*stackresources.StackState, error) {
-	stackBeta2, err := conversions.StackFromInternalV1beta2(stack)
+	stackLatest, err := conversions.StackFromInternalV1alpha3(stack)
 	if err != nil {
-		return nil, errors.Wrap(err, "conversion to v1beta2 failed")
+		return nil, errors.Wrap(err, "conversion to v1alpha3 failed")
 	}
 	strategy, err := convert.ServiceStrategyFor(coretypes.ServiceTypeLoadBalancer) // in that case, service strategy does not really matter
 	if err != nil {
@@ -148,7 +148,7 @@ func convertToStackDefinition(stack *iv.Stack) (*stackresources.StackState, erro
 			return nil, errors.Wrap(err, "conversion to kube entities failed")
 		}
 	}
-	sd, err := convert.StackToStack(*stackBeta2, strategy, stackresources.EmptyStackState)
+	sd, err := convert.StackToStack(*stackLatest, strategy, stackresources.EmptyStackState)
 	if err != nil {
 		log.Errorf("Failed to convert to stack: %s", err)
 		if err != nil {

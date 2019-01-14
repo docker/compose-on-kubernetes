@@ -3,7 +3,7 @@ package controller
 import (
 	"time"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/convert"
 	"github.com/docker/compose-on-kubernetes/internal/deduplication"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
@@ -21,18 +21,18 @@ type childrenStore interface {
 
 // stackStore provides access to the stack cache
 type stackStore interface {
-	get(key string) (*v1beta2.Stack, error)
+	get(key string) (*latest.Stack, error)
 }
 
 type resourceUpdater interface {
 	applyStackDiff(d *diff.StackStateDiff) error
-	updateStackStatus(status v1beta2.StackStatus) (*v1beta2.Stack, error)
+	updateStackStatus(status latest.StackStatus) (*latest.Stack, error)
 	deleteSecretsAndConfigMaps() error
 }
 
 // ResourceUpdaterProvider is a factory providing resource updaters for a given stack (default implementation generates an impersonating clientset)
 type ResourceUpdaterProvider interface {
-	getUpdater(stack *v1beta2.Stack, isDirty bool) (resourceUpdater, error)
+	getUpdater(stack *latest.Stack, isDirty bool) (resourceUpdater, error)
 }
 
 // StackReconciler reconciles stack into children objects
@@ -66,7 +66,7 @@ func NewStackReconciler(stackStore stackStore,
 }
 
 // Start starts the reconciliation loop
-func (r *StackReconciler) Start(reconcileQueue <-chan string, deletionQueue <-chan *v1beta2.Stack, stop <-chan struct{}) {
+func (r *StackReconciler) Start(reconcileQueue <-chan string, deletionQueue <-chan *latest.Stack, stop <-chan struct{}) {
 	go func() {
 		for {
 			select {
@@ -100,7 +100,7 @@ func (r *StackReconciler) reconcileStack(key string) {
 	}
 }
 
-func (r *StackReconciler) deleteStackChildren(stack *v1beta2.Stack) {
+func (r *StackReconciler) deleteStackChildren(stack *latest.Stack) {
 	current, err := r.children.getCurrentStackState(stackresources.ObjKey(stack.Namespace, stack.Name))
 	if err != nil {
 		log.Errorf("Failed to resolve current state for %s/%s: %s", stack.Namespace, stack.Name, err)
@@ -127,7 +127,7 @@ func (r *StackReconciler) deleteStackChildren(stack *v1beta2.Stack) {
 	r.ownerCache.remove(stackresources.ObjKey(stack.Namespace, stack.Name))
 }
 
-func (r *StackReconciler) reconcileChildren(stack *v1beta2.Stack, resourceUpdater resourceUpdater) error {
+func (r *StackReconciler) reconcileChildren(stack *latest.Stack, resourceUpdater resourceUpdater) error {
 	objKey := stackresources.ObjKey(stack.Namespace, stack.Name)
 	current, err := r.children.getCurrentStackState(objKey)
 	if err != nil {
@@ -153,13 +153,13 @@ func (r *StackReconciler) reconcileChildren(stack *v1beta2.Stack, resourceUpdate
 	return err
 }
 
-func (r *StackReconciler) reconcileStatus(stack *v1beta2.Stack, reconcileError error, resourceUpdater resourceUpdater) error {
+func (r *StackReconciler) reconcileStatus(stack *latest.Stack, reconcileError error, resourceUpdater resourceUpdater) error {
 	objKey := stackresources.ObjKey(stack.Namespace, stack.Name)
 	current, err := r.children.getCurrentStackState(objKey)
 	if err != nil {
 		return err
 	}
-	var status v1beta2.StackStatus
+	var status latest.StackStatus
 	if reconcileError != nil {
 		status = statusFailure(reconcileError)
 	} else {

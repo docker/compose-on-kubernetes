@@ -4,7 +4,7 @@ import (
 	"errors"
 	"fmt"
 
-	apiv1beta2 "github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/e2e/cluster"
 	. "github.com/onsi/ginkgo" // Import ginkgo to simplify test code
 	. "github.com/onsi/gomega" // Import gomega to simplify test code
@@ -152,10 +152,10 @@ services:
 			if stack.Status == nil {
 				return false, nil
 			}
-			if stack.Status.Phase == apiv1beta2.StackFailure {
+			if stack.Status.Phase == latest.StackFailure {
 				return true, nil
 			}
-			if stack.Status.Phase == apiv1beta2.StackAvailable {
+			if stack.Status.Phase == latest.StackAvailable {
 				return false, errors.New("Stack available when it should not")
 			}
 			return false, nil

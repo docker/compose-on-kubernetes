@@ -4,7 +4,7 @@ import (
 	"context"
 	"net/http"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	log "github.com/sirupsen/logrus"
 	"k8s.io/apimachinery/pkg/runtime"
 	genericapirequest "k8s.io/apiserver/pkg/endpoints/request"
@@ -25,7 +25,7 @@ func NewStackLogRest(config *restclient.Config) rest.Storage {
 }
 
 func (s *stackLogRest) New() runtime.Object {
-	return &v1beta2.Stack{} // Not used here, but needs to be a valid and registered type.
+	return &latest.Stack{} // Not used here, but needs to be a valid and registered type.
 }
 
 // ProducesMIMETypes returns a list of the MIME types the specified HTTP verb (GET, POST, DELETE,

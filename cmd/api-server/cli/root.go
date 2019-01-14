@@ -13,6 +13,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3"
 	"github.com/docker/compose-on-kubernetes/api/compose/v1beta1"
 	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
 	"github.com/docker/compose-on-kubernetes/api/openapi"
@@ -161,6 +162,56 @@ func getTimeout(tlsExpireTimeout time.Duration) time.Duration {
 
 var loopbackIP = net.ParseIP("127.0.0.1")
 
+func registerAggregatedAPIs(aggregatorClient kubeaggreagatorv1beta1.APIServiceInterface, caBundle []byte, serviceNamespace, serviceName string, apiVersions ...string) error {
+	for ix, v := range apiVersions {
+		if err := registerAggregatedAPI(aggregatorClient, caBundle, serviceNamespace, serviceName, v, int32(ix+15)); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
+func registerAggregatedAPI(aggregatorClient kubeaggreagatorv1beta1.APIServiceInterface,
+	caBundle []byte, serviceNamespace, serviceName, apiVersion string, versionPriority int32) error {
+	apiService := &apiregistrationv1beta1types.APIService{
+		ObjectMeta: metav1.ObjectMeta{
+			Name: apiVersion + ".compose.docker.com",
+			Labels: map[string]string{
+				"com.docker.fry": "compose.api",
+			},
+		},
+		Spec: apiregistrationv1beta1types.APIServiceSpec{
+			CABundle:             caBundle,
+			Group:                v1beta1.GroupName,
+			GroupPriorityMinimum: 1000,
+			VersionPriority:      versionPriority,
+			Version:              apiVersion,
+			Service: &apiregistrationv1beta1types.ServiceReference{
+				Namespace: serviceNamespace,
+				Name:      serviceName,
+			},
+		},
+	}
+
+	existing, err := aggregatorClient.Get(apiVersion+".compose.docker.com", metav1.GetOptions{})
+	if err == nil {
+		bundle, err := mergeCABundle(existing.Spec.CABundle, caBundle)
+		if err != nil {
+			return err
+		}
+		apiService.ObjectMeta.ResourceVersion = existing.ObjectMeta.ResourceVersion
+		apiService.Spec.CABundle = bundle
+		if _, err := aggregatorClient.Update(apiService); err != nil {
+			return err
+		}
+	} else {
+		if _, err := aggregatorClient.Create(apiService); err != nil {
+			return err
+		}
+	}
+	return nil
+}
+
 func runComposeServer(o *apiServerOptions, stopCh <-chan struct{}) error {
 	if err := generateCertificateIfRequired(o); err != nil {
 		return err
@@ -208,79 +259,13 @@ func runComposeServer(o *apiServerOptions, stopCh <-chan struct{}) error {
 	})
 	server.GenericAPIServer.AddPostStartHook("start-compose-server-informers", func(context genericapiserver.PostStartHookContext) error {
 		config.GenericConfig.SharedInformerFactory.Start(context.StopCh)
-		apiServiceV1beta1 := &apiregistrationv1beta1types.APIService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "v1beta1.compose.docker.com",
-				Labels: map[string]string{
-					"com.docker.fry": "compose.api",
-				},
-			},
-			Spec: apiregistrationv1beta1types.APIServiceSpec{
-				CABundle:             caBundle,
-				Group:                v1beta1.SchemeGroupVersion.Group,
-				GroupPriorityMinimum: 1000,
-				VersionPriority:      15,
-				Version:              v1beta1.SchemeGroupVersion.Version,
-				Service: &apiregistrationv1beta1types.ServiceReference{
-					Namespace: o.serviceNamespace,
-					Name:      o.serviceName,
-				},
-			},
-		}
-
-		existing, err := aggregatorClient.APIServices().Get("v1beta1.compose.docker.com", metav1.GetOptions{})
-		if err == nil {
-			bundle, err := mergeCABundle(existing.Spec.CABundle, caBundle)
-			if err != nil {
-				return err
-			}
-			apiServiceV1beta1.ObjectMeta.ResourceVersion = existing.ObjectMeta.ResourceVersion
-			apiServiceV1beta1.Spec.CABundle = bundle
-			if _, err := aggregatorClient.APIServices().Update(apiServiceV1beta1); err != nil {
-				return err
-			}
-		} else {
-			if _, err := aggregatorClient.APIServices().Create(apiServiceV1beta1); err != nil {
-				return err
-			}
-		}
-
-		apiServiceV1beta2 := &apiregistrationv1beta1types.APIService{
-			ObjectMeta: metav1.ObjectMeta{
-				Name: "v1beta2.compose.docker.com",
-				Labels: map[string]string{
-					"com.docker.fry": "compose.api",
-				},
-			},
-			Spec: apiregistrationv1beta1types.APIServiceSpec{
-				CABundle:             caBundle,
-				Group:                v1beta2.SchemeGroupVersion.Group,
-				GroupPriorityMinimum: 1000,
-				VersionPriority:      16,
-				Version:              v1beta2.SchemeGroupVersion.Version,
-				Service: &apiregistrationv1beta1types.ServiceReference{
-					Namespace: o.serviceNamespace,
-					Name:      o.serviceName,
-				},
-			},
-		}
-		existing, err = aggregatorClient.APIServices().Get("v1beta2.compose.docker.com", metav1.GetOptions{})
-		if err == nil {
-			bundle, err := mergeCABundle(existing.Spec.CABundle, caBundle)
-			if err != nil {
-				return err
-			}
-			apiServiceV1beta2.ObjectMeta.ResourceVersion = existing.ObjectMeta.ResourceVersion
-			apiServiceV1beta2.Spec.CABundle = bundle
-			if _, err := aggregatorClient.APIServices().Update(apiServiceV1beta2); err != nil {
-				return err
-			}
-		} else {
-			if _, err := aggregatorClient.APIServices().Create(apiServiceV1beta2); err != nil {
-				return err
-			}
-		}
-		return nil
+		return registerAggregatedAPIs(
+			aggregatorClient.APIServices(),
+			caBundle,
+			o.serviceNamespace,
+			o.serviceName,
+			v1beta1.SchemeGroupVersion.Version, v1beta2.SchemeGroupVersion.Version, v1alpha3.SchemeGroupVersion.Version,
+		)
 	})
 
 	return server.GenericAPIServer.PrepareRun().Run(stopCh)

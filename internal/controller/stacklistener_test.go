@@ -4,7 +4,7 @@ import (
 	"sync"
 	"testing"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/rest"
@@ -31,7 +31,7 @@ func (s *dummyOwnerCache) setDirty(key string) {
 	}
 }
 
-func (s *dummyOwnerCache) get(stack *v1beta2.Stack, acceptDirty bool) rest.ImpersonationConfig {
+func (s *dummyOwnerCache) get(stack *latest.Stack, acceptDirty bool) rest.ImpersonationConfig {
 	return rest.ImpersonationConfig{}
 }
 func TestStackListenerCacheInvalidation(t *testing.T) {
@@ -44,7 +44,7 @@ func TestStackListenerCacheInvalidation(t *testing.T) {
 	}
 	reconcileQueue := make(chan string)
 	defer close(reconcileQueue)
-	deleteQueue := make(chan *v1beta2.Stack)
+	deleteQueue := make(chan *latest.Stack)
 	defer close(deleteQueue)
 	go func() {
 		for range reconcileQueue {
@@ -59,19 +59,19 @@ func TestStackListenerCacheInvalidation(t *testing.T) {
 		reconcileDeletionQueue: deleteQueue,
 		ownerCache:             cache,
 	}
-	testee.onAdd(&v1beta2.Stack{
+	testee.onAdd(&latest.Stack{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
 			Name:      "test-add",
 		},
 	})
-	testee.onUpdate(nil, &v1beta2.Stack{
+	testee.onUpdate(nil, &latest.Stack{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
 			Name:      "test-update",
 		},
 	})
-	testee.onDelete(&v1beta2.Stack{
+	testee.onDelete(&latest.Stack{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "ns",
 			Name:      "test-delete",
@@ -105,7 +105,7 @@ func (s *testStore) Run(<-chan struct{}) {
 
 func TestStackListenerGetByKey(t *testing.T) {
 	storeMock := &testStore{store: cache.NewStore(cache.DeletionHandlingMetaNamespaceKeyFunc)}
-	storeMock.store.Add(&v1beta2.Stack{
+	storeMock.store.Add(&latest.Stack{
 		ObjectMeta: metav1.ObjectMeta{
 			Namespace: "test-ns",
 			Name:      "test-name",

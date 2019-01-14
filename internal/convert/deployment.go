@@ -1,7 +1,7 @@
 package convert
 
 import (
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	appsv1beta2 "k8s.io/api/apps/v1beta2"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -9,7 +9,7 @@ import (
 )
 
 // toDeployment converts a Compose Service to a Kube Deployment if its replica mode is NOT `global`.
-func toDeployment(s v1beta2.ServiceConfig, objectMeta metav1.ObjectMeta, podTemplate apiv1.PodTemplateSpec, labelSelector map[string]string, original appsv1beta2.Deployment) *appsv1beta2.Deployment {
+func toDeployment(s latest.ServiceConfig, objectMeta metav1.ObjectMeta, podTemplate apiv1.PodTemplateSpec, labelSelector map[string]string, original appsv1beta2.Deployment) *appsv1beta2.Deployment {
 	revisionHistoryLimit := int32(3)
 	dep := original.DeepCopy()
 	dep.ObjectMeta = objectMeta
@@ -23,11 +23,11 @@ func toDeployment(s v1beta2.ServiceConfig, objectMeta metav1.ObjectMeta, podTemp
 	return dep
 }
 
-func isGlobal(srv v1beta2.ServiceConfig) bool {
+func isGlobal(srv latest.ServiceConfig) bool {
 	return srv.Deploy.Mode == "global"
 }
 
-func toDeploymentStrategy(s v1beta2.ServiceConfig, original appsv1beta2.DeploymentStrategy) appsv1beta2.DeploymentStrategy {
+func toDeploymentStrategy(s latest.ServiceConfig, original appsv1beta2.DeploymentStrategy) appsv1beta2.DeploymentStrategy {
 	config := s.Deploy.UpdateConfig
 	if config == nil {
 		return original

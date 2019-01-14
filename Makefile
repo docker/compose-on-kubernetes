@@ -107,4 +107,4 @@ help: ## this help
 	@awk 'BEGIN {FS = ":.*?## "} /^[a-zA-Z0-9_-]+:.*?## / {printf "\033[36m%-30s\033[0m %s\n", $$1, $$2}' $(MAKEFILE_LIST) | sort
 
 openapi:
-	openapi-gen -i github.com/docker/compose-on-kubernetes/api/compose/v1beta1,github.com/docker/compose-on-kubernetes/api/compose/v1beta2,github.com/docker/compose-on-kubernetes/api/compose/impersonation,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/apimachinery/pkg/version,k8s.io/apimachinery/pkg/runtime -p github.com/docker/compose-on-kubernetes/api/openapi
+	openapi-gen -i github.com/docker/compose-on-kubernetes/api/compose/v1beta1,github.com/docker/compose-on-kubernetes/api/compose/v1beta2,github.com/docker/compose-on-kubernetes/api/compose/v1alpha3,github.com/docker/compose-on-kubernetes/api/compose/impersonation,k8s.io/apimachinery/pkg/apis/meta/v1,k8s.io/apimachinery/pkg/version,k8s.io/apimachinery/pkg/runtime -p github.com/docker/compose-on-kubernetes/api/openapi

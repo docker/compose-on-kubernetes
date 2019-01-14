@@ -3,7 +3,7 @@ package registry
 import (
 	"testing"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	iv "github.com/docker/compose-on-kubernetes/internal/internalversion"
 	"github.com/stretchr/testify/assert"
 	"k8s.io/apiserver/pkg/authentication/user"
@@ -34,7 +34,7 @@ func TestPrepareStackOwnershipNoUser(t *testing.T) {
 func TestSetFieldsV1beta1SameCompose(t *testing.T) {
 	oldStack := iv.Stack{
 		Spec: iv.StackSpec{
-			Stack:       &v1beta2.StackSpec{},
+			Stack:       &latest.StackSpec{},
 			ComposeFile: "test",
 		},
 	}
@@ -51,13 +51,13 @@ func TestSetFieldsV1beta1SameCompose(t *testing.T) {
 func TestSetFieldsV1beta1DifferentCompose(t *testing.T) {
 	oldStack := iv.Stack{
 		Spec: iv.StackSpec{
-			Stack:       &v1beta2.StackSpec{},
+			Stack:       &latest.StackSpec{},
 			ComposeFile: "test",
 		},
 	}
 	newStack := iv.Stack{
 		Spec: iv.StackSpec{
-			Stack:       &v1beta2.StackSpec{},
+			Stack:       &latest.StackSpec{},
 			ComposeFile: "test2",
 		},
 	}
@@ -69,13 +69,13 @@ func TestSetFieldsV1beta1DifferentCompose(t *testing.T) {
 func TestSetFieldsV1beta2SameStack(t *testing.T) {
 	oldStack := iv.Stack{
 		Spec: iv.StackSpec{
-			Stack:       &v1beta2.StackSpec{},
+			Stack:       &latest.StackSpec{},
 			ComposeFile: "test",
 		},
 	}
 	newStack := iv.Stack{
 		Spec: iv.StackSpec{
-			Stack: &v1beta2.StackSpec{},
+			Stack: &latest.StackSpec{},
 		},
 	}
 	err := prepareFieldsForUpdate(APIV1beta2)(nil, &oldStack, &newStack)
@@ -86,14 +86,14 @@ func TestSetFieldsV1beta2SameStack(t *testing.T) {
 func TestSetFieldsV1beta2DifferentStack(t *testing.T) {
 	oldStack := iv.Stack{
 		Spec: iv.StackSpec{
-			Stack:       &v1beta2.StackSpec{},
+			Stack:       &latest.StackSpec{},
 			ComposeFile: "test",
 		},
 	}
 	newStack := iv.Stack{
 		Spec: iv.StackSpec{
-			Stack: &v1beta2.StackSpec{
-				Services: []v1beta2.ServiceConfig{
+			Stack: &latest.StackSpec{
+				Services: []latest.ServiceConfig{
 					{},
 				},
 			},

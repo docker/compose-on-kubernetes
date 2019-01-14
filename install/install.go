@@ -181,6 +181,10 @@ func IsRunning(config *rest.Config) (bool, error) {
 					return false, nil
 				}
 				_, err = stackClient.ComposeV1beta1().Stacks("e2e").List(metav1.ListOptions{})
+				if err != nil {
+					return false, nil
+				}
+				_, err = stackClient.ComposeV1alpha3().Stacks("e2e").List(metav1.ListOptions{})
 				return err == nil, nil
 			})
 			return err == nil, err
@@ -313,7 +317,7 @@ var composeRoleRules = []rbacv1types.PolicyRule{
 	{
 		APIGroups:     []string{"apiregistration.k8s.io"},
 		Resources:     []string{"apiservices"},
-		ResourceNames: []string{"v1beta1.compose.docker.com", "v1beta2.compose.docker.com"},
+		ResourceNames: []string{"v1beta1.compose.docker.com", "v1beta2.compose.docker.com", "v1alpha3.compose.docker.com"},
 		Verbs:         []string{"*"},
 	},
 	{

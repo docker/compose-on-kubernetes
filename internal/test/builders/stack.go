@@ -3,17 +3,17 @@ package builders
 import (
 	"time"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 // Stack is a builder to create an Stack
-func Stack(name string, builders ...func(*v1beta2.Stack)) *v1beta2.Stack {
-	stack := &v1beta2.Stack{
+func Stack(name string, builders ...func(*latest.Stack)) *latest.Stack {
+	stack := &latest.Stack{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: name,
 		},
-		Spec: &v1beta2.StackSpec{},
+		Spec: &latest.StackSpec{},
 	}
 
 	for _, builder := range builders {
@@ -24,16 +24,16 @@ func Stack(name string, builders ...func(*v1beta2.Stack)) *v1beta2.Stack {
 }
 
 // WithNamespace set the namespace of the stack
-func WithNamespace(namespace string) func(*v1beta2.Stack) {
-	return func(s *v1beta2.Stack) {
+func WithNamespace(namespace string) func(*latest.Stack) {
+	return func(s *latest.Stack) {
 		s.Namespace = namespace
 	}
 }
 
 // WithSecretConfig add a SecretConfig to to stack
-func WithSecretConfig(name string, builders ...func(*v1beta2.SecretConfig)) func(*v1beta2.Stack) {
-	return func(s *v1beta2.Stack) {
-		secret := &v1beta2.SecretConfig{
+func WithSecretConfig(name string, builders ...func(*latest.SecretConfig)) func(*latest.Stack) {
+	return func(s *latest.Stack) {
+		secret := &latest.SecretConfig{
 			Name: name,
 		}
 
@@ -42,23 +42,23 @@ func WithSecretConfig(name string, builders ...func(*v1beta2.SecretConfig)) func
 		}
 
 		if s.Spec.Secrets == nil {
-			s.Spec.Secrets = map[string]v1beta2.SecretConfig{}
+			s.Spec.Secrets = map[string]latest.SecretConfig{}
 		}
 		s.Spec.Secrets[name] = *secret
 	}
 }
 
 // SecretFile specifies the path of a secret
-func SecretFile(path string) func(*v1beta2.SecretConfig) {
-	return func(s *v1beta2.SecretConfig) {
+func SecretFile(path string) func(*latest.SecretConfig) {
+	return func(s *latest.SecretConfig) {
 		s.File = path
 	}
 }
 
 // WithConfigObjConfig add a ConfigConfig to to stack
-func WithConfigObjConfig(name string, builders ...func(*v1beta2.ConfigObjConfig)) func(*v1beta2.Stack) {
-	return func(s *v1beta2.Stack) {
-		secret := &v1beta2.ConfigObjConfig{
+func WithConfigObjConfig(name string, builders ...func(*latest.ConfigObjConfig)) func(*latest.Stack) {
+	return func(s *latest.Stack) {
+		secret := &latest.ConfigObjConfig{
 			Name: name,
 		}
 
@@ -67,30 +67,30 @@ func WithConfigObjConfig(name string, builders ...func(*v1beta2.ConfigObjConfig)
 		}
 
 		if s.Spec.Configs == nil {
-			s.Spec.Configs = map[string]v1beta2.ConfigObjConfig{}
+			s.Spec.Configs = map[string]latest.ConfigObjConfig{}
 		}
 		s.Spec.Configs[name] = *secret
 	}
 }
 
 // ConfigFile specifies the path of a config
-func ConfigFile(path string) func(*v1beta2.ConfigObjConfig) {
-	return func(c *v1beta2.ConfigObjConfig) {
+func ConfigFile(path string) func(*latest.ConfigObjConfig) {
+	return func(c *latest.ConfigObjConfig) {
 		c.File = path
 	}
 }
 
 // ConfigExternal specifies that the config is external
-func ConfigExternal(c *v1beta2.ConfigObjConfig) {
-	c.External = v1beta2.External{
+func ConfigExternal(c *latest.ConfigObjConfig) {
+	c.External = latest.External{
 		External: true,
 	}
 }
 
 // WithService adds a ServiceConifg to the stack
-func WithService(name string, builders ...func(*v1beta2.ServiceConfig)) func(*v1beta2.Stack) {
-	return func(s *v1beta2.Stack) {
-		service := &v1beta2.ServiceConfig{
+func WithService(name string, builders ...func(*latest.ServiceConfig)) func(*latest.Stack) {
+	return func(s *latest.Stack) {
+		service := &latest.ServiceConfig{
 			Name:  name,
 			Image: "busybox:latest",
 		}
@@ -100,36 +100,36 @@ func WithService(name string, builders ...func(*v1beta2.ServiceConfig)) func(*v1
 		}
 
 		if s.Spec.Services == nil {
-			s.Spec.Services = []v1beta2.ServiceConfig{}
+			s.Spec.Services = []latest.ServiceConfig{}
 		}
 		s.Spec.Services = append(s.Spec.Services, *service)
 	}
 }
 
 // Image specfies the image of the service
-func Image(reference string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func Image(reference string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		c.Image = reference
 	}
 }
 
 // StopGracePeriod specifies the stop-grace-period duration of a service
-func StopGracePeriod(duration time.Duration) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func StopGracePeriod(duration time.Duration) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		c.StopGracePeriod = &duration
 	}
 }
 
 // User specifies the user of a service
-func User(user int64) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func User(user int64) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		c.User = &user
 	}
 }
 
 // WithTmpFS adds a path to the tmpfs of a service
-func WithTmpFS(path string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WithTmpFS(path string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		if c.Tmpfs == nil {
 			c.Tmpfs = []string{}
 		}
@@ -138,8 +138,8 @@ func WithTmpFS(path string) func(*v1beta2.ServiceConfig) {
 }
 
 // WithLabel adds a label to a service
-func WithLabel(key, value string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WithLabel(key, value string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		if c.Labels == nil {
 			c.Labels = map[string]string{}
 		}
@@ -148,29 +148,29 @@ func WithLabel(key, value string) func(*v1beta2.ServiceConfig) {
 }
 
 // IPC sets the ipc mode of the service
-func IPC(mode string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func IPC(mode string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		c.Ipc = mode
 	}
 }
 
 // PID sets the pid mode of the service
-func PID(mode string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func PID(mode string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		c.Pid = mode
 	}
 }
 
 // Hostname sets the hostname of the service
-func Hostname(hostname string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func Hostname(hostname string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		c.Hostname = hostname
 	}
 }
 
 // WithExtraHost adds an extra host to the service
-func WithExtraHost(host string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WithExtraHost(host string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		if c.ExtraHosts == nil {
 			c.ExtraHosts = []string{}
 		}
@@ -179,13 +179,13 @@ func WithExtraHost(host string) func(*v1beta2.ServiceConfig) {
 }
 
 // WithVolume adds a volume to the service
-func WithVolume(builders ...func(*v1beta2.ServiceVolumeConfig)) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WithVolume(builders ...func(*latest.ServiceVolumeConfig)) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		if c.Volumes == nil {
-			c.Volumes = []v1beta2.ServiceVolumeConfig{}
+			c.Volumes = []latest.ServiceVolumeConfig{}
 		}
 
-		volume := &v1beta2.ServiceVolumeConfig{}
+		volume := &latest.ServiceVolumeConfig{}
 
 		for _, builder := range builders {
 			builder(volume)
@@ -196,38 +196,38 @@ func WithVolume(builders ...func(*v1beta2.ServiceVolumeConfig)) func(*v1beta2.Se
 }
 
 // Source sets the volume source
-func Source(source string) func(*v1beta2.ServiceVolumeConfig) {
-	return func(v *v1beta2.ServiceVolumeConfig) {
+func Source(source string) func(*latest.ServiceVolumeConfig) {
+	return func(v *latest.ServiceVolumeConfig) {
 		v.Source = source
 	}
 }
 
 // Target sets the volume target
-func Target(target string) func(*v1beta2.ServiceVolumeConfig) {
-	return func(v *v1beta2.ServiceVolumeConfig) {
+func Target(target string) func(*latest.ServiceVolumeConfig) {
+	return func(v *latest.ServiceVolumeConfig) {
 		v.Target = target
 	}
 }
 
 // Volume sets the volume type to volume
-func Volume(v *v1beta2.ServiceVolumeConfig) {
+func Volume(v *latest.ServiceVolumeConfig) {
 	v.Type = "volume"
 }
 
 // Mount sets the volume type to mount
-func Mount(v *v1beta2.ServiceVolumeConfig) {
+func Mount(v *latest.ServiceVolumeConfig) {
 	v.Type = "mount"
 }
 
 // VolumeReadOnly sets the volume to readonly
-func VolumeReadOnly(v *v1beta2.ServiceVolumeConfig) {
+func VolumeReadOnly(v *latest.ServiceVolumeConfig) {
 	v.ReadOnly = true
 }
 
 // Healthcheck sets the healthcheck config of the service
-func Healthcheck(builders ...func(*v1beta2.HealthCheckConfig)) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
-		healthcheck := &v1beta2.HealthCheckConfig{}
+func Healthcheck(builders ...func(*latest.HealthCheckConfig)) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
+		healthcheck := &latest.HealthCheckConfig{}
 
 		for _, builder := range builders {
 			builder(healthcheck)
@@ -238,40 +238,40 @@ func Healthcheck(builders ...func(*v1beta2.HealthCheckConfig)) func(*v1beta2.Ser
 }
 
 // Test sets the test commands of the healthcheck
-func Test(cmd ...string) func(*v1beta2.HealthCheckConfig) {
-	return func(h *v1beta2.HealthCheckConfig) {
+func Test(cmd ...string) func(*latest.HealthCheckConfig) {
+	return func(h *latest.HealthCheckConfig) {
 		h.Test = cmd
 	}
 }
 
 // Interval sets the interval duration of the healthcheck
-func Interval(duration time.Duration) func(*v1beta2.HealthCheckConfig) {
-	return func(h *v1beta2.HealthCheckConfig) {
+func Interval(duration time.Duration) func(*latest.HealthCheckConfig) {
+	return func(h *latest.HealthCheckConfig) {
 		h.Interval = &duration
 	}
 }
 
 // Timeout sets the timeout duration of the healthcheck
-func Timeout(duration time.Duration) func(*v1beta2.HealthCheckConfig) {
-	return func(h *v1beta2.HealthCheckConfig) {
+func Timeout(duration time.Duration) func(*latest.HealthCheckConfig) {
+	return func(h *latest.HealthCheckConfig) {
 		h.Timeout = &duration
 	}
 }
 
 // Retries sets the number of retries of the healthcheck
-func Retries(retries uint64) func(*v1beta2.HealthCheckConfig) {
-	return func(h *v1beta2.HealthCheckConfig) {
+func Retries(retries uint64) func(*latest.HealthCheckConfig) {
+	return func(h *latest.HealthCheckConfig) {
 		h.Retries = &retries
 	}
 }
 
 // WithSecret adds a secret to the service
-func WithSecret(builders ...func(*v1beta2.ServiceSecretConfig)) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WithSecret(builders ...func(*latest.ServiceSecretConfig)) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		if c.Secrets == nil {
-			c.Secrets = []v1beta2.ServiceSecretConfig{}
+			c.Secrets = []latest.ServiceSecretConfig{}
 		}
-		secret := &v1beta2.ServiceSecretConfig{}
+		secret := &latest.ServiceSecretConfig{}
 		for _, builder := range builders {
 			builder(secret)
 		}
@@ -280,26 +280,26 @@ func WithSecret(builders ...func(*v1beta2.ServiceSecretConfig)) func(*v1beta2.Se
 }
 
 // SecretSource sets the source of the secret
-func SecretSource(source string) func(*v1beta2.ServiceSecretConfig) {
-	return func(s *v1beta2.ServiceSecretConfig) {
+func SecretSource(source string) func(*latest.ServiceSecretConfig) {
+	return func(s *latest.ServiceSecretConfig) {
 		s.Source = source
 	}
 }
 
 // SecretTarget sets the target of the secret
-func SecretTarget(target string) func(*v1beta2.ServiceSecretConfig) {
-	return func(s *v1beta2.ServiceSecretConfig) {
+func SecretTarget(target string) func(*latest.ServiceSecretConfig) {
+	return func(s *latest.ServiceSecretConfig) {
 		s.Target = target
 	}
 }
 
 // WithConfig adds a config to the service
-func WithConfig(builders ...func(*v1beta2.ServiceConfigObjConfig)) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WithConfig(builders ...func(*latest.ServiceConfigObjConfig)) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		if c.Configs == nil {
-			c.Configs = []v1beta2.ServiceConfigObjConfig{}
+			c.Configs = []latest.ServiceConfigObjConfig{}
 		}
-		config := &v1beta2.ServiceConfigObjConfig{}
+		config := &latest.ServiceConfigObjConfig{}
 		for _, builder := range builders {
 			builder(config)
 		}
@@ -308,44 +308,44 @@ func WithConfig(builders ...func(*v1beta2.ServiceConfigObjConfig)) func(*v1beta2
 }
 
 // ConfigSource sets the source of the config
-func ConfigSource(source string) func(*v1beta2.ServiceConfigObjConfig) {
-	return func(c *v1beta2.ServiceConfigObjConfig) {
+func ConfigSource(source string) func(*latest.ServiceConfigObjConfig) {
+	return func(c *latest.ServiceConfigObjConfig) {
 		c.Source = source
 	}
 }
 
 // ConfigTarget sets the target of the config
-func ConfigTarget(target string) func(*v1beta2.ServiceConfigObjConfig) {
-	return func(c *v1beta2.ServiceConfigObjConfig) {
+func ConfigTarget(target string) func(*latest.ServiceConfigObjConfig) {
+	return func(c *latest.ServiceConfigObjConfig) {
 		c.Target = target
 	}
 }
 
 // ConfigUID sets the uid of the config
-func ConfigUID(uid string) func(*v1beta2.ServiceConfigObjConfig) {
-	return func(c *v1beta2.ServiceConfigObjConfig) {
+func ConfigUID(uid string) func(*latest.ServiceConfigObjConfig) {
+	return func(c *latest.ServiceConfigObjConfig) {
 		c.UID = uid
 	}
 }
 
 // ConfigGID sets the gid of the config
-func ConfigGID(gid string) func(*v1beta2.ServiceConfigObjConfig) {
-	return func(c *v1beta2.ServiceConfigObjConfig) {
+func ConfigGID(gid string) func(*latest.ServiceConfigObjConfig) {
+	return func(c *latest.ServiceConfigObjConfig) {
 		c.GID = gid
 	}
 }
 
 // ConfigMode sets the mode of the config
-func ConfigMode(mode uint32) func(*v1beta2.ServiceConfigObjConfig) {
-	return func(c *v1beta2.ServiceConfigObjConfig) {
+func ConfigMode(mode uint32) func(*latest.ServiceConfigObjConfig) {
+	return func(c *latest.ServiceConfigObjConfig) {
 		c.Mode = &mode
 	}
 }
 
 // Deploy sets the deploy config of the service
-func Deploy(builders ...func(*v1beta2.DeployConfig)) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
-		deploy := &v1beta2.DeployConfig{}
+func Deploy(builders ...func(*latest.DeployConfig)) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
+		deploy := &latest.DeployConfig{}
 
 		for _, builder := range builders {
 			builder(deploy)
@@ -356,9 +356,9 @@ func Deploy(builders ...func(*v1beta2.DeployConfig)) func(*v1beta2.ServiceConfig
 }
 
 // Resources sets the resources of the deploy config
-func Resources(builders ...func(*v1beta2.Resources)) func(*v1beta2.DeployConfig) {
-	return func(d *v1beta2.DeployConfig) {
-		resources := &v1beta2.Resources{}
+func Resources(builders ...func(*latest.Resources)) func(*latest.DeployConfig) {
+	return func(d *latest.DeployConfig) {
+		resources := &latest.Resources{}
 
 		for _, builder := range builders {
 			builder(resources)
@@ -369,9 +369,9 @@ func Resources(builders ...func(*v1beta2.Resources)) func(*v1beta2.DeployConfig)
 }
 
 // Limits sets the limits of the resources
-func Limits(builders ...func(*v1beta2.Resource)) func(*v1beta2.Resources) {
-	return func(r *v1beta2.Resources) {
-		limits := &v1beta2.Resource{}
+func Limits(builders ...func(*latest.Resource)) func(*latest.Resources) {
+	return func(r *latest.Resources) {
+		limits := &latest.Resource{}
 
 		for _, builder := range builders {
 			builder(limits)
@@ -382,9 +382,9 @@ func Limits(builders ...func(*v1beta2.Resource)) func(*v1beta2.Resources) {
 }
 
 // Reservations sets the reservations of the resources
-func Reservations(builders ...func(*v1beta2.Resource)) func(*v1beta2.Resources) {
-	return func(r *v1beta2.Resources) {
-		reservations := &v1beta2.Resource{}
+func Reservations(builders ...func(*latest.Resource)) func(*latest.Resources) {
+	return func(r *latest.Resources) {
+		reservations := &latest.Resource{}
 
 		for _, builder := range builders {
 			builder(reservations)
@@ -395,23 +395,23 @@ func Reservations(builders ...func(*v1beta2.Resource)) func(*v1beta2.Resources) 
 }
 
 // CPUs sets the cup of the resource
-func CPUs(cpus string) func(*v1beta2.Resource) {
-	return func(r *v1beta2.Resource) {
+func CPUs(cpus string) func(*latest.Resource) {
+	return func(r *latest.Resource) {
 		r.NanoCPUs = cpus
 	}
 }
 
 // Memory sets the memory of the resource
-func Memory(memory int64) func(*v1beta2.Resource) {
-	return func(r *v1beta2.Resource) {
+func Memory(memory int64) func(*latest.Resource) {
+	return func(r *latest.Resource) {
 		r.MemoryBytes = memory
 	}
 }
 
 // Update sets the update config of a deploy config
-func Update(builders ...func(*v1beta2.UpdateConfig)) func(*v1beta2.DeployConfig) {
-	return func(d *v1beta2.DeployConfig) {
-		update := &v1beta2.UpdateConfig{}
+func Update(builders ...func(*latest.UpdateConfig)) func(*latest.DeployConfig) {
+	return func(d *latest.DeployConfig) {
+		update := &latest.UpdateConfig{}
 
 		for _, builder := range builders {
 			builder(update)
@@ -422,27 +422,27 @@ func Update(builders ...func(*v1beta2.UpdateConfig)) func(*v1beta2.DeployConfig)
 }
 
 // Parallelism sets the parallelism of the update config
-func Parallelism(parallelism uint64) func(*v1beta2.UpdateConfig) {
-	return func(u *v1beta2.UpdateConfig) {
+func Parallelism(parallelism uint64) func(*latest.UpdateConfig) {
+	return func(u *latest.UpdateConfig) {
 		u.Parallelism = &parallelism
 	}
 }
 
 // ModeGlobal sets the deploy mode to global
-func ModeGlobal(d *v1beta2.DeployConfig) {
+func ModeGlobal(d *latest.DeployConfig) {
 	d.Mode = "global"
 }
 
 // Replicas sets the number of replicas of a deploy config
-func Replicas(replicas uint64) func(*v1beta2.DeployConfig) {
-	return func(d *v1beta2.DeployConfig) {
+func Replicas(replicas uint64) func(*latest.DeployConfig) {
+	return func(d *latest.DeployConfig) {
 		d.Replicas = &replicas
 	}
 }
 
 // WithDeployLabel adds a label to the deploy config
-func WithDeployLabel(key, value string) func(*v1beta2.DeployConfig) {
-	return func(d *v1beta2.DeployConfig) {
+func WithDeployLabel(key, value string) func(*latest.DeployConfig) {
+	return func(d *latest.DeployConfig) {
 		if d.Labels == nil {
 			d.Labels = map[string]string{}
 		}
@@ -451,9 +451,9 @@ func WithDeployLabel(key, value string) func(*v1beta2.DeployConfig) {
 }
 
 // RestartPolicy sets the restart policy of the deploy config
-func RestartPolicy(builders ...func(*v1beta2.RestartPolicy)) func(*v1beta2.DeployConfig) {
-	return func(d *v1beta2.DeployConfig) {
-		rp := &v1beta2.RestartPolicy{}
+func RestartPolicy(builders ...func(*latest.RestartPolicy)) func(*latest.DeployConfig) {
+	return func(d *latest.DeployConfig) {
+		rp := &latest.RestartPolicy{}
 
 		for _, builder := range builders {
 			builder(rp)
@@ -464,14 +464,14 @@ func RestartPolicy(builders ...func(*v1beta2.RestartPolicy)) func(*v1beta2.Deplo
 }
 
 // OnFailure sets the restart policy to on-failure
-func OnFailure(r *v1beta2.RestartPolicy) {
+func OnFailure(r *latest.RestartPolicy) {
 	r.Condition = "on-failure"
 }
 
 // Placement sets the placement of the deploy config
-func Placement(builders ...func(*v1beta2.Placement)) func(*v1beta2.DeployConfig) {
-	return func(d *v1beta2.DeployConfig) {
-		placement := &v1beta2.Placement{}
+func Placement(builders ...func(*latest.Placement)) func(*latest.DeployConfig) {
+	return func(d *latest.DeployConfig) {
+		placement := &latest.Placement{}
 
 		for _, builder := range builders {
 			builder(placement)
@@ -482,9 +482,9 @@ func Placement(builders ...func(*v1beta2.Placement)) func(*v1beta2.DeployConfig)
 }
 
 // Constraints sets the  constraints to the placement
-func Constraints(builders ...func(*v1beta2.Constraints)) func(*v1beta2.Placement) {
-	return func(p *v1beta2.Placement) {
-		constraints := &v1beta2.Constraints{}
+func Constraints(builders ...func(*latest.Constraints)) func(*latest.Placement) {
+	return func(p *latest.Placement) {
+		constraints := &latest.Constraints{}
 		for _, builder := range builders {
 			builder(constraints)
 		}
@@ -493,9 +493,9 @@ func Constraints(builders ...func(*v1beta2.Constraints)) func(*v1beta2.Placement
 }
 
 // OperatingSystem set the operating system constraint
-func OperatingSystem(value, operator string) func(*v1beta2.Constraints) {
-	return func(c *v1beta2.Constraints) {
-		c.OperatingSystem = &v1beta2.Constraint{
+func OperatingSystem(value, operator string) func(*latest.Constraints) {
+	return func(c *latest.Constraints) {
+		c.OperatingSystem = &latest.Constraint{
 			Operator: operator,
 			Value:    value,
 		}
@@ -503,9 +503,9 @@ func OperatingSystem(value, operator string) func(*v1beta2.Constraints) {
 }
 
 // Architecture set the operating system constraint
-func Architecture(value, operator string) func(*v1beta2.Constraints) {
-	return func(c *v1beta2.Constraints) {
-		c.Architecture = &v1beta2.Constraint{
+func Architecture(value, operator string) func(*latest.Constraints) {
+	return func(c *latest.Constraints) {
+		c.Architecture = &latest.Constraint{
 			Operator: operator,
 			Value:    value,
 		}
@@ -513,9 +513,9 @@ func Architecture(value, operator string) func(*v1beta2.Constraints) {
 }
 
 // ConstraintHostname set the operating system constraint
-func ConstraintHostname(value, operator string) func(*v1beta2.Constraints) {
-	return func(c *v1beta2.Constraints) {
-		c.Hostname = &v1beta2.Constraint{
+func ConstraintHostname(value, operator string) func(*latest.Constraints) {
+	return func(c *latest.Constraints) {
+		c.Hostname = &latest.Constraint{
 			Operator: operator,
 			Value:    value,
 		}
@@ -523,12 +523,12 @@ func ConstraintHostname(value, operator string) func(*v1beta2.Constraints) {
 }
 
 // WithMatchLabel adds the labels constraint to the constraint
-func WithMatchLabel(key, value, operator string) func(*v1beta2.Constraints) {
-	return func(c *v1beta2.Constraints) {
+func WithMatchLabel(key, value, operator string) func(*latest.Constraints) {
+	return func(c *latest.Constraints) {
 		if c.MatchLabels == nil {
-			c.MatchLabels = map[string]v1beta2.Constraint{}
+			c.MatchLabels = map[string]latest.Constraint{}
 		}
-		c.MatchLabels[key] = v1beta2.Constraint{
+		c.MatchLabels[key] = latest.Constraint{
 			Operator: operator,
 			Value:    value,
 		}
@@ -536,8 +536,8 @@ func WithMatchLabel(key, value, operator string) func(*v1beta2.Constraints) {
 }
 
 // WithCapAdd add a cap add to the service
-func WithCapAdd(caps ...string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WithCapAdd(caps ...string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		if c.CapAdd == nil {
 			c.CapAdd = []string{}
 		}
@@ -546,8 +546,8 @@ func WithCapAdd(caps ...string) func(*v1beta2.ServiceConfig) {
 }
 
 // WithCapDrop adds a cap drop to the service
-func WithCapDrop(caps ...string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WithCapDrop(caps ...string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		if c.CapDrop == nil {
 			c.CapDrop = []string{}
 		}
@@ -556,8 +556,8 @@ func WithCapDrop(caps ...string) func(*v1beta2.ServiceConfig) {
 }
 
 // WithEnvironment adds an environment variable to the service
-func WithEnvironment(key string, value *string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WithEnvironment(key string, value *string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		if c.Environment == nil {
 			c.Environment = map[string]*string{}
 		}
@@ -566,43 +566,43 @@ func WithEnvironment(key string, value *string) func(*v1beta2.ServiceConfig) {
 }
 
 // ReadOnly sets the service to read only
-func ReadOnly(c *v1beta2.ServiceConfig) {
+func ReadOnly(c *latest.ServiceConfig) {
 	c.ReadOnly = true
 }
 
 // Privileged sets the service to privileged
-func Privileged(c *v1beta2.ServiceConfig) {
+func Privileged(c *latest.ServiceConfig) {
 	c.Privileged = true
 }
 
 // Entrypoint sets the entrypoint of the service
-func Entrypoint(s ...string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func Entrypoint(s ...string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		c.Entrypoint = s
 	}
 }
 
 // Command sets the command of the service
-func Command(s ...string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func Command(s ...string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		c.Command = s
 	}
 }
 
 // WorkingDir sets the service's working folder
-func WorkingDir(w string) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WorkingDir(w string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		c.WorkingDir = w
 	}
 }
 
 // WithPort adds a port config to the service
-func WithPort(target uint32, builders ...func(*v1beta2.ServicePortConfig)) func(*v1beta2.ServiceConfig) {
-	return func(c *v1beta2.ServiceConfig) {
+func WithPort(target uint32, builders ...func(*latest.ServicePortConfig)) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
 		if c.Ports == nil {
-			c.Ports = []v1beta2.ServicePortConfig{}
+			c.Ports = []latest.ServicePortConfig{}
 		}
-		port := &v1beta2.ServicePortConfig{
+		port := &latest.ServicePortConfig{
 			Target:   target,
 			Protocol: "tcp",
 		}
@@ -616,23 +616,23 @@ func WithPort(target uint32, builders ...func(*v1beta2.ServicePortConfig)) func(
 }
 
 // Published sets the published port
-func Published(published uint32) func(*v1beta2.ServicePortConfig) {
-	return func(c *v1beta2.ServicePortConfig) {
+func Published(published uint32) func(*latest.ServicePortConfig) {
+	return func(c *latest.ServicePortConfig) {
 		c.Published = published
 	}
 }
 
 // ProtocolUDP set's the port's protocol
-func ProtocolUDP(c *v1beta2.ServicePortConfig) {
+func ProtocolUDP(c *latest.ServicePortConfig) {
 	c.Protocol = "udp"
 }
 
 // Tty sets the service's tty to true
-func Tty(s *v1beta2.ServiceConfig) {
+func Tty(s *latest.ServiceConfig) {
 	s.Tty = true
 }
 
 // StdinOpen sets the service's stdin opne to true
-func StdinOpen(s *v1beta2.ServiceConfig) {
+func StdinOpen(s *latest.ServiceConfig) {
 	s.StdinOpen = true
 }

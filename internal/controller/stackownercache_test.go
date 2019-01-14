@@ -4,28 +4,28 @@ import (
 	"testing"
 
 	"github.com/docker/compose-on-kubernetes/api/compose/impersonation"
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	"github.com/stretchr/testify/assert"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 )
 
 type ownerGetterFunc struct {
-	getFunc func(*v1beta2.Stack) (*v1beta2.Owner, error)
+	getFunc func(*latest.Stack) (*latest.Owner, error)
 }
 
-func (o *ownerGetterFunc) get(stack *v1beta2.Stack) (*v1beta2.Owner, error) {
+func (o *ownerGetterFunc) get(stack *latest.Stack) (*latest.Owner, error) {
 	return o.getFunc(stack)
 }
 
 func TestUpdateDeleteSequence(t *testing.T) {
 	var return404 bool
 	getter := &ownerGetterFunc{
-		getFunc: func(stack *v1beta2.Stack) (*v1beta2.Owner, error) {
+		getFunc: func(stack *latest.Stack) (*latest.Owner, error) {
 			if return404 {
-				return nil, kerrors.NewNotFound(v1beta2.GroupResource("stacks"), stack.Name)
+				return nil, kerrors.NewNotFound(latest.GroupResource("stacks"), stack.Name)
 			}
-			return &v1beta2.Owner{
+			return &latest.Owner{
 				Owner: impersonation.Config{
 					UserName: "test",
 				},
@@ -34,7 +34,7 @@ func TestUpdateDeleteSequence(t *testing.T) {
 	}
 	testee := &stackOwnerCache{data: make(map[string]stackOwnerCacheEntry), getter: getter}
 
-	testStack := &v1beta2.Stack{}
+	testStack := &latest.Stack{}
 	testStack.Name = "test"
 	testStack.Namespace = "ns"
 	// as of create
@@ -62,12 +62,12 @@ func TestUpdateDeleteSequence(t *testing.T) {
 // just after.
 func TestStackOwnerCachePanicOnUnresolvableOwner(t *testing.T) {
 	getter := &ownerGetterFunc{
-		getFunc: func(stack *v1beta2.Stack) (*v1beta2.Owner, error) {
-			return nil, kerrors.NewNotFound(v1beta2.GroupResource("stacks"), stack.Name)
+		getFunc: func(stack *latest.Stack) (*latest.Owner, error) {
+			return nil, kerrors.NewNotFound(latest.GroupResource("stacks"), stack.Name)
 		},
 	}
 	testee := &stackOwnerCache{data: make(map[string]stackOwnerCacheEntry), getter: getter}
-	testStack := &v1beta2.Stack{}
+	testStack := &latest.Stack{}
 	testStack.Name = "test"
 	testStack.Namespace = "ns"
 	assert.Panics(t, func() {

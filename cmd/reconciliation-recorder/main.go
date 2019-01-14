@@ -63,7 +63,7 @@ func run(stacksToProceed []string, opts *options) error {
 		return err
 	}
 	if len(stacksToProceed) == 0 {
-		allStacks, err := stacks.ComposeV1beta2().Stacks(opts.namespace).List(metav1.ListOptions{IncludeUninitialized: true})
+		allStacks, err := stacks.ComposeLatest().Stacks(opts.namespace).List(metav1.ListOptions{IncludeUninitialized: true})
 		if err != nil {
 			return err
 		}
@@ -80,7 +80,7 @@ func run(stacksToProceed []string, opts *options) error {
 }
 
 func processStack(stacks clientset.Interface, k8sclient k8sclientset.Interface, name, namespace, outdir string) error {
-	stack, err := stacks.ComposeV1beta2().Stacks(namespace).Get(name, metav1.GetOptions{IncludeUninitialized: true})
+	stack, err := stacks.ComposeLatest().Stacks(namespace).Get(name, metav1.GetOptions{IncludeUninitialized: true})
 	if err != nil {
 		return err
 	}

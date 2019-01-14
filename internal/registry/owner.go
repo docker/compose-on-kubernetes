@@ -3,8 +3,8 @@ package registry
 import (
 	"context"
 
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/api/compose/v1beta1"
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
@@ -28,7 +28,7 @@ func (r *stackOwnerRest) New() runtime.Object {
 	if r.version == "v1beta1" {
 		return &v1beta1.Owner{}
 	}
-	return &v1beta2.Owner{}
+	return &latest.Owner{}
 }
 
 func (r *stackOwnerRest) Get(ctx context.Context, name string, options *metav1.GetOptions) (runtime.Object, error) {
@@ -36,7 +36,7 @@ func (r *stackOwnerRest) Get(ctx context.Context, name string, options *metav1.G
 	if err != nil {
 		return nil, err
 	}
-	var res v1beta2.Owner
+	var res latest.Owner
 	res.Owner = stack.Spec.Owner
 	log.Debugf("Answering owner request on %s: %s", name, res.Owner.UserName)
 	return &res, nil

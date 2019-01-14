@@ -5,7 +5,7 @@ import (
 	"sort"
 	"strconv"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/api/labels"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	log "github.com/sirupsen/logrus"
@@ -18,16 +18,16 @@ const (
 )
 
 // IsStackDirty indicates if the stack is pending reconciliation
-func IsStackDirty(stack *v1beta2.Stack) bool {
+func IsStackDirty(stack *latest.Stack) bool {
 	if stack.Status == nil {
 		return true
 	}
-	return stack.Status.Phase == v1beta2.StackReconciliationPending ||
-		stack.Status.Phase == v1beta2.StackFailure
+	return stack.Status.Phase == latest.StackReconciliationPending ||
+		stack.Status.Phase == latest.StackFailure
 }
 
-// StackToStack converts a v1beta2.Stack to a StackDefinition
-func StackToStack(stack v1beta2.Stack, strategy ServiceStrategy, original *stackresources.StackState) (*stackresources.StackState, error) {
+// StackToStack converts a latest.Stack to a StackDefinition
+func StackToStack(stack latest.Stack, strategy ServiceStrategy, original *stackresources.StackState) (*stackresources.StackState, error) {
 	if stack.Spec == nil {
 		return nil, errors.New("stack spec is nil")
 	}
@@ -57,7 +57,7 @@ func StackToStack(stack v1beta2.Stack, strategy ServiceStrategy, original *stack
 }
 
 // toStackService creates a Kubernetes stack service out of a swarm service.
-func toStackResources(stackName, stackNamespace string, srv v1beta2.ServiceConfig, configuration *v1beta2.StackSpec,
+func toStackResources(stackName, stackNamespace string, srv latest.ServiceConfig, configuration *latest.StackSpec,
 	strategy ServiceStrategy, original *stackresources.StackState, stackDirty bool) ([]interface{}, error) {
 	labelSelector := labels.ForService(stackName, srv.Name)
 	objectMeta := objectMeta(srv, labelSelector, stackNamespace)
@@ -128,7 +128,7 @@ func toStackResources(stackName, stackNamespace string, srv v1beta2.ServiceConfi
 	return resources, nil
 }
 
-func objectMeta(srv v1beta2.ServiceConfig, labels map[string]string, namespace string) metav1.ObjectMeta {
+func objectMeta(srv latest.ServiceConfig, labels map[string]string, namespace string) metav1.ObjectMeta {
 	return metav1.ObjectMeta{
 		Name:      srv.Name,
 		Labels:    mergeLabels(labels, srv.Deploy.Labels),

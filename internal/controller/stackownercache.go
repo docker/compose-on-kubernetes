@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"github.com/docker/compose-on-kubernetes/api/client/clientset"
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	log "github.com/sirupsen/logrus"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
@@ -17,11 +17,11 @@ import (
 type StackOwnerCacher interface {
 	remove(key string)
 	setDirty(key string)
-	get(stack *v1beta2.Stack, acceptDirty bool) rest.ImpersonationConfig
+	get(stack *latest.Stack, acceptDirty bool) rest.ImpersonationConfig
 }
 
 type ownerGetter interface {
-	get(*v1beta2.Stack) (*v1beta2.Owner, error)
+	get(*latest.Stack) (*latest.Owner, error)
 }
 
 type stackOwnerCacheEntry struct {
@@ -39,8 +39,8 @@ type apiOwnerGetter struct {
 	rest.Interface
 }
 
-func (g *apiOwnerGetter) get(stack *v1beta2.Stack) (*v1beta2.Owner, error) {
-	var owner v1beta2.Owner
+func (g *apiOwnerGetter) get(stack *latest.Stack) (*latest.Owner, error) {
+	var owner latest.Owner
 	if err := g.Get().Namespace(stack.Namespace).Name(stack.Name).Resource("stacks").SubResource("owner").Do().Into(&owner); err != nil {
 		return nil, err
 	}
@@ -55,7 +55,7 @@ func NewStackOwnerCache(config *rest.Config) (StackOwnerCacher, error) {
 	}
 	return &stackOwnerCache{
 		data:   make(map[string]stackOwnerCacheEntry),
-		getter: &apiOwnerGetter{cs.ComposeV1beta2().RESTClient()},
+		getter: &apiOwnerGetter{cs.ComposeLatest().RESTClient()},
 	}, nil
 }
 
@@ -74,7 +74,7 @@ func (s *stackOwnerCache) setDirty(key string) {
 	}
 }
 
-func (s *stackOwnerCache) getWithError(stack *v1beta2.Stack, acceptDirty bool) (rest.ImpersonationConfig, error) {
+func (s *stackOwnerCache) getWithError(stack *latest.Stack, acceptDirty bool) (rest.ImpersonationConfig, error) {
 	s.mut.Lock()
 	defer s.mut.Unlock()
 	objKey := stackresources.ObjKey(stack.Namespace, stack.Name)
@@ -105,7 +105,7 @@ func (s *stackOwnerCache) getWithError(stack *v1beta2.Stack, acceptDirty bool) (
 	return ic, nil
 }
 
-func (s *stackOwnerCache) get(stack *v1beta2.Stack, acceptDirty bool) rest.ImpersonationConfig {
+func (s *stackOwnerCache) get(stack *latest.Stack, acceptDirty bool) rest.ImpersonationConfig {
 	var ic rest.ImpersonationConfig
 	if err := wait.ExponentialBackoff(wait.Backoff{
 		Duration: time.Second,

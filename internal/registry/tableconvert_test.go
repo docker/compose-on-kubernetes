@@ -5,7 +5,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
+	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	iv "github.com/docker/compose-on-kubernetes/internal/internalversion"
 	"github.com/stretchr/testify/assert"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -49,14 +49,14 @@ func TestConvertTable(t *testing.T) {
 			Message: "test message",
 		},
 		Spec: iv.StackSpec{
-			Stack: &v1beta2.StackSpec{
-				Services: []v1beta2.ServiceConfig{
+			Stack: &latest.StackSpec{
+				Services: []latest.ServiceConfig{
 					{
 						Name: "no-ports",
 					},
 					{
 						Name: "with-ports",
-						Ports: []v1beta2.ServicePortConfig{
+						Ports: []latest.ServicePortConfig{
 							{
 								Target:   88,
 								Protocol: "",
