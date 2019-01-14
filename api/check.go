@@ -7,7 +7,7 @@ import (
 	apimachinerymetav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime/schema"
-	"k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/discovery"
 )
 
 // StackVersion represents the detected Compose Component on Kubernetes side.
@@ -21,8 +21,8 @@ const (
 )
 
 // GetStackAPIVersion returns the most recent stack API installed.
-func GetStackAPIVersion(clientSet *kubernetes.Clientset) (StackVersion, error) {
-	groups, err := clientSet.Discovery().ServerGroups()
+func GetStackAPIVersion(serverGroupsClient discovery.ServerGroupsInterface) (StackVersion, error) {
+	groups, err := serverGroupsClient.ServerGroups()
 	if err != nil {
 		return "", err
 	}
