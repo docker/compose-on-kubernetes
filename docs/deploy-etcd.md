@@ -17,7 +17,7 @@ kube-system:tiller`.
 apiVersion: "etcd.database.coreos.com/v1beta2"
 kind: "EtcdCluster"
 metadata:
-  name: "compose-etcd"
+  name: "compose-etcd-client"
   namespace: "compose"
 spec:
   size: 3
