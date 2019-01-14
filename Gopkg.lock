@@ -298,19 +298,6 @@
   revision = "e89373fe6b4a7413d7acd6da1725b83ef713e6e4"
 
 [[projects]]
-  digest = "1:2e3c336fc7fde5c984d2841455a658a6d626450b1754a854b3b32e7a8f49a07a"
-  name = "github.com/google/go-cmp"
-  packages = [
-    "cmp",
-    "cmp/internal/diff",
-    "cmp/internal/function",
-    "cmp/internal/value",
-  ]
-  pruneopts = "NUT"
-  revision = "3af367b6b30c263d47e8895973edcca9a49cf029"
-  version = "v0.2.0"
-
-[[projects]]
   branch = "master"
   digest = "1:52c5834e2bebac9030c97cc0798ac11c3aa8a39f098aeb419f142533da6cd3cc"
   name = "github.com/google/gofuzz"
@@ -866,20 +853,6 @@
   source = "https://github.com/simonferquel/yaml"
 
 [[projects]]
-  digest = "1:96dd14a129cdd71b7e354dde14251546ab89523af2999c39db24ef74d4eaabf6"
-  name = "gotest.tools"
-  packages = [
-    "assert",
-    "assert/cmp",
-    "internal/difflib",
-    "internal/format",
-    "internal/source",
-  ]
-  pruneopts = "NUT"
-  revision = "7c797b5133e5460410dbb22ba779bf35e6975dea"
-  version = "v2.2.0"
-
-[[projects]]
   digest = "1:6dd53537a34d9b612e66acd39859953cf7ad70e5b5953937bed5ea998355e7b8"
   name = "k8s.io/api"
   packages = [
@@ -1301,11 +1274,10 @@
     "github.com/stretchr/testify/assert",
     "golang.org/x/sync/errgroup",
     "gopkg.in/yaml.v2",
-    "gotest.tools/assert",
-    "gotest.tools/assert/cmp",
     "k8s.io/api/apps/v1beta2",
     "k8s.io/api/core/v1",
     "k8s.io/api/rbac/v1",
+    "k8s.io/api/storage/v1",
     "k8s.io/apiextensions-apiserver/pkg/apis/apiextensions/v1beta1",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset",
     "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset/typed/apiextensions/v1beta1",
