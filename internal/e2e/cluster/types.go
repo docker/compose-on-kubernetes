@@ -1,6 +1,7 @@
 package cluster
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"fmt"
 	"strings"
@@ -163,6 +164,55 @@ func (ns *Namespace) Pods() corev1.PodInterface {
 // StacksV1beta1 returns a v1beta1 client
 func (ns *Namespace) StacksV1beta1() composev1beta1.StackInterface {
 	return ns.stacks1
+}
+
+// StacksV1alpha3 returns a v1alpha3 client
+func (ns *Namespace) StacksV1alpha3() composev1alpha3.StackInterface {
+	return ns.stacksv1alpha3
+}
+
+// CreatePullSecret creates a pull secret
+func (ns *Namespace) CreatePullSecret(name, server, username, password string) error {
+	data, err := generatePullSecretData(server, username, password)
+	if err != nil {
+		return err
+	}
+	s := &apiv1.Secret{
+		ObjectMeta: metav1.ObjectMeta{
+			Namespace: ns.name,
+			Name:      name,
+		},
+		Type: apiv1.SecretTypeDockerConfigJson,
+		Data: map[string][]byte{
+			apiv1.DockerConfigJsonKey: data,
+		},
+	}
+	_, err = ns.Secrets().Create(s)
+	return err
+}
+
+func generatePullSecretData(server, username, password string) ([]byte, error) {
+	e := dockerConfigEntry{
+		Username: username,
+		Password: password,
+		Auth:     base64.StdEncoding.EncodeToString([]byte(fmt.Sprintf("%s:%s", username, password))),
+	}
+	cfg := dockerConfigJSON{
+		Auths: map[string]dockerConfigEntry{
+			server: e,
+		},
+	}
+	return json.Marshal(&cfg)
+}
+
+type dockerConfigJSON struct {
+	Auths map[string]dockerConfigEntry `json:"auths"`
+}
+type dockerConfigEntry struct {
+	Username string `json:"username,omitempty"`
+	Password string `json:"password,omitempty"`
+	Email    string `json:"email,omitempty"`
+	Auth     string `json:"auth,omitempty"`
 }
 
 // CreateStack creates a stack.
