@@ -66,6 +66,7 @@ func toPodTemplate(serviceConfig latest.ServiceConfig, labels map[string]string,
 	if len(tpl.Spec.Containers) == 0 {
 		tpl.Spec.Containers = []apiv1.Container{{}}
 	}
+
 	containerIX := 0
 	for ix, c := range tpl.Spec.Containers {
 		if c.Name == serviceConfig.Name {
@@ -89,6 +90,16 @@ func toPodTemplate(serviceConfig latest.ServiceConfig, labels map[string]string,
 	tpl.Spec.Containers[containerIX].Resources = apiv1.ResourceRequirements{
 		Limits:   limits,
 		Requests: requests,
+	}
+
+	if serviceConfig.PullSecret != "" {
+		pullSecrets := map[string]struct{}{}
+		for _, ps := range tpl.Spec.ImagePullSecrets {
+			pullSecrets[ps.Name] = struct{}{}
+		}
+		if _, ok := pullSecrets[serviceConfig.PullSecret]; !ok {
+			tpl.Spec.ImagePullSecrets = append(tpl.Spec.ImagePullSecrets, apiv1.LocalObjectReference{Name: serviceConfig.PullSecret})
+		}
 	}
 	return tpl, nil
 }

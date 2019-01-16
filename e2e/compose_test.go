@@ -26,8 +26,11 @@ import (
 )
 
 const (
-	portMin = 32768
-	portMax = 35535
+	portMin                  = 32768
+	portMax                  = 35535
+	privateImagePullUsername = "composeonk8simagepull"
+	privateImagePullPassword = "XHWl8mJ6IH5o"
+	privateImagePullImage    = "composeonkubernetes/nginx:1.12.1-alpine"
 )
 
 var usedPorts = map[int]struct{}{}
@@ -1037,6 +1040,28 @@ configs:
 			}
 			return false, err
 		})
+	})
+
+	It("Should deploy stacks with private images", func() {
+		err := ns.CreatePullSecret("test-pull-secret", "https://index.docker.io/v1/", privateImagePullUsername, privateImagePullPassword)
+		expectNoError(err)
+		s := &latest.Stack{
+			ObjectMeta: metav1.ObjectMeta{
+				Name: "with-private-images",
+			},
+			Spec: &latest.StackSpec{
+				Services: []latest.ServiceConfig{
+					{
+						Name:       "test-service",
+						Image:      privateImagePullImage,
+						PullSecret: "test-pull-secret",
+					},
+				},
+			},
+		}
+		s, err = ns.StacksV1alpha3().Create(s)
+		expectNoError(err)
+		waitUntil(ns.IsStackAvailable(s.Name))
 	})
 
 })
