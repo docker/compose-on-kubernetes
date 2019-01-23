@@ -5,20 +5,22 @@
 - To install etcd using these instructions, you must have [Helm](https://helm.sh) in your client environment.
 - [Download the Compose on Kubernetes installer](https://github.com/docker/compose-on-kubernetes/releases).
 - Ensure storage and dns are enabled: `microk8s.enable storage dns`
-- Alias kubectl from the snap with: `sudo snap alias microk8s.kubectl kubectl`.
+- `kubectl` availabe in path - if it's not already available it can be aliased from the snap with: `sudo snap alias microk8s.kubectl kubectl`.
 
 ## Create compose namespace
 
 - Confirm that MicroK8s is working with `microk8s.inspect`.
 - Create a compose namespace by running `kubectl create namespace compose`.
 
+## Populate Kubernetes Config
+
+If you do not already have a `~/.kube/config` file create it with `microk8s.kubectl config view --raw > ~/.kube/config`.
+
 ## Deploy etcd
 
 Please follow [How to deploy etcd](./deploy-etcd.md).
 
 ## Deploy Compose on Kubernetes
-
-If you do not already have a `~/.kube/config` file create it with `kubectl config view --raw > ~/.kube/config`.
 
 Run `./installer-linux -namespace=compose -etcd-servers=http://compose-etcd-client:2379 -tag=v0.4.18`.
 
