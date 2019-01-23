@@ -2,6 +2,8 @@
 
 ### Install Helm server side component
 
+`etcd` is deployed using Helm so we must first install the Helm server:
+
 - Create the tiller service account: `kubectl -n kube-system create serviceaccount tiller`.
 - Give it admin access to your cluster (note: you might want to reduce the scope of this): `kubectl -n kube-system create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount 
 kube-system:tiller`.
