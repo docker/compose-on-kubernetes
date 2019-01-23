@@ -1,4 +1,4 @@
-# Install on Minikube
+# Install on MicroK8s
 
 ## Pre-requisites
 - [MicroK8s](https://microk8s.io/)
