@@ -13,8 +13,7 @@ Just run `kubectl create namespace compose`.
 
 ## Deploy etcd
 
-If you already have an etcd instance, skip this.
-Otherwise, please follow [How to deploy etcd](./deploy-etcd.md).
+Compose on Kubernetes requires an etcd instance (in addition to the kube-system etcd instance). Please follow [How to deploy etcd](./deploy-etcd.md).
 
 ## Admin rights
 
