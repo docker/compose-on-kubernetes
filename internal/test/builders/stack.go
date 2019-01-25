@@ -120,6 +120,13 @@ func PullSecret(name string) func(*latest.ServiceConfig) {
 	}
 }
 
+// PullPolicy specifies the pull policy used for this service
+func PullPolicy(policy string) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
+		c.PullPolicy = policy
+	}
+}
+
 // StopGracePeriod specifies the stop-grace-period duration of a service
 func StopGracePeriod(duration time.Duration) func(*latest.ServiceConfig) {
 	return func(c *latest.ServiceConfig) {

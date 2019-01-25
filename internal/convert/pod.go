@@ -48,6 +48,10 @@ func toPodTemplate(serviceConfig latest.ServiceConfig, labels map[string]string,
 	if err != nil {
 		return apiv1.PodTemplateSpec{}, err
 	}
+	pullPolicy, err := toImagePullPolicy(serviceConfig.Image, serviceConfig.PullPolicy)
+	if err != nil {
+		return apiv1.PodTemplateSpec{}, err
+	}
 	tpl.ObjectMeta = metav1.ObjectMeta{
 		Labels:      labels,
 		Annotations: serviceConfig.Labels,
@@ -76,7 +80,7 @@ func toPodTemplate(serviceConfig latest.ServiceConfig, labels map[string]string,
 	}
 	tpl.Spec.Containers[containerIX].Name = serviceConfig.Name
 	tpl.Spec.Containers[containerIX].Image = serviceConfig.Image
-	tpl.Spec.Containers[containerIX].ImagePullPolicy = toImagePullPolicy(serviceConfig.Image)
+	tpl.Spec.Containers[containerIX].ImagePullPolicy = pullPolicy
 	tpl.Spec.Containers[containerIX].Command = serviceConfig.Entrypoint
 	tpl.Spec.Containers[containerIX].Args = serviceConfig.Command
 	tpl.Spec.Containers[containerIX].WorkingDir = serviceConfig.WorkingDir
@@ -104,11 +108,19 @@ func toPodTemplate(serviceConfig latest.ServiceConfig, labels map[string]string,
 	return tpl, nil
 }
 
-func toImagePullPolicy(image string) apiv1.PullPolicy {
-	if strings.HasSuffix(image, ":latest") {
-		return apiv1.PullAlways
+func toImagePullPolicy(image string, specifiedPolicy string) (apiv1.PullPolicy, error) {
+	if specifiedPolicy == "" {
+		if strings.HasSuffix(image, ":latest") {
+			return apiv1.PullAlways, nil
+		}
+		return apiv1.PullIfNotPresent, nil
 	}
-	return apiv1.PullIfNotPresent
+	switch apiv1.PullPolicy(specifiedPolicy) {
+	case apiv1.PullAlways, apiv1.PullIfNotPresent, apiv1.PullNever:
+		return apiv1.PullPolicy(specifiedPolicy), nil
+	default:
+		return "", errors.Errorf("invalid pull policy %q, must be %q, %q or %q", specifiedPolicy, apiv1.PullAlways, apiv1.PullIfNotPresent, apiv1.PullNever)
+	}
 }
 
 func toHostAliases(extraHosts []string) ([]apiv1.HostAlias, error) {
