@@ -15,18 +15,26 @@ import (
 )
 
 func podTemplate(t *testing.T, stack *latest.Stack) apiv1.PodTemplateSpec {
-	s, err := StackToStack(*stack, loadBalancerServiceStrategy{}, stackresources.EmptyStackState)
+	res, err := podTemplateWithError(stack)
 	assert.NoError(t, err)
+	return res
+}
+
+func podTemplateWithError(stack *latest.Stack) (apiv1.PodTemplateSpec, error) {
+	s, err := StackToStack(*stack, loadBalancerServiceStrategy{}, stackresources.EmptyStackState)
+	if err != nil {
+		return apiv1.PodTemplateSpec{}, err
+	}
 	for _, r := range s.Deployments {
-		return r.Spec.Template
+		return r.Spec.Template, nil
 	}
 	for _, r := range s.Daemonsets {
-		return r.Spec.Template
+		return r.Spec.Template, nil
 	}
 	for _, r := range s.Statefulsets {
-		return r.Spec.Template
+		return r.Spec.Template, nil
 	}
-	return apiv1.PodTemplateSpec{}
+	return apiv1.PodTemplateSpec{}, nil
 }
 
 func TestToPodWithDockerSocket(t *testing.T) {
@@ -878,4 +886,60 @@ func TestToPodWithPullSecret(t *testing.T) {
 			Image("nginx"),
 		)))
 	assert.Nil(t, podTemplateNoSecret.Spec.ImagePullSecrets)
+}
+
+func TestToPodWithPullPolicy(t *testing.T) {
+	cases := []struct {
+		name           string
+		stack          *latest.Stack
+		expectedPolicy apiv1.PullPolicy
+		expectedError  string
+	}{
+		{
+			name: "specific tag",
+			stack: Stack("demo",
+				WithService("nginx",
+					Image("nginx:specific"),
+				)),
+			expectedPolicy: apiv1.PullIfNotPresent,
+		},
+		{
+			name: "latest tag",
+			stack: Stack("demo",
+				WithService("nginx",
+					Image("nginx:latest"),
+				)),
+			expectedPolicy: apiv1.PullAlways,
+		},
+		{
+			name: "explicit policy",
+			stack: Stack("demo",
+				WithService("nginx",
+					Image("nginx:latest"),
+					PullPolicy("Never"),
+				)),
+			expectedPolicy: apiv1.PullNever,
+		},
+		{
+			name: "invalid policy",
+			stack: Stack("demo",
+				WithService("nginx",
+					Image("nginx:latest"),
+					PullPolicy("Invalid"),
+				)),
+			expectedError: `invalid pull policy "Invalid", must be "Always", "IfNotPresent" or "Never"`,
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			pod, err := podTemplateWithError(c.stack)
+			if c.expectedError != "" {
+				assert.EqualError(t, err, c.expectedError)
+			} else {
+				assert.NoError(t, err)
+				assert.Equal(t, pod.Spec.Containers[0].ImagePullPolicy, c.expectedPolicy)
+			}
+		})
+	}
 }

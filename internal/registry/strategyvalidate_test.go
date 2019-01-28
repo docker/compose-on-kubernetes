@@ -366,3 +366,18 @@ func TestValidateStackNotNilWithoutStatus(t *testing.T) {
 	err := validateStackNotNil()(nil, &stack)
 	assert.Len(t, err, 1)
 }
+
+func TestValidateInvalidPullPolicy(t *testing.T) {
+	s := Stack("test",
+		WithService("redis",
+			Image("redis"),
+			PullPolicy("Invalid")))
+	stack := iv.Stack{
+		Spec: iv.StackSpec{
+			Stack: s.Spec,
+		},
+	}
+	err := validateDryRun()(nil, &stack)
+	assert.Len(t, err, 1)
+	assert.Contains(t, err[0].Error(), `invalid pull policy "Invalid", must be "Always", "IfNotPresent" or "Never"`)
+}
