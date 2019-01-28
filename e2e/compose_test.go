@@ -1100,7 +1100,7 @@ func expectNoError(err error) {
 }
 
 func waitUntil(condition wait.ConditionFunc) {
-	expectNoError(wait.PollImmediate(1*time.Second, 5*time.Minute, condition))
+	ExpectWithOffset(1, wait.PollImmediate(1*time.Second, 5*time.Minute, condition)).NotTo(HaveOccurred())
 }
 
 func stackServiceLabel(name string) string {
