@@ -92,20 +92,20 @@ func (u *testResourceUpdater) deleteSecretsAndConfigMaps() error {
 	return nil
 }
 
-type reconiliationTestCaseResult struct {
+type reconciliationTestCaseResult struct {
 	diffs                  []*diff.StackStateDiff
 	statuses               []*latest.Stack
 	childResourceDeletions int
 }
 
 func runReconcilierTestCase(originalStack *latest.Stack, defaultServiceType coretypes.ServiceType, operation func(*StackReconciler),
-	originalState ...interface{}) (reconiliationTestCaseResult, error) {
+	originalState ...interface{}) (reconciliationTestCaseResult, error) {
 	cache := &dummyOwnerCache{
 		data: make(map[string]stackOwnerCacheEntry),
 	}
 	childrenStore, err := newTestChildrenStore(originalState...)
 	if err != nil {
-		return reconiliationTestCaseResult{}, err
+		return reconciliationTestCaseResult{}, err
 	}
 	stackStore := newTestStackStore(originalStack)
 	chDiffs := make(chan *diff.StackStateDiff)
@@ -142,7 +142,7 @@ func runReconcilierTestCase(originalStack *latest.Stack, defaultServiceType core
 		close(chDiffs)
 		close(chStatusUpdates)
 		close(chChildrenDeletions)
-		return reconiliationTestCaseResult{}, err
+		return reconciliationTestCaseResult{}, err
 	}
 
 	operation(testee)
@@ -151,18 +151,18 @@ func runReconcilierTestCase(originalStack *latest.Stack, defaultServiceType core
 	close(chStatusUpdates)
 	close(chChildrenDeletions)
 	wg.Wait()
-	return reconiliationTestCaseResult{childResourceDeletions: childrenResourceDeletions, diffs: producedDiffs, statuses: producedStatusUpdates}, nil
+	return reconciliationTestCaseResult{childResourceDeletions: childrenResourceDeletions, diffs: producedDiffs, statuses: producedStatusUpdates}, nil
 }
 
 func runReconciliationTestCase(originalStack *latest.Stack, defaultServiceType coretypes.ServiceType,
-	originalState ...interface{}) (reconiliationTestCaseResult, error) {
+	originalState ...interface{}) (reconciliationTestCaseResult, error) {
 	return runReconcilierTestCase(originalStack, defaultServiceType, func(testee *StackReconciler) {
 		testee.reconcileStack(stackresources.ObjKey(originalStack.Namespace, originalStack.Name))
 	}, originalState...)
 }
 
 func runRemoveStackTestCase(originalStack *latest.Stack, defaultServiceType coretypes.ServiceType,
-	originalState ...interface{}) (reconiliationTestCaseResult, error) {
+	originalState ...interface{}) (reconciliationTestCaseResult, error) {
 	return runReconcilierTestCase(originalStack, defaultServiceType, func(testee *StackReconciler) {
 		testee.deleteStackChildren(originalStack)
 	}, originalState...)
