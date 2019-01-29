@@ -89,6 +89,11 @@ func (r *StackReconciler) reconcileStack(key string) {
 		log.Errorf("Cannot reconcile stack %s: %s", key, err)
 		return
 	}
+	if stack.DeletionTimestamp != nil {
+		// pending deletion
+		r.deleteStackChildren(stack)
+		return
+	}
 	updater, err := r.resourceUpdater.getUpdater(stack, convert.IsStackDirty(stack))
 	if err != nil {
 		log.Errorf("Updater resolution failed: %s", err)

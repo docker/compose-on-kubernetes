@@ -289,6 +289,11 @@ func (ns *Namespace) DeleteStack(name string) error {
 	return ns.stacks.Delete(name, &metav1.DeleteOptions{})
 }
 
+// DeleteStackWithPropagation deletes a stack using the specified propagation.
+func (ns *Namespace) DeleteStackWithPropagation(name string, propagation metav1.DeletionPropagation) error {
+	return ns.stacks.Delete(name, &metav1.DeleteOptions{PropagationPolicy: &propagation})
+}
+
 // DeleteStacksv1 deletes all stacks.
 func (ns *Namespace) DeleteStacksv1() error {
 	return ns.stacks1.DeleteCollection(&metav1.DeleteOptions{}, metav1.ListOptions{})

@@ -14,6 +14,7 @@ import (
 	. "github.com/docker/compose-on-kubernetes/internal/test/builders"
 	"github.com/stretchr/testify/assert"
 	coretypes "k8s.io/api/core/v1"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
 type testChildrenStore struct {
@@ -45,26 +46,31 @@ func newTestStackStore(originalStack *latest.Stack) *testStackStore {
 }
 
 type testResourceUpdaterProvider struct {
-	diffs    chan<- *diff.StackStateDiff
-	statuses chan<- *latest.Stack
+	diffs                chan<- *diff.StackStateDiff
+	statuses             chan<- *latest.Stack
+	deleteChildResources chan<- struct{}
 }
 
 func (p *testResourceUpdaterProvider) getUpdater(stack *latest.Stack, _ bool) (resourceUpdater, error) {
 	return &testResourceUpdater{
-		diffs:    p.diffs,
-		statuses: p.statuses,
-		stack:    stack,
+		diffs:                p.diffs,
+		statuses:             p.statuses,
+		stack:                stack,
+		deleteChildResources: p.deleteChildResources,
 	}, nil
 }
 
-func newTestResourceUpdaterProvider(diffs chan<- *diff.StackStateDiff, statuses chan<- *latest.Stack) *testResourceUpdaterProvider {
-	return &testResourceUpdaterProvider{diffs: diffs, statuses: statuses}
+func newTestResourceUpdaterProvider(diffs chan<- *diff.StackStateDiff,
+	statuses chan<- *latest.Stack,
+	deleteChildResources chan<- struct{}) *testResourceUpdaterProvider {
+	return &testResourceUpdaterProvider{diffs: diffs, statuses: statuses, deleteChildResources: deleteChildResources}
 }
 
 type testResourceUpdater struct {
-	diffs    chan<- *diff.StackStateDiff
-	statuses chan<- *latest.Stack
-	stack    *latest.Stack
+	diffs                chan<- *diff.StackStateDiff
+	statuses             chan<- *latest.Stack
+	deleteChildResources chan<- struct{}
+	stack                *latest.Stack
 }
 
 func (u *testResourceUpdater) applyStackDiff(diff *diff.StackStateDiff) error {
@@ -82,62 +88,81 @@ func (u *testResourceUpdater) updateStackStatus(status latest.StackStatus) (*lat
 }
 
 func (u *testResourceUpdater) deleteSecretsAndConfigMaps() error {
+	u.deleteChildResources <- struct{}{}
 	return nil
 }
 
+type reconciliationTestCaseResult struct {
+	diffs                  []*diff.StackStateDiff
+	statuses               []*latest.Stack
+	childResourceDeletions int
+}
+
 func runReconcilierTestCase(originalStack *latest.Stack, defaultServiceType coretypes.ServiceType, operation func(*StackReconciler),
-	originalState ...interface{}) ([]*diff.StackStateDiff, []*latest.Stack, error) {
+	originalState ...interface{}) (reconciliationTestCaseResult, error) {
 	cache := &dummyOwnerCache{
 		data: make(map[string]stackOwnerCacheEntry),
 	}
 	childrenStore, err := newTestChildrenStore(originalState...)
 	if err != nil {
-		return nil, nil, err
+		return reconciliationTestCaseResult{}, err
 	}
 	stackStore := newTestStackStore(originalStack)
 	chDiffs := make(chan *diff.StackStateDiff)
 	chStatusUpdates := make(chan *latest.Stack)
-	var wg sync.WaitGroup
-	wg.Add(2)
-	var producedDiffs []*diff.StackStateDiff
+	chChildrenDeletions := make(chan struct{})
+	var (
+		wg                        sync.WaitGroup
+		producedDiffs             []*diff.StackStateDiff
+		producedStatusUpdates     []*latest.Stack
+		childrenResourceDeletions int
+	)
+	wg.Add(3)
 	go func() {
 		defer wg.Done()
 		for d := range chDiffs {
 			producedDiffs = append(producedDiffs, d)
 		}
 	}()
-	var producedStatusUpdates []*latest.Stack
 	go func() {
 		defer wg.Done()
 		for s := range chStatusUpdates {
 			producedStatusUpdates = append(producedStatusUpdates, s)
 		}
 	}()
-	resourceUpdater := newTestResourceUpdaterProvider(chDiffs, chStatusUpdates)
+	go func() {
+		defer wg.Done()
+		for range chChildrenDeletions {
+			childrenResourceDeletions++
+		}
+	}()
+	resourceUpdater := newTestResourceUpdaterProvider(chDiffs, chStatusUpdates, chChildrenDeletions)
 	testee, err := NewStackReconciler(stackStore, childrenStore, defaultServiceType, resourceUpdater, cache)
 	if err != nil {
 		close(chDiffs)
 		close(chStatusUpdates)
-		return nil, nil, err
+		close(chChildrenDeletions)
+		return reconciliationTestCaseResult{}, err
 	}
 
 	operation(testee)
 
 	close(chDiffs)
 	close(chStatusUpdates)
+	close(chChildrenDeletions)
 	wg.Wait()
-	return producedDiffs, producedStatusUpdates, nil
+	return reconciliationTestCaseResult{childResourceDeletions: childrenResourceDeletions, diffs: producedDiffs, statuses: producedStatusUpdates}, nil
 }
 
 func runReconciliationTestCase(originalStack *latest.Stack, defaultServiceType coretypes.ServiceType,
-	originalState ...interface{}) (producedDiffs []*diff.StackStateDiff, producedStatusUpdates []*latest.Stack, err error) {
+	originalState ...interface{}) (reconciliationTestCaseResult, error) {
 	return runReconcilierTestCase(originalStack, defaultServiceType, func(testee *StackReconciler) {
 		testee.reconcileStack(stackresources.ObjKey(originalStack.Namespace, originalStack.Name))
 	}, originalState...)
 }
 
 func runRemoveStackTestCase(originalStack *latest.Stack, defaultServiceType coretypes.ServiceType,
-	originalState ...interface{}) (producedDiffs []*diff.StackStateDiff, producedStatusUpdates []*latest.Stack, err error) {
+	originalState ...interface{}) (reconciliationTestCaseResult, error) {
 	return runReconcilierTestCase(originalStack, defaultServiceType, func(testee *StackReconciler) {
 		testee.deleteStackChildren(originalStack)
 	}, originalState...)
@@ -149,22 +174,22 @@ func TestRemoveChildren(t *testing.T) {
 	dep := Deployment(originalStack, "dep")
 	daemon := Daemonset(originalStack, "daemon")
 	stateful := Statefulset(originalStack, "stateful")
-	diffs, statuses, err := runRemoveStackTestCase(originalStack, coretypes.ServiceTypeLoadBalancer, svc, dep, daemon, stateful)
+	result, err := runRemoveStackTestCase(originalStack, coretypes.ServiceTypeLoadBalancer, svc, dep, daemon, stateful)
 	assert.NoError(t, err)
-	assert.Equal(t, 0, len(statuses))
-	assert.Equal(t, 1, len(diffs))
-	assert.Equal(t, 0, len(diffs[0].DaemonsetsToAdd))
-	assert.Equal(t, 0, len(diffs[0].DaemonsetsToUpdate))
-	assert.Equal(t, 0, len(diffs[0].DeploymentsToAdd))
-	assert.Equal(t, 0, len(diffs[0].DeploymentsToUpdate))
-	assert.Equal(t, 0, len(diffs[0].ServicesToAdd))
-	assert.Equal(t, 0, len(diffs[0].ServicesToUpdate))
-	assert.Equal(t, 0, len(diffs[0].StatefulsetsToAdd))
-	assert.Equal(t, 0, len(diffs[0].StatefulsetsToUpdate))
-	assert.Equal(t, 1, len(diffs[0].DaemonsetsToDelete))
-	assert.Equal(t, 1, len(diffs[0].DeploymentsToDelete))
-	assert.Equal(t, 1, len(diffs[0].ServicesToDelete))
-	assert.Equal(t, 1, len(diffs[0].StatefulsetsToDelete))
+	assert.Equal(t, 0, len(result.statuses))
+	assert.Equal(t, 1, len(result.diffs))
+	assert.Equal(t, 0, len(result.diffs[0].DaemonsetsToAdd))
+	assert.Equal(t, 0, len(result.diffs[0].DaemonsetsToUpdate))
+	assert.Equal(t, 0, len(result.diffs[0].DeploymentsToAdd))
+	assert.Equal(t, 0, len(result.diffs[0].DeploymentsToUpdate))
+	assert.Equal(t, 0, len(result.diffs[0].ServicesToAdd))
+	assert.Equal(t, 0, len(result.diffs[0].ServicesToUpdate))
+	assert.Equal(t, 0, len(result.diffs[0].StatefulsetsToAdd))
+	assert.Equal(t, 0, len(result.diffs[0].StatefulsetsToUpdate))
+	assert.Equal(t, 1, len(result.diffs[0].DaemonsetsToDelete))
+	assert.Equal(t, 1, len(result.diffs[0].DeploymentsToDelete))
+	assert.Equal(t, 1, len(result.diffs[0].ServicesToDelete))
+	assert.Equal(t, 1, len(result.diffs[0].StatefulsetsToDelete))
 }
 
 func TestCreate(t *testing.T) {
@@ -181,30 +206,30 @@ func TestCreate(t *testing.T) {
 			WithVolume(Volume, Source("volumename"), Target("/data")),
 		),
 	)
-	diffs, statuses, err := runReconciliationTestCase(originalStack, coretypes.ServiceTypeLoadBalancer)
+	result, err := runReconciliationTestCase(originalStack, coretypes.ServiceTypeLoadBalancer)
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(statuses))
-	assert.Equal(t, statusProgressing(), *statuses[0].Status)
-	assert.Equal(t, 1, len(diffs))
-	assert.Equal(t, 1, len(diffs[0].DaemonsetsToAdd))
-	assert.Equal(t, 0, len(diffs[0].DaemonsetsToUpdate))
-	assert.Equal(t, 0, len(diffs[0].DaemonsetsToDelete))
-	assert.Equal(t, 1, len(diffs[0].DeploymentsToAdd))
-	assert.Equal(t, 0, len(diffs[0].DeploymentsToUpdate))
-	assert.Equal(t, 0, len(diffs[0].DeploymentsToDelete))
-	assert.Equal(t, 3, len(diffs[0].ServicesToAdd))
-	assert.Equal(t, 0, len(diffs[0].ServicesToUpdate))
-	assert.Equal(t, 0, len(diffs[0].ServicesToDelete))
-	assert.Equal(t, 1, len(diffs[0].StatefulsetsToAdd))
-	assert.Equal(t, 0, len(diffs[0].StatefulsetsToUpdate))
-	assert.Equal(t, 0, len(diffs[0].StatefulsetsToDelete))
+	assert.Equal(t, 1, len(result.statuses))
+	assert.Equal(t, statusProgressing(), *result.statuses[0].Status)
+	assert.Equal(t, 1, len(result.diffs))
+	assert.Equal(t, 1, len(result.diffs[0].DaemonsetsToAdd))
+	assert.Equal(t, 0, len(result.diffs[0].DaemonsetsToUpdate))
+	assert.Equal(t, 0, len(result.diffs[0].DaemonsetsToDelete))
+	assert.Equal(t, 1, len(result.diffs[0].DeploymentsToAdd))
+	assert.Equal(t, 0, len(result.diffs[0].DeploymentsToUpdate))
+	assert.Equal(t, 0, len(result.diffs[0].DeploymentsToDelete))
+	assert.Equal(t, 3, len(result.diffs[0].ServicesToAdd))
+	assert.Equal(t, 0, len(result.diffs[0].ServicesToUpdate))
+	assert.Equal(t, 0, len(result.diffs[0].ServicesToDelete))
+	assert.Equal(t, 1, len(result.diffs[0].StatefulsetsToAdd))
+	assert.Equal(t, 0, len(result.diffs[0].StatefulsetsToUpdate))
+	assert.Equal(t, 0, len(result.diffs[0].StatefulsetsToDelete))
 
-	daemon := &diffs[0].DaemonsetsToAdd[0]
-	deployment := &diffs[0].DeploymentsToAdd[0]
-	svc0 := &diffs[0].ServicesToAdd[0]
-	svc1 := &diffs[0].ServicesToAdd[1]
-	svc2 := &diffs[0].ServicesToAdd[2]
-	statefulset := &diffs[0].StatefulsetsToAdd[0]
+	daemon := &result.diffs[0].DaemonsetsToAdd[0]
+	deployment := &result.diffs[0].DeploymentsToAdd[0]
+	svc0 := &result.diffs[0].ServicesToAdd[0]
+	svc1 := &result.diffs[0].ServicesToAdd[1]
+	svc2 := &result.diffs[0].ServicesToAdd[2]
+	statefulset := &result.diffs[0].StatefulsetsToAdd[0]
 
 	// ensure owner refs populated
 	assert.Equal(t, 1, len(daemon.OwnerReferences))
@@ -214,10 +239,10 @@ func TestCreate(t *testing.T) {
 	assert.Equal(t, 1, len(svc2.OwnerReferences))
 	assert.Equal(t, 1, len(statefulset.OwnerReferences))
 
-	stack := statuses[0]
+	stack := result.statuses[0]
 
 	// make sure re-reconcile does nothing
-	diffs, statuses, err = runReconciliationTestCase(stack, coretypes.ServiceTypeLoadBalancer,
+	result, err = runReconciliationTestCase(stack, coretypes.ServiceTypeLoadBalancer,
 		daemon,
 		deployment,
 		svc0,
@@ -226,15 +251,15 @@ func TestCreate(t *testing.T) {
 		statefulset)
 
 	assert.NoError(t, err)
-	assert.Equal(t, 0, len(statuses))
-	assert.Equal(t, 1, len(diffs))
-	assert.True(t, diffs[0].Empty())
+	assert.Equal(t, 0, len(result.statuses))
+	assert.Equal(t, 1, len(result.diffs))
+	assert.True(t, result.diffs[0].Empty())
 
 	// update resources status, to simulate readyness
 	daemon.Status.NumberUnavailable = 0
 	deployment.Status.ReadyReplicas = 1
 	statefulset.Status.ReadyReplicas = 1
-	diffs, statuses, err = runReconciliationTestCase(stack, coretypes.ServiceTypeLoadBalancer,
+	result, err = runReconciliationTestCase(stack, coretypes.ServiceTypeLoadBalancer,
 		daemon,
 		deployment,
 		svc0,
@@ -243,10 +268,34 @@ func TestCreate(t *testing.T) {
 		statefulset)
 
 	assert.NoError(t, err)
-	assert.Equal(t, 1, len(statuses))
-	assert.Equal(t, statusAvailable(), *statuses[0].Status)
-	assert.Equal(t, 1, len(diffs))
-	assert.True(t, diffs[0].Empty())
+	assert.Equal(t, 1, len(result.statuses))
+	assert.Equal(t, statusAvailable(), *result.statuses[0].Status)
+	assert.Equal(t, 1, len(result.diffs))
+	assert.True(t, result.diffs[0].Empty())
+}
+
+func TestPendingDeletionStack(t *testing.T) {
+	originalStack := Stack("test",
+		WithNamespace("test"),
+		WithService("dep",
+			Image("nginx")),
+		WithService("daemon",
+			Image("nginx"),
+			Deploy(ModeGlobal),
+		),
+		WithService("stateful",
+			Image("nginx"),
+			WithVolume(Volume, Source("volumename"), Target("/data")),
+		),
+	)
+	deleteTS := metav1.Now()
+	originalStack.DeletionTimestamp = &deleteTS
+	result, err := runReconciliationTestCase(originalStack, coretypes.ServiceTypeLoadBalancer)
+	assert.NoError(t, err)
+	assert.Equal(t, 0, len(result.statuses))
+	assert.Equal(t, 1, len(result.diffs))
+	assert.True(t, result.diffs[0].Empty())
+	assert.Equal(t, 1, result.childResourceDeletions)
 }
 
 func TestReplayLogs(t *testing.T) {
@@ -286,13 +335,13 @@ func TestReplayLogs(t *testing.T) {
 			assert.NoError(t, err)
 			var tc TestCase
 			assert.NoError(t, json.Unmarshal(data, &tc))
-			diffs, statuses, err := runReconciliationTestCase(tc.Stack, c.defaultServicetype, tc.Children.FlattenResources()...)
+			result, err := runReconciliationTestCase(tc.Stack, c.defaultServicetype, tc.Children.FlattenResources()...)
 			assert.NoError(t, err)
-			assert.Equal(t, 0, len(statuses))
-			assert.Equal(t, 1, len(diffs))
-			assert.True(t, diffs[0].Empty())
-			if !diffs[0].Empty() {
-				for _, res := range diffs[0].DaemonsetsToUpdate {
+			assert.Equal(t, 0, len(result.statuses))
+			assert.Equal(t, 1, len(result.diffs))
+			assert.True(t, result.diffs[0].Empty())
+			if !result.diffs[0].Empty() {
+				for _, res := range result.diffs[0].DaemonsetsToUpdate {
 					fmt.Printf("daemonset %v changed:\n", res.Name)
 					fmt.Println("current:")
 					current := tc.Children.Daemonsets[stackresources.ObjKey(res.Namespace, res.Name)]
@@ -302,7 +351,7 @@ func TestReplayLogs(t *testing.T) {
 					data, _ = json.MarshalIndent(&res.Spec, "", "  ")
 					fmt.Println(string(data))
 				}
-				for _, res := range diffs[0].DeploymentsToUpdate {
+				for _, res := range result.diffs[0].DeploymentsToUpdate {
 					fmt.Printf("deployment %v changed:\n", res.Name)
 					fmt.Println("current:")
 					current := tc.Children.Deployments[stackresources.ObjKey(res.Namespace, res.Name)]
@@ -312,7 +361,7 @@ func TestReplayLogs(t *testing.T) {
 					data, _ = json.MarshalIndent(&res.Spec, "", "  ")
 					fmt.Println(string(data))
 				}
-				for _, res := range diffs[0].StatefulsetsToUpdate {
+				for _, res := range result.diffs[0].StatefulsetsToUpdate {
 					fmt.Printf("statefulset %v changed:\n", res.Name)
 					fmt.Println("current:")
 					current := tc.Children.Statefulsets[stackresources.ObjKey(res.Namespace, res.Name)]
@@ -322,7 +371,7 @@ func TestReplayLogs(t *testing.T) {
 					data, _ = json.MarshalIndent(&res.Spec, "", "  ")
 					fmt.Println(string(data))
 				}
-				for _, res := range diffs[0].ServicesToUpdate {
+				for _, res := range result.diffs[0].ServicesToUpdate {
 					fmt.Printf("service %v changed:\n", res.Name)
 					fmt.Println("current:")
 					current := tc.Children.Services[stackresources.ObjKey(res.Namespace, res.Name)]

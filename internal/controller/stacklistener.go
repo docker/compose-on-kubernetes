@@ -4,10 +4,11 @@ import (
 	"time"
 
 	"github.com/docker/compose-on-kubernetes/api/client/clientset"
-	"github.com/docker/compose-on-kubernetes/api/client/informers"
+	"github.com/docker/compose-on-kubernetes/api/client/informers/compose/v1alpha3"
 	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"
 )
 
@@ -87,8 +88,9 @@ func NewStackListener(clientSet clientset.Interface,
 	reconcileQueue chan<- string,
 	reconcileDeletionQueue chan<- *latest.Stack,
 	ownerCache StackOwnerCacher) *StackListener {
-	informersFactory := informers.NewSharedInformerFactory(clientSet, reconciliationInterval)
-	stacksInformer := informersFactory.Compose().V1alpha3().Stacks().Informer()
+	stacksInformer := v1alpha3.NewFilteredStackInformer(clientSet, reconciliationInterval, func(o *metav1.ListOptions) {
+		o.IncludeUninitialized = true
+	})
 	result := &StackListener{
 		stacks:                 stacksInformer,
 		reconcileQueue:         reconcileQueue,
