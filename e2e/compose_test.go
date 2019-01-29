@@ -1063,6 +1063,17 @@ configs:
 		expectNoError(err)
 		waitUntil(ns.IsStackAvailable(s.Name))
 	})
+	It("Should delete stacks with propagation=Foreground", func() {
+		_, err := ns.CreateStack(cluster.StackOperationV1alpha3, "app", `version: '3.2'
+services:
+  front:
+    image: nginx:1.12.1-alpine`)
+		Expect(err).NotTo(HaveOccurred())
+		waitUntil(ns.IsStackAvailable("app"))
+		err = ns.DeleteStackWithPropagation("app", metav1.DeletePropagationForeground)
+		Expect(err).NotTo(HaveOccurred())
+		waitUntil(ns.ContainsZeroStack())
+	})
 
 })
 
