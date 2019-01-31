@@ -10,7 +10,7 @@
 ## Create compose namespace
 
 - Confirm that MicroK8s is working with `microk8s.inspect`.
-- Create a compose namespace by running `kubectl create namespace compose`.
+- Create a compose namespace by running `microk8s.kubectl create namespace compose`.
 
 ## Populate Kubernetes Config
 
