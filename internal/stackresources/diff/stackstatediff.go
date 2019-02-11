@@ -108,6 +108,16 @@ func normalizeEqualService(current, desired *coretypes.Service) bool {
 	return reflect.DeepEqual(current.Spec, desired.Spec) && reflect.DeepEqual(current.Labels, desired.Labels)
 }
 
+func serviceRequiresReCreate(current, desired *coretypes.Service) bool {
+	if current.Spec.Type != coretypes.ServiceTypeExternalName &&
+		desired.Spec.Type != coretypes.ServiceTypeExternalName &&
+		current.Spec.ClusterIP != "" {
+		// once a cluster IP is assigned to a service, it cannot be changed (except if changing type from/to external name)
+		return current.Spec.ClusterIP != desired.Spec.ClusterIP
+	}
+	return false
+}
+
 func computeDeploymentsDiff(current, desired *stackresources.StackState, result *StackStateDiff) {
 	for k, desiredVersion := range desired.Deployments {
 		if currentVersion, ok := current.Deployments[k]; ok {
@@ -166,8 +176,13 @@ func computeServicesDiff(current, desired *stackresources.StackState, result *St
 	for k, desiredVersion := range desired.Services {
 		if currentVersion, ok := current.Services[k]; ok {
 			if !normalizeEqualService(&currentVersion, &desiredVersion) {
-				desiredVersion.ResourceVersion = currentVersion.ResourceVersion
-				result.ServicesToUpdate = append(result.ServicesToUpdate, desiredVersion)
+				if serviceRequiresReCreate(&currentVersion, &desiredVersion) {
+					result.ServicesToDelete = append(result.ServicesToDelete, currentVersion)
+					result.ServicesToAdd = append(result.ServicesToAdd, desiredVersion)
+				} else {
+					desiredVersion.ResourceVersion = currentVersion.ResourceVersion
+					result.ServicesToUpdate = append(result.ServicesToUpdate, desiredVersion)
+				}
 			}
 		} else {
 			result.ServicesToAdd = append(result.ServicesToAdd, desiredVersion)
