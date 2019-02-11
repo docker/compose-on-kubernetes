@@ -54,6 +54,11 @@ type k8sResourceUpdater struct {
 }
 
 func (u *k8sResourceUpdater) applyDaemonsets(toAdd, toUpdate, toDelete []appstypes.DaemonSet) error {
+	for _, r := range toDelete {
+		if err := u.k8sclient.AppsV1beta2().DaemonSets(u.originalStack.Namespace).Delete(r.Name, &deleteOptions); err != nil && !kerrors.IsNotFound(err) {
+			return errors.Wrapf(err, "k8sResourceUpdater: error while deleting daemonset %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
+		}
+	}
 	for _, r := range toAdd {
 		if _, err := u.k8sclient.AppsV1beta2().DaemonSets(u.originalStack.Namespace).Create(&r); err != nil {
 			return errors.Wrapf(err, "k8sResourceUpdater: error while creating daemonset %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
@@ -64,15 +69,15 @@ func (u *k8sResourceUpdater) applyDaemonsets(toAdd, toUpdate, toDelete []appstyp
 			return errors.Wrapf(err, "k8sResourceUpdater: error while patching daemonset %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
 		}
 	}
-	for _, r := range toDelete {
-		if err := u.k8sclient.AppsV1beta2().DaemonSets(u.originalStack.Namespace).Delete(r.Name, &deleteOptions); err != nil && !kerrors.IsNotFound(err) {
-			return errors.Wrapf(err, "k8sResourceUpdater: error while deleting daemonset %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
-		}
-	}
 	return nil
 }
 
 func (u *k8sResourceUpdater) applyDeployments(toAdd, toUpdate, toDelete []appstypes.Deployment) error {
+	for _, r := range toDelete {
+		if err := u.k8sclient.AppsV1beta2().Deployments(u.originalStack.Namespace).Delete(r.Name, &deleteOptions); err != nil && !kerrors.IsNotFound(err) {
+			return errors.Wrapf(err, "k8sResourceUpdater: error while deleting deployment %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
+		}
+	}
 	for _, r := range toAdd {
 		if _, err := u.k8sclient.AppsV1beta2().Deployments(u.originalStack.Namespace).Create(&r); err != nil {
 			return errors.Wrapf(err, "k8sResourceUpdater: error while creating deployment %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
@@ -83,15 +88,15 @@ func (u *k8sResourceUpdater) applyDeployments(toAdd, toUpdate, toDelete []appsty
 			return errors.Wrapf(err, "k8sResourceUpdater: error while patching deployment %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
 		}
 	}
-	for _, r := range toDelete {
-		if err := u.k8sclient.AppsV1beta2().Deployments(u.originalStack.Namespace).Delete(r.Name, &deleteOptions); err != nil && !kerrors.IsNotFound(err) {
-			return errors.Wrapf(err, "k8sResourceUpdater: error while deleting deployment %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
-		}
-	}
 	return nil
 }
 
 func (u *k8sResourceUpdater) applyStatefulsets(toAdd, toUpdate, toDelete []appstypes.StatefulSet) error {
+	for _, r := range toDelete {
+		if err := u.k8sclient.AppsV1beta2().StatefulSets(u.originalStack.Namespace).Delete(r.Name, &deleteOptions); err != nil && !kerrors.IsNotFound(err) {
+			return errors.Wrapf(err, "k8sResourceUpdater: error while deleting statefulset %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
+		}
+	}
 	for _, r := range toAdd {
 		if _, err := u.k8sclient.AppsV1beta2().StatefulSets(u.originalStack.Namespace).Create(&r); err != nil {
 			return errors.Wrapf(err, "k8sResourceUpdater: error while creating statefulset %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
@@ -102,15 +107,15 @@ func (u *k8sResourceUpdater) applyStatefulsets(toAdd, toUpdate, toDelete []appst
 			return errors.Wrapf(err, "k8sResourceUpdater: error while patching statefulset %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
 		}
 	}
-	for _, r := range toDelete {
-		if err := u.k8sclient.AppsV1beta2().StatefulSets(u.originalStack.Namespace).Delete(r.Name, &deleteOptions); err != nil && !kerrors.IsNotFound(err) {
-			return errors.Wrapf(err, "k8sResourceUpdater: error while deleting statefulset %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
-		}
-	}
 	return nil
 }
 
 func (u *k8sResourceUpdater) applyServices(toAdd, toUpdate, toDelete []coretypes.Service) error {
+	for _, r := range toDelete {
+		if err := u.k8sclient.CoreV1().Services(u.originalStack.Namespace).Delete(r.Name, &deleteOptions); err != nil && !kerrors.IsNotFound(err) {
+			return errors.Wrapf(err, "k8sResourceUpdater: error while deleting service %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
+		}
+	}
 	for _, r := range toAdd {
 		if _, err := u.k8sclient.CoreV1().Services(u.originalStack.Namespace).Create(&r); err != nil {
 			return errors.Wrapf(err, "k8sResourceUpdater: error while creating service %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
@@ -119,11 +124,6 @@ func (u *k8sResourceUpdater) applyServices(toAdd, toUpdate, toDelete []coretypes
 	for _, r := range toUpdate {
 		if _, err := u.k8sclient.CoreV1().Services(u.originalStack.Namespace).Update(&r); err != nil {
 			return errors.Wrapf(err, "k8sResourceUpdater: error while patching service %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
-		}
-	}
-	for _, r := range toDelete {
-		if err := u.k8sclient.CoreV1().Services(u.originalStack.Namespace).Delete(r.Name, &deleteOptions); err != nil && !kerrors.IsNotFound(err) {
-			return errors.Wrapf(err, "k8sResourceUpdater: error while deleting service %s in stack %s", r.Name, stackresources.ObjKey(u.originalStack.Namespace, u.originalStack.Name))
 		}
 	}
 	return nil
