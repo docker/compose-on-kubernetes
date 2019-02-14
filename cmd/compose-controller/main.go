@@ -26,11 +26,11 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apiserver/pkg/server/healthz"
 	k8sclientset "k8s.io/client-go/kubernetes"
+	"k8s.io/client-go/rest"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
 const (
-
 	// reconcileQueueLength is the size of the buffer for reconciliation deduplication (it means that up to 200 stacks can be updated
 	// concurrently before getting unnecessary duplicated events)
 	reconcileQueueLength = 200
@@ -45,6 +45,7 @@ type controllerOptions struct {
 	reconciliationInterval cliopts.PositiveDurationOpt
 	logLevel               string
 	defaultServiceType     string
+	healthzCheckPort       int
 }
 
 func defaultOptions() controllerOptions {
@@ -63,6 +64,7 @@ func main() {
 	flag.Var(&opts.reconciliationInterval, "reconciliation-interval", "Reconciliation interval of the stack controller (default: 12h)")
 	flag.StringVar(&opts.logLevel, "log-level", "info", `Set the logging level ("debug"|"info"|"warn"|"error"|"fatal")`)
 	flag.StringVar(&opts.defaultServiceType, "default-service-type", "LoadBalancer", `Specify the default service type for published ports ("LoadBalancer"|"NodePort")`)
+	flag.IntVar(&opts.healthzCheckPort, "healthz-check-port", 8080, "defines the port used by healthz check server (0 to disable it)")
 
 	flag.Parse()
 
@@ -88,14 +90,7 @@ func start(opts *controllerOptions) error {
 
 	// Chances are we were started at the same time as the API server, so give
 	// it time to start
-	for i := 0; i < 60; i++ {
-		err = check.APIPresent(config)
-		if err == nil {
-			break
-		}
-		time.Sleep(1 * time.Second)
-	}
-	if err != nil {
+	if err := checkAPIPresent(config); err != nil {
 		return err
 	}
 
@@ -157,10 +152,23 @@ func start(opts *controllerOptions) error {
 	stackReconciler.Start(reconcileQueue.Out(), deletionQueue, stop)
 	log.Infof("Controller ready")
 
-	healthz.DefaultHealthz()
-	go http.ListenAndServe(":8080", nil)
+	if opts.healthzCheckPort > 0 {
+		healthz.DefaultHealthz()
+		go http.ListenAndServe(fmt.Sprintf(":%d", opts.healthzCheckPort), nil)
+	}
 	<-stop
 	return nil
+}
+
+func checkAPIPresent(config *rest.Config) error {
+	var err error
+	for i := 0; i < 60; i++ {
+		if err = check.APIPresent(config); err == nil {
+			return nil
+		}
+		time.Sleep(1 * time.Second)
+	}
+	return err
 }
 
 func initLogger(level string, out io.Writer) {
