@@ -16,7 +16,7 @@ type OptionsCommon struct {
 	DefaultServiceType     string
 	APIServerAffinity      *corev1types.Affinity
 	ControllerAffinity     *corev1types.Affinity
-	SkipLivenessProbes     bool
+	HealthzCheckPort       int
 	PullPolicy             corev1types.PullPolicy
 }
 
