@@ -38,6 +38,7 @@ type apiServerOptions struct {
 	serviceNamespace   string
 	serviceName        string
 	caBundleFile       string
+	healthzCheckPort   int
 }
 
 // NewCommandStartComposeServer provides a CLI handler for 'start master' command
@@ -66,6 +67,7 @@ func NewCommandStartComposeServer(stopCh <-chan struct{}) *cobra.Command {
 	flags.StringVar(&o.serviceNamespace, "service-namespace", "", "defines the namespace of the service exposing the aggregated API")
 	flags.StringVar(&o.serviceName, "service-name", "", "defines the name of the service exposing the aggregated API")
 	flags.StringVar(&o.caBundleFile, "ca-bundle-file", "", "defines the path to the CA bundle file")
+	flags.IntVar(&o.healthzCheckPort, "healthz-check-port", 8080, "defines the port used by healthz check server (0 to disable it)")
 	return cmd
 }
 
@@ -241,23 +243,27 @@ func runComposeServer(o *apiServerOptions, stopCh <-chan struct{}) error {
 	if err != nil {
 		return err
 	}
-	server.GenericAPIServer.AddPostStartHook("start-compose-server-healthz-endpoint", func(context genericapiserver.PostStartHookContext) error {
-		m := http.NewServeMux()
-		healthz.InstallHandler(m, server.GenericAPIServer.HealthzChecks()...)
-		srv := &http.Server{
-			Addr:    ":8080",
-			Handler: m,
+
+	if o.healthzCheckPort > 0 {
+		err = server.GenericAPIServer.AddPostStartHook("start-compose-server-healthz-endpoint", func(context genericapiserver.PostStartHookContext) error {
+			m := http.NewServeMux()
+			healthz.InstallHandler(m, server.GenericAPIServer.HealthzChecks()...)
+			srv := &http.Server{
+				Addr:    fmt.Sprintf(":%d", o.healthzCheckPort),
+				Handler: m,
+			}
+			go srv.ListenAndServe()
+			go func() {
+				<-context.StopCh
+				srv.Close()
+			}()
+			return nil
+		})
+		if err != nil {
+			return err
 		}
-		go func() {
-			srv.ListenAndServe()
-		}()
-		go func() {
-			<-context.StopCh
-			srv.Close()
-		}()
-		return nil
-	})
-	server.GenericAPIServer.AddPostStartHook("start-compose-server-informers", func(context genericapiserver.PostStartHookContext) error {
+	}
+	err = server.GenericAPIServer.AddPostStartHook("start-compose-server-informers", func(context genericapiserver.PostStartHookContext) error {
 		config.GenericConfig.SharedInformerFactory.Start(context.StopCh)
 		return registerAggregatedAPIs(
 			aggregatorClient.APIServices(),
@@ -267,6 +273,9 @@ func runComposeServer(o *apiServerOptions, stopCh <-chan struct{}) error {
 			v1beta1.SchemeGroupVersion.Version, v1beta2.SchemeGroupVersion.Version, v1alpha3.SchemeGroupVersion.Version,
 		)
 	})
+	if err != nil {
+		return err
+	}
 
 	return server.GenericAPIServer.PrepareRun().Run(stopCh)
 }

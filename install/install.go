@@ -6,6 +6,7 @@ import (
 	"errors"
 	"fmt"
 	"os"
+	"strconv"
 	"time"
 
 	kubeapiclientset "github.com/docker/compose-on-kubernetes/api/client/clientset"
@@ -609,32 +610,29 @@ func applyCustomTLSHash(hash string, deploy *appsv1beta2types.Deployment) {
 	deploy.Spec.Template.Annotations[customTLSHashAnnotationName] = hash
 }
 
-func (c *installer) configureAPIServerImage() (image string, args []string, env []corev1types.EnvVar, pullPolicy corev1types.PullPolicy) {
+func (c *installer) configureAPIServerImage() (string, []string, []corev1types.EnvVar, corev1types.PullPolicy) {
 	if c.enableCoverage {
 		return imagePrefix + "api-server-coverage" + ":" + c.commonOptions.Tag,
 			[]string{},
 			[]corev1types.EnvVar{{Name: "TEST_API_SERVER", Value: "1"}},
 			corev1types.PullNever
 	}
+	args := []string{
+		"--kubeconfig", "",
+		"--authentication-kubeconfig=",
+		"--authorization-kubeconfig=",
+		"--service-name=compose-api",
+		"--service-namespace", c.commonOptions.Namespace,
+		"--healthz-check-port", strconv.Itoa(c.commonOptions.HealthzCheckPort),
+	}
 	if c.debugImages {
-		return imagePrefix + "api-server-debug:latest", []string{
-				"--kubeconfig=",
-				"--authentication-kubeconfig=",
-				"--authorization-kubeconfig=",
-				"--service-name=compose-api",
-				"--service-namespace", c.commonOptions.Namespace,
-			},
+		return imagePrefix + "api-server-debug:latest",
+			args,
 			[]corev1types.EnvVar{},
 			corev1types.PullNever
 	}
 	return imagePrefix + "api-server" + ":" + c.commonOptions.Tag,
-		[]string{
-			"--kubeconfig", "",
-			"--authentication-kubeconfig=",
-			"--authorization-kubeconfig=",
-			"--service-name=compose-api",
-			"--service-namespace", c.commonOptions.Namespace,
-		},
+		args,
 		[]corev1types.EnvVar{},
 		c.commonOptions.PullPolicy
 }
@@ -681,7 +679,7 @@ func (c *installer) createAPIServer(ctx *installerContext) error {
 								Handler: corev1types.Handler{
 									HTTPGet: &corev1types.HTTPGetAction{
 										Path:   "/healthz",
-										Port:   intstr.FromInt(8080),
+										Port:   intstr.FromInt(c.commonOptions.HealthzCheckPort),
 										Scheme: corev1types.URISchemeHTTP,
 									},
 								},
@@ -696,7 +694,7 @@ func (c *installer) createAPIServer(ctx *installerContext) error {
 			},
 		},
 	}
-	if c.commonOptions.SkipLivenessProbes {
+	if c.commonOptions.HealthzCheckPort == 0 {
 		deploy.Spec.Template.Spec.Containers[0].LivenessProbe = nil
 	}
 
@@ -788,20 +786,19 @@ func pullSecrets(secret *corev1types.Secret) []corev1types.LocalObjectReference 
 	return []corev1types.LocalObjectReference{{Name: secret.Name}}
 }
 
-func (c *installer) configureControllerImage() (image string, args []string, pullPolicy v1.PullPolicy) {
+func (c *installer) configureControllerImage() (string, []string, v1.PullPolicy) {
 	if c.enableCoverage {
 		return imagePrefix + "controller-coverage" + ":" + c.commonOptions.Tag, []string{}, corev1types.PullNever
 	}
-	if c.debugImages {
-		return imagePrefix + "controller-debug:latest", []string{
-			"--kubeconfig=",
-			"--reconciliation-interval", c.commonOptions.ReconciliationInterval.String(),
-		}, corev1types.PullNever
-	}
-	return imagePrefix + "controller:" + c.commonOptions.Tag, []string{
+	args := []string{
 		"--kubeconfig", "",
 		"--reconciliation-interval", c.commonOptions.ReconciliationInterval.String(),
-	}, c.commonOptions.PullPolicy
+		"--healthz-check-port", strconv.Itoa(c.commonOptions.HealthzCheckPort),
+	}
+	if c.debugImages {
+		return imagePrefix + "controller-debug:latest", args, corev1types.PullNever
+	}
+	return imagePrefix + "controller:" + c.commonOptions.Tag, args, c.commonOptions.PullPolicy
 }
 
 func (c *installer) createController(ctx *installerContext) error {
@@ -849,7 +846,7 @@ func (c *installer) createController(ctx *installerContext) error {
 									HTTPGet: &corev1types.HTTPGetAction{
 										Path:   "/healthz",
 										Scheme: corev1types.URISchemeHTTP,
-										Port:   intstr.FromInt(8080),
+										Port:   intstr.FromInt(c.commonOptions.HealthzCheckPort),
 									},
 								},
 								InitialDelaySeconds: 15,
@@ -867,7 +864,7 @@ func (c *installer) createController(ctx *installerContext) error {
 		deploy.Spec.Template.Spec.Containers[0].Env = []corev1types.EnvVar{{Name: "TEST_COMPOSE_CONTROLLER", Value: "1"}}
 	}
 
-	if c.commonOptions.SkipLivenessProbes {
+	if c.commonOptions.HealthzCheckPort == 0 {
 		deploy.Spec.Template.Spec.Containers[0].LivenessProbe = nil
 	}
 

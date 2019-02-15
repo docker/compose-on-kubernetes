@@ -79,6 +79,9 @@ func parseOptions() (installerConfig, error) {
 	if err != nil {
 		return installerConfig{}, err
 	}
+	if flags.skipLivenessProbes {
+		options.HealthzCheckPort = 0
+	}
 	return installerConfig{
 		options:    options,
 		restConfig: config,
@@ -96,12 +99,13 @@ func parsePullPolicy(pullPolicy string) (corev1types.PullPolicy, error) {
 }
 
 type additionalFlags struct {
-	etcdBundle certBundleSource
-	tlsBundle  certBundleSource
-	logLevel   string
-	pullPolicy string
-	kubeconfig string
-	uninstall  bool
+	etcdBundle         certBundleSource
+	tlsBundle          certBundleSource
+	logLevel           string
+	pullPolicy         string
+	kubeconfig         string
+	uninstall          bool
+	skipLivenessProbes bool
 }
 
 func parseFlags(customFlags *additionalFlags, options *install.SafeOptions) {
@@ -112,7 +116,8 @@ func parseFlags(customFlags *additionalFlags, options *install.SafeOptions) {
 	pullPolicyDescription := fmt.Sprintf("Image pull policy (%q|%q|%q)", corev1types.PullAlways, corev1types.PullNever, corev1types.PullIfNotPresent)
 	flag.StringVar(&customFlags.pullPolicy, "pull-policy", string(corev1types.PullAlways), pullPolicyDescription)
 	flag.StringVar(&options.Etcd.Servers, "etcd-servers", "", "etcd server addresses")
-	flag.BoolVar(&options.SkipLivenessProbes, "skip-liveness-probes", false, "Disable liveness probe on Controller and API server deployments. Use this when HTTPS liveness probe fails.")
+	flag.BoolVar(&customFlags.skipLivenessProbes, "skip-liveness-probes", false, "Disable liveness probe on Controller and API server deployments. Use this when HTTPS liveness probe fails.")
+	flag.IntVar(&options.HealthzCheckPort, "healthz-check-port", 8080, "Defines the port used by healthz check server for api-server and controller (0 to disable it)")
 
 	flag.StringVar(&customFlags.etcdBundle.ca, "etcd-ca-file", "", "CA of etcd TLS certificate")
 	flag.StringVar(&customFlags.etcdBundle.cert, "etcd-cert-file", "", "TLS client certificate for accessing etcd")

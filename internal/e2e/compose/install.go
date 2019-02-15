@@ -38,6 +38,7 @@ func Install(config *rest.Config, ns, tag, pullSecret string) (func(), error) {
 			Tag:                    tag,
 			PullSecret:             pullSecret,
 			ReconciliationInterval: constants.DefaultFullSyncInterval,
+			HealthzCheckPort:       8080,
 		},
 		Coverage: true,
 	})
