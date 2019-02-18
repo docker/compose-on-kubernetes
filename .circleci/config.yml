@@ -158,6 +158,7 @@ jobs:
           command: |
             KUBE_VERSION=1.10.11 ./scripts/e2e-cluster.sh delete
             KUBE_VERSION=1.11.5 ./scripts/e2e-cluster.sh delete
+            KUBE_VERSION=1.13.3 ./scripts/e2e-cluster.sh delete
           when: on_fail
       - persist_to_workspace:
           root: /root/
@@ -229,6 +230,12 @@ jobs:
     environment:
       - KUBE_VERSION: 1.11.5
     steps: *cluster-setup-steps
+  cluster-setup-1_13:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.13.3
+    steps: *cluster-setup-steps
   cluster-setup-benchmark:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -248,6 +255,12 @@ jobs:
     environment:
       - KUBE_VERSION: 1.11.5
     steps: *deploy-images-steps
+  deploy-images-1_13:
+    docker: *compose-ci-docker
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.13.3
+    steps: *deploy-images-steps
   deploy-images-benchmark:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -266,6 +279,12 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       - KUBE_VERSION: 1.11.5
+    steps: *test-e2e-steps
+  test-e2e-1_13:
+    docker: *compose-ci-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      - KUBE_VERSION: 1.13.3
     steps: *test-e2e-steps
   coverage-upload:
     docker: *public-golang
@@ -439,6 +458,14 @@ workflows:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
+      - cluster-setup-1_13:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - test-unit:
           requires:
             - checkout
@@ -505,6 +532,15 @@ workflows:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
+      - deploy-images-1_13:
+          requires:
+            - cluster-setup-1_13
+            - images
+          filters:
+            tags:
+              only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - test-e2e-1_10:
           requires:
             - deploy-images-1_10
@@ -521,11 +557,20 @@ workflows:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
+      - test-e2e-1_13:
+          requires:
+            - deploy-images-1_13
+          filters:
+            tags:
+              only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
       - coverage-upload:
           requires:
             - test-unit
             - test-e2e-1_10
             - test-e2e-1_11
+            - test-e2e-1_13
           filters:
             tags:
               only: /v.*/
@@ -556,11 +601,11 @@ workflows:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
-          
       - push-to-hub:
           requires:
             - test-e2e-1_10
             - test-e2e-1_11
+            - test-e2e-1_13
           filters:
             branches:
               only: master
@@ -570,6 +615,7 @@ workflows:
           requires:
             - test-e2e-1_10
             - test-e2e-1_11
+            - test-e2e-1_13
           filters:
             branches:
               only: master
