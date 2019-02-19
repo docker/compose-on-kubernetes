@@ -67,6 +67,34 @@ aliases:
           ./scripts/e2e-cluster.sh delete
         when: always
 
+  e2e-kind-steps: &e2e-kind-steps
+    - attach_workspace:
+        at: /root
+    - setup_remote_docker:
+        version: 18.06.0-ce
+    - run:
+        name: "Prepare Kind and run E2E tests"
+        command: |
+          git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
+          cd /root/src/sigs.k8s.io/kind
+          git reset --hard 302bb7dbb611236aeadd6d1741c9f237d1ec28d2
+          go install
+          cd -        
+          export PATH="$PATH:/root/bin"
+          export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
+          export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
+          export IMAGE_PREFIX=kube-compose-
+          export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
+          mkdir -p ./coverage-enabled-images
+          cp /root/kube-compose-api-server-coverage.tar /root/kube-compose-controller-coverage.tar ./coverage-enabled-images/
+          make -f docker.Makefile KUBERNETES_VERSION=${KUBERNETES_VERSION} TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
+          docker load -i /root/kube-compose-e2e-tests.tar
+          make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-kind-circleci
+    - persist_to_workspace:
+        root: /root/
+        paths:
+          - 'src/github.com/docker/compose-on-kubernetes/e2e-coverage/compose-*/coverage.txt'    
+
 jobs:
   checkout:
     docker: *compose-ci-docker
@@ -174,33 +202,21 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
-    steps:
-      - attach_workspace:
-          at: /root
-      - setup_remote_docker:
-          version: 18.06.0-ce
-      - run:
-          name: "Prepare Kind and run E2E tests"
-          command: |
-            git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
-            cd /root/src/sigs.k8s.io/kind
-            git reset --hard 302bb7dbb611236aeadd6d1741c9f237d1ec28d2
-            go install
-            cd -        
-            export PATH="$PATH:/root/bin"
-            export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
-            export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
-            export IMAGE_PREFIX=kube-compose-
-            export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
-            mkdir -p ./coverage-enabled-images
-            cp /root/kube-compose-api-server-coverage.tar /root/kube-compose-controller-coverage.tar ./coverage-enabled-images/
-            make -f docker.Makefile TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
-            docker load -i /root/kube-compose-e2e-tests.tar
-            make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-kind-circleci
-      - persist_to_workspace:
-          root: /root/
-          paths:
-            - 'src/github.com/docker/compose-on-kubernetes/e2e-coverage/compose-*/coverage.txt'
+    steps: *e2e-kind-steps
+  e2e-kind-1_11:
+    docker: *public-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
+      KUBERNETES_VERSION: "1.11.3"   # FIXME 1.11.7
+    steps: *e2e-kind-steps
+  e2e-kind-1_13:
+    docker: *public-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
+      KUBERNETES_VERSION: "1.13.3"
+    steps: *e2e-kind-steps
   test-unit:
     docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -218,24 +234,6 @@ jobs:
           root: /root/
           paths:
             - 'src/github.com/docker/compose-on-kubernetes/coverage.txt'
-  cluster-setup-1_10:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.10.11
-    steps: *cluster-setup-steps
-  cluster-setup-1_11:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.11.5
-    steps: *cluster-setup-steps
-  cluster-setup-1_13:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.13.3
-    steps: *cluster-setup-steps
   cluster-setup-benchmark:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -243,24 +241,6 @@ jobs:
       - KUBE_VERSION: 1.11.5
       - KUBE_ENV_NAME: benchmark
     steps: *cluster-setup-steps
-  deploy-images-1_10:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.10.11
-    steps: *deploy-images-steps
-  deploy-images-1_11:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.11.5
-    steps: *deploy-images-steps
-  deploy-images-1_13:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.13.3
-    steps: *deploy-images-steps
   deploy-images-benchmark:
     docker: *compose-ci-docker
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -268,24 +248,6 @@ jobs:
       - KUBE_VERSION: 1.11.5
       - KUBE_ENV_NAME: benchmark
     steps: *deploy-images-steps
-  test-e2e-1_10:
-    docker: *compose-ci-golang
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.10.11
-    steps: *test-e2e-steps
-  test-e2e-1_11:
-    docker: *compose-ci-golang
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.11.5
-    steps: *test-e2e-steps
-  test-e2e-1_13:
-    docker: *compose-ci-golang
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.13.3
-    steps: *test-e2e-steps
   coverage-upload:
     docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -360,7 +322,7 @@ jobs:
             ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${TAG} ./bin/
   run-benchmark:
     docker: *compose-ci-golang
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes    
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       - KUBE_VERSION: 1.11.5
       - KUBE_ENV_NAME: benchmark
@@ -442,31 +404,15 @@ workflows:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
-      - cluster-setup-1_10:
-          requires:
-            - checkout
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - cluster-setup-1_11:
-          requires:
-            - checkout
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - cluster-setup-1_13:
-          requires:
-            - checkout
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
       - test-unit:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
+      - images:
           requires:
             - checkout
           filters:
@@ -484,21 +430,13 @@ workflows:
               only: /^(?!pull\/).*$/
       - validate-vendor:
           requires:
-            - deploy-images-1_11
+            - checkout
           filters:
             tags:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
       - check-licenses:
-          requires:
-            - deploy-images-1_10
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - images:
           requires:
             - checkout
           filters:
@@ -514,52 +452,17 @@ workflows:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
-      - deploy-images-1_10:
+      - e2e-kind-1_11:
           requires:
-            - cluster-setup-1_10
             - images
           filters:
             tags:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
-      - deploy-images-1_11:
+      - e2e-kind-1_13:
           requires:
-            - cluster-setup-1_11
             - images
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - deploy-images-1_13:
-          requires:
-            - cluster-setup-1_13
-            - images
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - test-e2e-1_10:
-          requires:
-            - deploy-images-1_10
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - test-e2e-1_11:
-          requires:
-            - deploy-images-1_11
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - test-e2e-1_13:
-          requires:
-            - deploy-images-1_13
           filters:
             tags:
               only: /v.*/
@@ -568,44 +471,42 @@ workflows:
       - coverage-upload:
           requires:
             - test-unit
-            - test-e2e-1_10
-            - test-e2e-1_11
-            - test-e2e-1_13
+            - e2e-kind-1_11
+            - e2e-kind-1_13
           filters:
             tags:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
-      - cluster-setup-benchmark:
-          requires:
-            - checkout
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - deploy-images-benchmark:
-          requires:
-            - cluster-setup-benchmark
-            - images
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - run-benchmark:
-          requires:
-            - deploy-images-benchmark
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
+      # - cluster-setup-benchmark:
+      #     requires:
+      #       - checkout
+      #     filters:
+      #       tags:
+      #         only: /v.*/
+      #       branches:              
+      #         only: /^(?!pull\/).*$/
+      # - deploy-images-benchmark:
+      #     requires:
+      #       - cluster-setup-benchmark
+      #       - images
+      #     filters:
+      #       tags:
+      #         only: /v.*/
+      #       branches:              
+      #         only: /^(?!pull\/).*$/
+      # - run-benchmark:
+      #     requires:
+      #       - deploy-images-benchmark
+      #     filters:
+      #       tags:
+      #         only: /v.*/
+      #       branches:              
+      #         only: /^(?!pull\/).*$/
       - push-to-hub:
           requires:
-            - test-e2e-1_10
-            - test-e2e-1_11
-            - test-e2e-1_13
+            - e2e-kind-1_11
+            - e2e-kind-1_13
           filters:
             branches:
               only: master
@@ -613,9 +514,8 @@ workflows:
               only: /v.*/
       - build-and-release-installer:
           requires:
-            - test-e2e-1_10
-            - test-e2e-1_11
-            - test-e2e-1_13
+            - e2e-kind-1_11
+            - e2e-kind-1_13
           filters:
             branches:
               only: master
