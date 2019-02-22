@@ -19,7 +19,7 @@ import (
 type StackOwnerCacher interface {
 	remove(key string)
 	setDirty(key string)
-	get(stack *latest.Stack, acceptDirty bool) rest.ImpersonationConfig
+	getWithRetries(stack *latest.Stack, acceptDirty bool) (rest.ImpersonationConfig, error)
 }
 
 type ownerGetter interface {
@@ -112,9 +112,9 @@ func (s *stackOwnerCache) getWithError(stack *latest.Stack, acceptDirty bool) (r
 	return ic, nil
 }
 
-func (s *stackOwnerCache) get(stack *latest.Stack, acceptDirty bool) rest.ImpersonationConfig {
+func (s *stackOwnerCache) getWithRetries(stack *latest.Stack, acceptDirty bool) (rest.ImpersonationConfig, error) {
 	var ic rest.ImpersonationConfig
-	if err := wait.ExponentialBackoff(wait.Backoff{
+	err := wait.ExponentialBackoff(wait.Backoff{
 		Duration: time.Second,
 		Factor:   2,
 		Jitter:   float64(100 * time.Millisecond),
@@ -134,8 +134,6 @@ func (s *stackOwnerCache) get(stack *latest.Stack, acceptDirty bool) rest.Impers
 			return false, err
 		}
 		return false, nil
-	}); err != nil {
-		panic("fatal error: controller cannot retrive ownership information from a stack")
-	}
-	return ic
+	})
+	return ic, err
 }
