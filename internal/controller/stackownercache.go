@@ -5,10 +5,12 @@ import (
 	"time"
 
 	"github.com/docker/compose-on-kubernetes/api/client/clientset"
+	"github.com/docker/compose-on-kubernetes/api/client/clientset/scheme"
 	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	log "github.com/sirupsen/logrus"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/rest"
 )
@@ -41,7 +43,12 @@ type apiOwnerGetter struct {
 
 func (g *apiOwnerGetter) get(stack *latest.Stack) (*latest.Owner, error) {
 	var owner latest.Owner
-	if err := g.Get().Namespace(stack.Namespace).Name(stack.Name).Resource("stacks").SubResource("owner").Do().Into(&owner); err != nil {
+	if err := g.Get().Namespace(stack.Namespace).Name(stack.Name).
+		Resource("stacks").
+		SubResource("owner").
+		VersionedParams(&metav1.GetOptions{IncludeUninitialized: true}, scheme.ParameterCodec).
+		Do().
+		Into(&owner); err != nil {
 		return nil, err
 	}
 	return &owner, nil
