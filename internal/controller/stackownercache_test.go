@@ -38,19 +38,19 @@ func TestUpdateDeleteSequence(t *testing.T) {
 	testStack.Name = "test"
 	testStack.Namespace = "ns"
 	// as of create
-	cfg := testee.get(testStack, false)
+	cfg, _ := testee.getWithRetries(testStack, false)
 	assert.Equal(t, "test", cfg.UserName)
 	// as of update
 	testee.setDirty(stackresources.ObjKey(testStack.Namespace, testStack.Name))
-	cfg = testee.get(testStack, false)
+	cfg, _ = testee.getWithRetries(testStack, false)
 	assert.Equal(t, "test", cfg.UserName)
 	// as of update followed by delete
 	testee.setDirty(stackresources.ObjKey(testStack.Namespace, testStack.Name))
 	return404 = true
-	cfg = testee.get(testStack, false)
+	cfg, _ = testee.getWithRetries(testStack, false)
 	assert.Equal(t, "test", cfg.UserName)
 	// as of delete
-	cfg = testee.get(testStack, true)
+	cfg, _ = testee.getWithRetries(testStack, true)
 	assert.Equal(t, "test", cfg.UserName)
 	testee.remove(stackresources.ObjKey(testStack.Namespace, testStack.Name))
 
@@ -70,7 +70,6 @@ func TestStackOwnerCachePanicOnUnresolvableOwner(t *testing.T) {
 	testStack := &latest.Stack{}
 	testStack.Name = "test"
 	testStack.Namespace = "ns"
-	assert.Panics(t, func() {
-		testee.get(testStack, true)
-	})
+	_, err := testee.getWithRetries(testStack, true)
+	assert.Error(t, err)
 }

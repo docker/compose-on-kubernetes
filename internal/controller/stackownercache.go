@@ -5,10 +5,12 @@ import (
 	"time"
 
 	"github.com/docker/compose-on-kubernetes/api/client/clientset"
+	"github.com/docker/compose-on-kubernetes/api/client/clientset/scheme"
 	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	log "github.com/sirupsen/logrus"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
+	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/wait"
 	"k8s.io/client-go/rest"
 )
@@ -17,7 +19,7 @@ import (
 type StackOwnerCacher interface {
 	remove(key string)
 	setDirty(key string)
-	get(stack *latest.Stack, acceptDirty bool) rest.ImpersonationConfig
+	getWithRetries(stack *latest.Stack, acceptDirty bool) (rest.ImpersonationConfig, error)
 }
 
 type ownerGetter interface {
@@ -41,7 +43,12 @@ type apiOwnerGetter struct {
 
 func (g *apiOwnerGetter) get(stack *latest.Stack) (*latest.Owner, error) {
 	var owner latest.Owner
-	if err := g.Get().Namespace(stack.Namespace).Name(stack.Name).Resource("stacks").SubResource("owner").Do().Into(&owner); err != nil {
+	if err := g.Get().Namespace(stack.Namespace).Name(stack.Name).
+		Resource("stacks").
+		SubResource("owner").
+		VersionedParams(&metav1.GetOptions{IncludeUninitialized: true}, scheme.ParameterCodec).
+		Do().
+		Into(&owner); err != nil {
 		return nil, err
 	}
 	return &owner, nil
@@ -105,9 +112,9 @@ func (s *stackOwnerCache) getWithError(stack *latest.Stack, acceptDirty bool) (r
 	return ic, nil
 }
 
-func (s *stackOwnerCache) get(stack *latest.Stack, acceptDirty bool) rest.ImpersonationConfig {
+func (s *stackOwnerCache) getWithRetries(stack *latest.Stack, acceptDirty bool) (rest.ImpersonationConfig, error) {
 	var ic rest.ImpersonationConfig
-	if err := wait.ExponentialBackoff(wait.Backoff{
+	err := wait.ExponentialBackoff(wait.Backoff{
 		Duration: time.Second,
 		Factor:   2,
 		Jitter:   float64(100 * time.Millisecond),
@@ -127,8 +134,6 @@ func (s *stackOwnerCache) get(stack *latest.Stack, acceptDirty bool) rest.Impers
 			return false, err
 		}
 		return false, nil
-	}); err != nil {
-		panic("fatal error: controller cannot retrive ownership information from a stack")
-	}
-	return ic
+	})
+	return ic, err
 }

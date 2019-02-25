@@ -31,8 +31,8 @@ func (s *dummyOwnerCache) setDirty(key string) {
 	}
 }
 
-func (s *dummyOwnerCache) get(stack *latest.Stack, acceptDirty bool) rest.ImpersonationConfig {
-	return rest.ImpersonationConfig{}
+func (s *dummyOwnerCache) getWithRetries(stack *latest.Stack, acceptDirty bool) (rest.ImpersonationConfig, error) {
+	return rest.ImpersonationConfig{}, nil
 }
 func TestStackListenerCacheInvalidation(t *testing.T) {
 	cache := &dummyOwnerCache{

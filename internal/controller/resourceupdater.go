@@ -21,13 +21,15 @@ type impersonatingResourceUpdaterProvider struct {
 }
 
 func (p *impersonatingResourceUpdaterProvider) getUpdater(stack *latest.Stack, isDirty bool) (resourceUpdater, error) {
-	ic := p.ownerCache.get(stack, !isDirty)
+	ic, err := p.ownerCache.getWithRetries(stack, !isDirty)
+	if err != nil {
+		return nil, err
+	}
 	localConfig := p.config
 	localConfig.Impersonate = ic
 	result := &k8sResourceUpdater{
 		originalStack: stack,
 	}
-	var err error
 	if result.stackClient, err = clientset.NewForConfig(&localConfig); err != nil {
 		return nil, err
 	}
