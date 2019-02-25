@@ -20,7 +20,7 @@ ARG VERSION
 ARG IMAGE_REPO_PREFIX
 ENV GITCOMMIT=$GITCOMMIT VERSION=$VERSION BUILDTIME=$BUILDTIME IMAGE_REPO_PREFIX=$IMAGE_REPO_PREFIX
 ENV CGO_ENABLED=0
-RUN make bin/compose-controller bin/compose-controller.test e2e-binary bin/installer bin/api-server bin/api-server.test
+RUN make bin/compose-controller bin/compose-controller.test e2e-binary bin/installer bin/api-server bin/api-server.test bin/e2e_benchmark
 RUN go get github.com/onsi/ginkgo/ginkgo
 RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.12.4/bin/linux/amd64/kubectl && \
   chmod +x ./kubectl && \
@@ -34,6 +34,12 @@ ENTRYPOINT ["/ginkgo","-v", "-p", "--nodes=10", "/e2e.test", "--"]
 COPY --from=build /go/bin/ginkgo /ginkgo
 COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/e2e/e2e.test /e2e.test
 COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/e2e/retrieve-coverage /retrieve-coverage
+COPY --from=build /bin/kubectl /bin/kubectl
+
+# e2e-benchmark
+FROM runbase AS compose-e2e-benchmark
+ENTRYPOINT ["/e2e_benchmark", "--kubeconfig=/kind-config", "--"]
+COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/bin/e2e_benchmark /e2e_benchmark
 COPY --from=build /bin/kubectl /bin/kubectl
 
 # compose-installer (retrieved with --target=compose-installer)

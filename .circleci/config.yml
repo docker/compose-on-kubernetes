@@ -13,59 +13,69 @@ aliases:
   public-golang: &public-golang
     - image: circleci/golang:1.11
       user: root
-  cluster-setup-steps: &cluster-setup-steps
-    - attach_workspace:
-        at: /root
-    - run:
-        name: Deploy testkit cluster
-        command: ./scripts/e2e-cluster.sh create
-    - persist_to_workspace:
-        root: /root/
-        paths:
-          - '.kube'
-    - run:
-        name: Tear down testkit cluster (on failure)
-        command: |
-          ./scripts/e2e-cluster.sh delete
-        when: on_fail
 
-  deploy-images-steps: &deploy-images-steps
+  e2e-kind-steps: &e2e-kind-steps
     - attach_workspace:
         at: /root
+    - setup_remote_docker:
+        version: 18.06.0-ce
     - run:
-        name: Deploy images
+        name: "Prepare Kind and run e2e tests"
         command: |
-          for image in controller-coverage api-server-coverage controller api-server; do
-            ./scripts/e2e-cluster.sh docker load -i /root/kube-compose-$image.tar
-          done
-    - run:
-        name: Tear down testkit cluster (on failure)
-        command: |
-          ./scripts/e2e-cluster.sh delete
-        when: on_fail
-
-  test-e2e-steps: &test-e2e-steps
-    - attach_workspace:
-        at: /root
-    - run:
-        name: Run e2e tests
-        command: |
+          git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
+          cd /root/src/sigs.k8s.io/kind
+          git reset --hard 302bb7dbb611236aeadd6d1741c9f237d1ec28d2
+          go install
+          cd -        
+          export PATH="$PATH:/root/bin"
           export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
           export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
           export IMAGE_PREFIX=kube-compose-
-          export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY}/${IMAGE_PREFIX}
-          KUBECONFIG=$HOME/.kube/${KUBE_VERSION}/config.testkit kubectl create namespace e2emigration
-          KUBECONFIG=$HOME/.kube/${KUBE_VERSION}/config.testkit kubectl -n e2emigration create secret docker-registry migration-pull-secret --docker-server=https://index.docker.io/v1/ --docker-username=${DOCKER_USER} --docker-password=${DOCKER_PASS} --docker-email=noreply@docker.com
-          PATH="$PATH:$GOPATH/bin" make KUBECONFIG=$HOME/.kube/${KUBE_VERSION}/config.testkit TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e
+          export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
+          mkdir -p ./pre-loaded-images
+          cp /root/kube-compose-api-server-coverage.tar /root/kube-compose-controller-coverage.tar ./pre-loaded-images/
+          make -f docker.Makefile KUBERNETES_VERSION=${KUBERNETES_VERSION} TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
+          docker load -i /root/kube-compose-e2e-tests.tar
+          make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-kind-circleci
+        no_output_timeout: 15m
     - persist_to_workspace:
         root: /root/
         paths:
-          - 'src/github.com/docker/compose-on-kubernetes/e2e/e2e/compose-*/coverage.txt'
+          - 'src/github.com/docker/compose-on-kubernetes/e2e-coverage/compose-*/coverage.txt'    
+
+  e2e-benchmark-kind-steps: &e2e-benchmark-kind-steps
+    - attach_workspace:
+        at: /root
+    - setup_remote_docker:
+        version: 18.06.0-ce
     - run:
-        name: Tear down testkit cluster
+        name: "Prepare Kind and run e2e benchmark"
         command: |
-          ./scripts/e2e-cluster.sh delete
-        when: always
+          git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
+          cd /root/src/sigs.k8s.io/kind
+          git reset --hard 302bb7dbb611236aeadd6d1741c9f237d1ec28d2
+          go install
+          cd -        
+          export PATH="$PATH:/root/bin"
+          export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
+          export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
+          export IMAGE_PREFIX=kube-compose-
+          export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
+          mkdir -p ./pre-loaded-images
+          cp /root/kube-compose-api-server.tar /root/kube-compose-controller.tar ./pre-loaded-images/
+          make -f docker.Makefile KUBERNETES_VERSION=${KUBERNETES_VERSION} TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
+          docker load -i /root/kube-compose-e2e-benchmark.tar
+          make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-benchmark-kind-circleci
+        no_output_timeout: 15m
+    - run:
+        name: Get cluster info (on failure)
+        command: |
+          curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/linux/amd64/kubectl
+          chmod +x ./kubectl
+          mv kubectl /root/bin
+          export PATH="$PATH:/root/bin"
+          make e2e-kind-pods-info
+        when: on_fail
 
 jobs:
   checkout:
@@ -78,17 +88,11 @@ jobs:
       - run:
           name: Login to docker hub
           command: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
-      - run:
-          name: Setup testkit
-          command: ./scripts/e2e-cluster.sh auth
       - persist_to_workspace:
           root: /root/
           paths:
             - 'src'
             - '.docker'
-            - '.testkit'
-            - '.aws'
-            - '.kube'
   
   checkout-pr:
     docker: *public-golang
@@ -150,15 +154,9 @@ jobs:
             export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
             echo "building images with TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} and IMAGE_REPO_PREFIX=${IMAGE_REPO_PREFIX}"
             make -f docker.Makefile TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} images
-            for image in controller controller-coverage api-server api-server-coverage installer e2e-tests; do
+            for image in controller controller-coverage api-server api-server-coverage installer e2e-tests e2e-benchmark; do
               docker save "${IMAGE_REPO_PREFIX}$image:${CIRCLE_TAG:-${CIRCLE_SHA1}}" -o "/root/${IMAGE_PREFIX}$image.tar"
             done
-      - run:
-          name: Tear down testkit cluster (on failure)
-          command: |
-            KUBE_VERSION=1.10.11 ./scripts/e2e-cluster.sh delete
-            KUBE_VERSION=1.11.5 ./scripts/e2e-cluster.sh delete
-          when: on_fail
       - persist_to_workspace:
           root: /root/
           paths:
@@ -168,38 +166,34 @@ jobs:
             - kube-compose-controller-coverage.tar
             - kube-compose-installer.tar
             - kube-compose-e2e-tests.tar
+            - kube-compose-e2e-benchmark.tar
   e2e-kind:
     docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
-    steps:
-      - attach_workspace:
-          at: /root
-      - setup_remote_docker:
-          version: 18.06.0-ce
-      - run:
-          name: "Prepare Kind and run E2E tests"
-          command: |
-            git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
-            cd /root/src/sigs.k8s.io/kind
-            git reset --hard 302bb7dbb611236aeadd6d1741c9f237d1ec28d2
-            go install
-            cd -        
-            export PATH="$PATH:/root/bin"
-            export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
-            export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
-            export IMAGE_PREFIX=kube-compose-
-            export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
-            mkdir -p ./coverage-enabled-images
-            cp /root/kube-compose-api-server-coverage.tar /root/kube-compose-controller-coverage.tar ./coverage-enabled-images/
-            make -f docker.Makefile TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
-            docker load -i /root/kube-compose-e2e-tests.tar
-            make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-kind-circleci
-      - persist_to_workspace:
-          root: /root/
-          paths:
-            - 'src/github.com/docker/compose-on-kubernetes/e2e-coverage/compose-*/coverage.txt'
+    steps: *e2e-kind-steps
+  e2e-kind-1_11:
+    docker: *public-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
+      KUBERNETES_VERSION: "1.11.7"
+    steps: *e2e-kind-steps
+  e2e-kind-1_13:
+    docker: *public-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
+      KUBERNETES_VERSION: "1.13.3"
+    steps: *e2e-kind-steps
+  e2e-benchmark-kind:
+    docker: *public-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
+      KUBERNETES_VERSION: "1.13.3"
+    steps: *e2e-benchmark-kind-steps
   test-unit:
     docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -217,56 +211,6 @@ jobs:
           root: /root/
           paths:
             - 'src/github.com/docker/compose-on-kubernetes/coverage.txt'
-  cluster-setup-1_10:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.10.11
-    steps: *cluster-setup-steps
-  cluster-setup-1_11:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.11.5
-    steps: *cluster-setup-steps
-  cluster-setup-benchmark:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.11.5
-      - KUBE_ENV_NAME: benchmark
-    steps: *cluster-setup-steps
-  deploy-images-1_10:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.10.11
-    steps: *deploy-images-steps
-  deploy-images-1_11:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.11.5
-    steps: *deploy-images-steps
-  deploy-images-benchmark:
-    docker: *compose-ci-docker
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.11.5
-      - KUBE_ENV_NAME: benchmark
-    steps: *deploy-images-steps
-  test-e2e-1_10:
-    docker: *compose-ci-golang
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.10.11
-    steps: *test-e2e-steps
-  test-e2e-1_11:
-    docker: *compose-ci-golang
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes
-    environment:
-      - KUBE_VERSION: 1.11.5
-    steps: *test-e2e-steps
   coverage-upload:
     docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -339,31 +283,7 @@ jobs:
             go install
             cd /root/src/github.com/docker/compose-on-kubernetes
             ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${TAG} ./bin/
-  run-benchmark:
-    docker: *compose-ci-golang
-    working_directory: /root/src/github.com/docker/compose-on-kubernetes    
-    environment:
-      - KUBE_VERSION: 1.11.5
-      - KUBE_ENV_NAME: benchmark
-    steps:
-      - attach_workspace:
-          at: /root
-      - setup_remote_docker:
-          version: 17.07.0-ce
-      - run:
-          name: benchmark
-          command: |
-            export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
-            export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
-            export IMAGE_PREFIX=kube-compose-
-            export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
-            make bin/e2e_benchmark
-            TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} ./bin/e2e_benchmark --kubeconfig=$HOME/.kube/benchmark/config.testkit --logs-namespace=benchmark -f report --max-duration 7m
-      - run:
-          name: Tear down testkit cluster
-          command: |
-            ./scripts/e2e-cluster.sh delete
-          when: always
+
 workflows:
   version: 2
   pr:
@@ -423,23 +343,15 @@ workflows:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
-      - cluster-setup-1_10:
-          requires:
-            - checkout
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - cluster-setup-1_11:
-          requires:
-            - checkout
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
       - test-unit:
+          requires:
+            - checkout
+          filters:
+            tags:
+              only: /v.*/
+            branches:              
+              only: /^(?!pull\/).*$/
+      - images:
           requires:
             - checkout
           filters:
@@ -457,21 +369,13 @@ workflows:
               only: /^(?!pull\/).*$/
       - validate-vendor:
           requires:
-            - deploy-images-1_11
+            - checkout
           filters:
             tags:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
       - check-licenses:
-          requires:
-            - deploy-images-1_10
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - images:
           requires:
             - checkout
           filters:
@@ -487,80 +391,46 @@ workflows:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
-      - deploy-images-1_10:
+      - e2e-kind-1_11:
           requires:
-            - cluster-setup-1_10
             - images
           filters:
             tags:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
-      - deploy-images-1_11:
+      - e2e-kind-1_13:
           requires:
-            - cluster-setup-1_11
             - images
           filters:
             tags:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
-      - test-e2e-1_10:
-          requires:
-            - deploy-images-1_10
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - test-e2e-1_11:
-          requires:
-            - deploy-images-1_11
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
+      # - e2e-benchmark-kind:
+      #     requires:
+      #       - images
+      #     filters:
+      #       tags:
+      #         only: /v.*/
+      #       branches:
+      #         only: /^(?!pull\/).*$/
       - coverage-upload:
           requires:
             - test-unit
-            - test-e2e-1_10
-            - test-e2e-1_11
+            - e2e-kind-1_11
+            - e2e-kind-1_13
+            # - e2e-benchmark-kind
           filters:
             tags:
               only: /v.*/
             branches:              
               only: /^(?!pull\/).*$/
-      - cluster-setup-benchmark:
-          requires:
-            - checkout
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - deploy-images-benchmark:
-          requires:
-            - cluster-setup-benchmark
-            - images
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-      - run-benchmark:
-          requires:
-            - deploy-images-benchmark
-          filters:
-            tags:
-              only: /v.*/
-            branches:              
-              only: /^(?!pull\/).*$/
-          
       - push-to-hub:
           requires:
-            - test-e2e-1_10
-            - test-e2e-1_11
+            - e2e-kind-1_11
+            - e2e-kind-1_13
+            # - e2e-benchmark-kind
           filters:
             branches:
               only: master
@@ -568,8 +438,9 @@ workflows:
               only: /v.*/
       - build-and-release-installer:
           requires:
-            - test-e2e-1_10
-            - test-e2e-1_11
+            - e2e-kind-1_11
+            - e2e-kind-1_13
+            # - e2e-benchmark-kind
           filters:
             branches:
               only: master

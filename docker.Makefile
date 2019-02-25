@@ -3,7 +3,9 @@ include common.mk
 BUILD_BASE_IMAGE = golang:1.11.1-alpine3.8
 TEST_BASE_IMAGE = golang:1.11.1
 RUN_BASE_IMAGE = alpine:3.8
-IMAGES = ${IMAGE_REPO_PREFIX}controller ${IMAGE_REPO_PREFIX}controller-coverage ${IMAGE_REPO_PREFIX}e2e-tests ${IMAGE_REPO_PREFIX}api-server ${IMAGE_REPO_PREFIX}api-server-coverage ${IMAGE_REPO_PREFIX}installer
+KUBERNETES_VERSION ?= 1.13.3
+KIND_TAG = v$(KUBERNETES_VERSION)-$(TAG)
+IMAGES = ${IMAGE_REPO_PREFIX}controller ${IMAGE_REPO_PREFIX}controller-coverage ${IMAGE_REPO_PREFIX}e2e-tests ${IMAGE_REPO_PREFIX}e2e-benchmark ${IMAGE_REPO_PREFIX}api-server ${IMAGE_REPO_PREFIX}api-server-coverage ${IMAGE_REPO_PREFIX}installer
 PUSH_IMAGES = push/${IMAGE_REPO_PREFIX}controller push/${IMAGE_REPO_PREFIX}api-server push/${IMAGE_REPO_PREFIX}installer
 DOCKERFILE = Dockerfile
 ifneq ($(DOCKER_BUILDKIT),)
@@ -33,6 +35,10 @@ ${IMAGE_REPO_PREFIX}e2e-tests:
 	@echo "🌟 build ${IMAGE_REPO_PREFIX}e2e-tests:${TAG}"
 	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}e2e-tests:$(TAG) --target compose-e2e-tests -f ${DOCKERFILE}  -
 
+${IMAGE_REPO_PREFIX}e2e-benchmark:
+	@echo "🌟 build ${IMAGE_REPO_PREFIX}e2e-benchmark:${TAG}"
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}e2e-benchmark:$(TAG) --target compose-e2e-benchmark -f ${DOCKERFILE}  -
+
 ${IMAGE_REPO_PREFIX}api-server:
 	@echo "🌟 build ${IMAGE_REPO_PREFIX}api-server:${TAG}"
 	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e | docker build ${BUILD_ARGS} -t ${IMAGE_REPO_PREFIX}api-server:$(TAG) --target compose-api-server -f ${DOCKERFILE} -
@@ -58,16 +64,16 @@ images: $(IMAGES) ## build images
 
 save-coverage-images: 
 	@echo "🌟 save ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG)"
-	@mkdir -p coverage-enabled-images
-	@docker save -o coverage-enabled-images/coverage-enabled-images.tar ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG)
+	@mkdir -p pre-loaded-images
+	@docker save -o pre-loaded-images/coverage-enabled-images.tar ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG)
 
 build-kind-image:
-	@echo "🌟 build ${IMAGE_REPO_PREFIX}e2e-kind-node:${TAG}"
-	@tar cf - Dockerfile.kind coverage-enabled-images | docker build -t ${IMAGE_REPO_PREFIX}e2e-kind-node:${TAG} -f Dockerfile.kind -
+	@echo "🌟 build ${IMAGE_REPO_PREFIX}e2e-kind-node:$(KIND_TAG)"
+	@tar cf - Dockerfile.kind pre-loaded-images | docker build -t ${IMAGE_REPO_PREFIX}e2e-kind-node:$(KIND_TAG) --build-arg BASE_IMAGE=dockertesteng/kind-node:v$(KUBERNETES_VERSION) -f Dockerfile.kind -
 
 create-kind-cluster: build-kind-image
 	@echo "🌟 Create kind cluster"
-	@kind create cluster --name compose-on-kube --image ${IMAGE_REPO_PREFIX}e2e-kind-node:${TAG}
+	@kind create cluster --name compose-on-kube --image ${IMAGE_REPO_PREFIX}e2e-kind-node:$(KIND_TAG)
 
 delete-kind-cluster:
 	@echo "🌟 Delete kind cluster"
