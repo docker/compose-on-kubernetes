@@ -117,7 +117,7 @@ func toServices(s latest.ServiceConfig, objectMeta metav1.ObjectMeta, labelSelec
 	randomPortsMeta := randomPortsObjectMeta(objectMeta)
 
 	originalHL := original.Services[stackresources.ObjKey(headlessMeta.Namespace, headlessMeta.Name)]
-	hl := toHeadlessService(headlessMeta, labelSelector, originalHL, s.InternalPorts)
+	hl := toInternalService(headlessMeta, labelSelector, originalHL, s.InternalPorts, s.InternalServiceType)
 
 	originalRandom := original.Services[stackresources.ObjKey(randomPortsMeta.Namespace, randomPortsMeta.Name)]
 	originalPublished := original.Services[stackresources.ObjKey(publishedMeta.Namespace, publishedMeta.Name)]
@@ -148,12 +148,20 @@ func toServices(s latest.ServiceConfig, objectMeta metav1.ObjectMeta, labelSelec
 	return hl, published, random
 }
 
-// toHeadlessService creates a Kubernetes headless service.
-func toHeadlessService(objectMeta metav1.ObjectMeta, labelSelector map[string]string, original apiv1.Service, internalPorts []latest.InternalPort) *apiv1.Service {
+// toInternalService creates a Kubernetes service for intra-stack communication.
+func toInternalService(objectMeta metav1.ObjectMeta, labelSelector map[string]string, original apiv1.Service,
+	internalPorts []latest.InternalPort, internalServiceType latest.InternalServiceType) *apiv1.Service {
+	useHeadless := false
+	switch internalServiceType {
+	case latest.InternalServiceTypeHeadless:
+		useHeadless = true
+	case latest.InternalServiceTypeAuto:
+		useHeadless = len(internalPorts) == 0
+	}
 	service := original.DeepCopy()
 	service.ObjectMeta = objectMeta
 	service.Spec.Selector = labelSelector
-	if len(internalPorts) == 0 {
+	if useHeadless {
 		service.Spec.ClusterIP = apiv1.ClusterIPNone
 		service.Spec.Ports = []apiv1.ServicePort{{
 			Name:       headlessPortName,

@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/docker/compose-on-kubernetes/api/compose/latest"
+	corev1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
@@ -626,6 +627,16 @@ func WithPort(target uint32, builders ...func(*latest.ServicePortConfig)) func(*
 		}
 
 		c.Ports = append(c.Ports, *port)
+	}
+}
+
+// WithInternalPort adds an internal port declaration
+func WithInternalPort(port int32, protocol corev1.Protocol) func(*latest.ServiceConfig) {
+	return func(c *latest.ServiceConfig) {
+		c.InternalPorts = append(c.InternalPorts, latest.InternalPort{
+			Port:     port,
+			Protocol: protocol,
+		})
 	}
 }
 
