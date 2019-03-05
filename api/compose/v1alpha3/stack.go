@@ -3,6 +3,7 @@ package v1alpha3
 import (
 	"time"
 
+	"k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 )
@@ -99,6 +100,7 @@ type ServiceConfig struct {
 	WorkingDir      string                   `json:"working_dir,omitempty"`
 	PullSecret      string                   `json:"pull_secret,omitempty"`
 	PullPolicy      string                   `json:"pull_policy,omitempty"`
+	InternalPorts   []InternalPort           `json:"internal_ports,omitempty"`
 }
 
 // ServicePortConfig is the port configuration for a service
@@ -269,4 +271,12 @@ func (s *StackStatus) clone() *StackStatus {
 // Clone clones a Stack
 func (s *Stack) Clone() *Stack {
 	return s.clone()
+}
+
+// InternalPort describes a Port exposed internally to other services
+// in the stack
+// +k8s:deepcopy-gen=true
+type InternalPort struct {
+	Port     uint32      `json:"port,omitempty"`
+	Protocol v1.Protocol `json:"protocol,omitempty"`
 }
