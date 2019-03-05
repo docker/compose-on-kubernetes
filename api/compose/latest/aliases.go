@@ -88,6 +88,10 @@ type Resources = ref.Resources
 // FileReferenceConfig for a reference to a swarm file object
 type FileReferenceConfig = ref.FileReferenceConfig
 
+// InternalPort describes a Port exposed internally to other services
+// in the stack
+type InternalPort = ref.InternalPort
+
 // These are valid conditions of a stack.
 const (
 	// StackAvailable means the stack is available.

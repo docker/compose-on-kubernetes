@@ -277,6 +277,6 @@ func (s *Stack) Clone() *Stack {
 // in the stack
 // +k8s:deepcopy-gen=true
 type InternalPort struct {
-	Port     uint32      `json:"port,omitempty"`
+	Port     int32       `json:"port,omitempty"`
 	Protocol v1.Protocol `json:"protocol,omitempty"`
 }

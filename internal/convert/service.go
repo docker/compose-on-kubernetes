@@ -117,7 +117,7 @@ func toServices(s latest.ServiceConfig, objectMeta metav1.ObjectMeta, labelSelec
 	randomPortsMeta := randomPortsObjectMeta(objectMeta)
 
 	originalHL := original.Services[stackresources.ObjKey(headlessMeta.Namespace, headlessMeta.Name)]
-	hl := toHeadlessService(headlessMeta, labelSelector, originalHL)
+	hl := toHeadlessService(headlessMeta, labelSelector, originalHL, s.InternalPorts)
 
 	originalRandom := original.Services[stackresources.ObjKey(randomPortsMeta.Namespace, randomPortsMeta.Name)]
 	originalPublished := original.Services[stackresources.ObjKey(publishedMeta.Namespace, publishedMeta.Name)]
@@ -149,17 +149,33 @@ func toServices(s latest.ServiceConfig, objectMeta metav1.ObjectMeta, labelSelec
 }
 
 // toHeadlessService creates a Kubernetes headless service.
-func toHeadlessService(objectMeta metav1.ObjectMeta, labelSelector map[string]string, original apiv1.Service) *apiv1.Service {
+func toHeadlessService(objectMeta metav1.ObjectMeta, labelSelector map[string]string, original apiv1.Service, internalPorts []latest.InternalPort) *apiv1.Service {
 	service := original.DeepCopy()
 	service.ObjectMeta = objectMeta
-	service.Spec.ClusterIP = apiv1.ClusterIPNone
 	service.Spec.Selector = labelSelector
-	service.Spec.Ports = []apiv1.ServicePort{{
-		Name:       headlessPortName,
-		Port:       headlessPort,
-		TargetPort: intstr.FromInt(headlessPort),
-		Protocol:   apiv1.ProtocolTCP,
-	}}
+	if len(internalPorts) == 0 {
+		service.Spec.ClusterIP = apiv1.ClusterIPNone
+		service.Spec.Ports = []apiv1.ServicePort{{
+			Name:       headlessPortName,
+			Port:       headlessPort,
+			TargetPort: intstr.FromInt(headlessPort),
+			Protocol:   apiv1.ProtocolTCP,
+		}}
+	} else {
+		if service.Spec.ClusterIP == apiv1.ClusterIPNone {
+			service.Spec.ClusterIP = ""
+		}
+		service.Spec.Ports = []apiv1.ServicePort{}
+		for _, p := range internalPorts {
+			service.Spec.Ports = append(service.Spec.Ports,
+				apiv1.ServicePort{
+					Name:       fmt.Sprintf("%d-%s", p.Port, strings.ToLower(string(p.Protocol))),
+					Port:       p.Port,
+					TargetPort: intstr.FromInt(int(p.Port)),
+					Protocol:   p.Protocol,
+				})
+		}
+	}
 	return service
 }
 

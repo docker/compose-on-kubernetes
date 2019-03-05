@@ -1075,6 +1075,37 @@ services:
 		waitUntil(ns.ContainsZeroStack())
 	})
 
+	It("Should leverage cluster IP if InternalPorts are specified", func() {
+		stack, err := ns.CreateStack(cluster.StackOperationV1alpha3, "app", `version: '3.2'
+services:
+  front:
+    image: nginx:1.12.1-alpine`)
+		Expect(err).NotTo(HaveOccurred())
+		waitUntil(ns.IsStackAvailable("app"))
+		svc, err := ns.Services().Get("front", metav1.GetOptions{})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(svc.Spec.ClusterIP).To(Equal(corev1.ClusterIPNone))
+		stack.Spec.Services[0].InternalPorts = []latest.InternalPort{
+			{
+				Port:     80,
+				Protocol: corev1.ProtocolTCP,
+			},
+		}
+		stack, err = ns.UpdateStackFromSpec("app", stack)
+		Expect(err).NotTo(HaveOccurred())
+		waitUntil(ns.IsStackAvailable("app"))
+		svc, err = ns.Services().Get("front", metav1.GetOptions{})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(svc.Spec.ClusterIP).NotTo(Equal(corev1.ClusterIPNone))
+		stack.Spec.Services[0].InternalPorts = nil
+		stack, err = ns.UpdateStackFromSpec("app", stack)
+		Expect(err).NotTo(HaveOccurred())
+		waitUntil(ns.IsStackAvailable("app"))
+		svc, err = ns.Services().Get("front", metav1.GetOptions{})
+		Expect(err).NotTo(HaveOccurred())
+		Expect(svc.Spec.ClusterIP).To(Equal(corev1.ClusterIPNone))
+	})
+
 })
 
 func drainUntil(stream chan string, match string) bool {
