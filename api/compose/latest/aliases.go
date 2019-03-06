@@ -88,6 +88,13 @@ type Resources = ref.Resources
 // FileReferenceConfig for a reference to a swarm file object
 type FileReferenceConfig = ref.FileReferenceConfig
 
+// InternalPort describes a Port exposed internally to other services
+// in the stack
+type InternalPort = ref.InternalPort
+
+// InternalServiceType defines the strategy for defining the Service Type to use for inter-service networking
+type InternalServiceType = ref.InternalServiceType
+
 // These are valid conditions of a stack.
 const (
 	// StackAvailable means the stack is available.
@@ -99,6 +106,13 @@ const (
 	StackFailure StackPhase = "Failure"
 	// StackReconciliationPending means the stack has not yet been reconciled
 	StackReconciliationPending StackPhase = "ReconciliationPending"
+
+	// InternalServiceTypeAuto behavior is the same as InternalServiceTypeHeadless if InternalPorts is empty, InternalServiceTypeClusterIP otherwise
+	InternalServiceTypeAuto = InternalServiceType("")
+	// InternalServiceTypeHeadless always create a Headless service
+	InternalServiceTypeHeadless = InternalServiceType("Headless")
+	// InternalServiceTypeClusterIP always create a ClusterIP service
+	InternalServiceTypeClusterIP = InternalServiceType("ClusterIP")
 )
 
 var (

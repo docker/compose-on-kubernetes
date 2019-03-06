@@ -77,6 +77,20 @@ func testService(spec string, labels map[string]string, opts ...resourceOpt) *co
 	return v
 }
 
+func testServiceType(t coretypes.ServiceType) resourceOpt {
+	return func(v interface{}) {
+		svc := v.(*coretypes.Service)
+		svc.Spec.Type = t
+	}
+}
+
+func testClusterIP(ip string) resourceOpt {
+	return func(v interface{}) {
+		svc := v.(*coretypes.Service)
+		svc.Spec.ClusterIP = ip
+	}
+}
+
 func testPodSpecImage(spec *coretypes.PodTemplateSpec, img string) {
 	spec.Spec.InitContainers = []coretypes.Container{
 		{
@@ -324,6 +338,40 @@ func TestStackDiff(t *testing.T) {
 				},
 				ServicesToUpdate: []coretypes.Service{
 					*testService("spec", map[string]string{"key": "val2"}),
+				},
+			},
+		},
+		{
+			name: "service-headless-to-cluster-ip",
+			current: newStackStateOrPanic(
+				testService("spec", nil, testServiceType(coretypes.ServiceTypeClusterIP), testClusterIP(coretypes.ClusterIPNone)),
+			),
+			desired: newStackStateOrPanic(
+				testService("spec", nil, testServiceType(coretypes.ServiceTypeClusterIP), testClusterIP("")),
+			),
+			expected: &StackStateDiff{
+				ServicesToDelete: []coretypes.Service{
+					*testService("spec", nil, testServiceType(coretypes.ServiceTypeClusterIP), testClusterIP(coretypes.ClusterIPNone)),
+				},
+				ServicesToAdd: []coretypes.Service{
+					*testService("spec", nil, testServiceType(coretypes.ServiceTypeClusterIP), testClusterIP("")),
+				},
+			},
+		},
+		{
+			name: "service-cluster-ip-to-headless",
+			current: newStackStateOrPanic(
+				testService("spec", nil, testServiceType(coretypes.ServiceTypeClusterIP), testClusterIP("1.2.3.4")),
+			),
+			desired: newStackStateOrPanic(
+				testService("spec", nil, testServiceType(coretypes.ServiceTypeClusterIP), testClusterIP(coretypes.ClusterIPNone)),
+			),
+			expected: &StackStateDiff{
+				ServicesToDelete: []coretypes.Service{
+					*testService("spec", nil, testServiceType(coretypes.ServiceTypeClusterIP), testClusterIP("1.2.3.4")),
+				},
+				ServicesToAdd: []coretypes.Service{
+					*testService("spec", nil, testServiceType(coretypes.ServiceTypeClusterIP), testClusterIP(coretypes.ClusterIPNone)),
 				},
 			},
 		},

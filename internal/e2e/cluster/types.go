@@ -662,6 +662,11 @@ func (ns *Namespace) Secrets() corev1.SecretInterface {
 	return ns.secrets
 }
 
+// Services returns a Services client for the namespace
+func (ns *Namespace) Services() corev1.ServiceInterface {
+	return ns.services
+}
+
 // As returns the same namespace with an impersonated config
 func (ns *Namespace) As(user rest.ImpersonationConfig) (*Namespace, error) {
 	cfg := *ns.config

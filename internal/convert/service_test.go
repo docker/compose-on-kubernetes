@@ -519,3 +519,89 @@ func TestServiceStrategyFor(t *testing.T) {
 		assert.Equal(t, c, s.publishedServiceType())
 	}
 }
+
+func TestInternalServiceStrategy(t *testing.T) {
+	cases := []struct {
+		name              string
+		desiredType       latest.InternalServiceType
+		ports             []latest.InternalPort
+		expectedClusterIP string
+		original          apiv1.Service
+	}{
+		{
+			name:              "auto-no-ports",
+			expectedClusterIP: apiv1.ClusterIPNone,
+		},
+		{
+			name: "auto-some-ports",
+			ports: []latest.InternalPort{
+				{
+					Port:     8080,
+					Protocol: apiv1.ProtocolUDP,
+				},
+			},
+		},
+		{
+			name: "headless-some-ports",
+			ports: []latest.InternalPort{
+				{
+					Port:     8080,
+					Protocol: apiv1.ProtocolUDP,
+				},
+			},
+			desiredType:       latest.InternalServiceTypeHeadless,
+			expectedClusterIP: apiv1.ClusterIPNone,
+		},
+		{
+			name:        "clusterip-no-ports",
+			desiredType: latest.InternalServiceTypeClusterIP,
+		},
+
+		{
+			name:              "auto-no-ports-existing-with-ip",
+			expectedClusterIP: apiv1.ClusterIPNone,
+			original: apiv1.Service{
+				Spec: apiv1.ServiceSpec{
+					ClusterIP: "1.1.1.1",
+				},
+			},
+		},
+		{
+			name: "auto-some-ports-with-ip",
+			ports: []latest.InternalPort{
+				{
+					Port:     8080,
+					Protocol: apiv1.ProtocolUDP,
+				},
+			},
+			original: apiv1.Service{
+				Spec: apiv1.ServiceSpec{
+					ClusterIP: "1.1.1.1",
+				},
+			},
+			expectedClusterIP: "1.1.1.1",
+		},
+		{
+			name: "auto-some-ports-no-ip",
+			ports: []latest.InternalPort{
+				{
+					Port:     8080,
+					Protocol: apiv1.ProtocolUDP,
+				},
+			},
+			original: apiv1.Service{
+				Spec: apiv1.ServiceSpec{
+					ClusterIP: apiv1.ClusterIPNone,
+				},
+			},
+			expectedClusterIP: "",
+		},
+	}
+
+	for _, c := range cases {
+		t.Run(c.name, func(t *testing.T) {
+			svc := toInternalService(metav1.ObjectMeta{}, nil, c.original, c.ports, c.desiredType)
+			assert.Equal(t, c.expectedClusterIP, svc.Spec.ClusterIP)
+		})
+	}
+}
