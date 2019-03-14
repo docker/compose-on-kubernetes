@@ -143,7 +143,7 @@ func WithCustomStatusMatch(match func(Status) bool) InstallerOption {
 	}
 }
 
-func tagForCusomImages(controllerImage, apiServerImage string) string {
+func tagForCustomImages(controllerImage, apiServerImage string) string {
 	bytes := sha1.Sum([]byte(fmt.Sprintf("%s %s", controllerImage, apiServerImage)))
 	return hex.EncodeToString(bytes[:])
 }
@@ -159,7 +159,7 @@ func newInstaller(config *rest.Config, options ...InstallerOption) (*installer, 
 	}
 	if i.controllerImageOverride != "" && i.apiServerImageOverride != "" {
 		// compute a tag for these images
-		i.commonOptions.Tag = tagForCusomImages(i.controllerImageOverride, i.apiServerImageOverride)
+		i.commonOptions.Tag = tagForCustomImages(i.controllerImageOverride, i.apiServerImageOverride)
 	}
 	if i.debugImages {
 		i.commonOptions.Tag = "debug"
