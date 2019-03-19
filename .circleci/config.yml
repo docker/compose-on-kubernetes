@@ -36,9 +36,10 @@ aliases:
           export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
           export IMAGE_PREFIX=kube-compose-
           export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
+          export KUBERNETES_VERSION_PARAM="${KUBERNETES_VERSION:+KUBERNETES_VERSION=$KUBERNETES_VERSION}"
           mkdir -p ./pre-loaded-images
           cp /root/kube-compose-api-server-coverage.tar /root/kube-compose-controller-coverage.tar ./pre-loaded-images/
-          make -f docker.Makefile KUBERNETES_VERSION=${KUBERNETES_VERSION} TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
+          make -f docker.Makefile ${KUBERNETES_VERSION_PARAM} TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
           docker load -i /root/kube-compose-e2e-tests.tar
           make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-kind-circleci
         no_output_timeout: 15m
@@ -65,9 +66,10 @@ aliases:
           export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
           export IMAGE_PREFIX=kube-compose-
           export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
+          export KUBERNETES_VERSION_PARAM="${KUBERNETES_VERSION:+KUBERNETES_VERSION=$KUBERNETES_VERSION}"
           mkdir -p ./pre-loaded-images
           cp /root/kube-compose-api-server.tar /root/kube-compose-controller.tar ./pre-loaded-images/
-          make -f docker.Makefile KUBERNETES_VERSION=${KUBERNETES_VERSION} TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
+          make -f docker.Makefile ${KUBERNETES_VERSION_PARAM} TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
           docker load -i /root/kube-compose-e2e-benchmark.tar
           make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-benchmark-kind-circleci
         no_output_timeout: 15m
