@@ -33,7 +33,7 @@ func init() {
 // RegisterConversions adds conversion functions to the given scheme.
 // Public to allow building arbitrary schemes.
 func RegisterConversions(scheme *runtime.Scheme) error {
-	return scheme.AddGeneratedConversionFuncs(
+	return scheme.AddConversionFuncs(
 		Convert_v1alpha3_ComposeFile_To_v1beta2_ComposeFile,
 		Convert_v1beta2_ComposeFile_To_v1alpha3_ComposeFile,
 		Convert_v1alpha3_ConfigObjConfig_To_v1beta2_ConfigObjConfig,

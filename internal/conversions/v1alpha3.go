@@ -16,7 +16,7 @@ import (
 // RegisterV1alpha3Conversions adds conversion functions to the given scheme.
 // Public to allow building arbitrary schemes.
 func RegisterV1alpha3Conversions(scheme *runtime.Scheme) error {
-	return scheme.AddGeneratedConversionFuncs(
+	return scheme.AddConversionFuncs(
 		ownerToInternalV1alpha3,
 		ownerFromInternalV1alpha3,
 		stackToInternalV1alpha3,
