@@ -46,7 +46,7 @@ func (g *apiOwnerGetter) get(stack *latest.Stack) (*latest.Owner, error) {
 	if err := g.Get().Namespace(stack.Namespace).Name(stack.Name).
 		Resource("stacks").
 		SubResource("owner").
-		VersionedParams(&metav1.GetOptions{IncludeUninitialized: true}, scheme.ParameterCodec).
+		VersionedParams(&metav1.GetOptions{}, scheme.ParameterCodec).
 		Do().
 		Into(&owner); err != nil {
 		return nil, err
