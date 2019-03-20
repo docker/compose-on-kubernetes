@@ -11,7 +11,7 @@ import (
 // RegisterV1beta2Conversions adds conversion functions to the given scheme.
 // Public to allow building arbitrary schemes.
 func RegisterV1beta2Conversions(scheme *runtime.Scheme) error {
-	return scheme.AddGeneratedConversionFuncs(
+	return scheme.AddConversionFuncs(
 		ownerToInternalV1beta2,
 		ownerFromInternalV1beta2,
 		stackToInternalV1beta2,

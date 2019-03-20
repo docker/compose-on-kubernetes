@@ -46,7 +46,7 @@ func NewCommandStartComposeServer(stopCh <-chan struct{}) *cobra.Command {
 	codec := apiserver.Codecs.LegacyCodec(internalversion.StorageSchemeGroupVersion)
 
 	o := &apiServerOptions{
-		RecommendedOptions: genericoptions.NewRecommendedOptions(defaultEtcdPathPrefix, codec),
+		RecommendedOptions: genericoptions.NewRecommendedOptions(defaultEtcdPathPrefix, codec, nil),
 	}
 
 	cmd := &cobra.Command{
