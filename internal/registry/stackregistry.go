@@ -31,8 +31,9 @@ type stackRESTGet interface {
 
 type stackRESTStore interface {
 	stackRESTGet
-	CreateStack(ctx context.Context, newStack *iv.Stack, createValidation rest.ValidateObjectFunc, includeUninitialized bool) (*iv.Stack, error)
-	UpdateStack(ctx context.Context, name string, transform StackTransform, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc) (*iv.Stack, bool, error)
+	CreateStack(ctx context.Context, newStack *iv.Stack, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (*iv.Stack, error)
+	UpdateStack(ctx context.Context, name string, transform StackTransform, createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc,
+		forceAllowCreate bool, options *metav1.UpdateOptions) (*iv.Stack, bool, error)
 }
 
 // GetStack wraps the Get method in a more strictly typed way
@@ -49,8 +50,8 @@ func (s *StackREST) GetStack(ctx context.Context, name string, options *metav1.G
 }
 
 // CreateStack wraps the Create method in a more strictly typed way
-func (s *StackREST) CreateStack(ctx context.Context, newStack *iv.Stack, createValidation rest.ValidateObjectFunc, includeUninitialized bool) (*iv.Stack, error) {
-	obj, err := s.Create(ctx, newStack, createValidation, includeUninitialized)
+func (s *StackREST) CreateStack(ctx context.Context, newStack *iv.Stack, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (*iv.Stack, error) {
+	obj, err := s.Create(ctx, newStack, createValidation, options)
 	if err != nil {
 		return nil, err
 	}
@@ -66,7 +67,7 @@ type StackTransform func(ctx context.Context, newObj *iv.Stack, oldObj *iv.Stack
 
 // UpdateStack wraps the Update method in a more strictly typed way
 func (s *StackREST) UpdateStack(ctx context.Context, name string, transform StackTransform,
-	createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc) (*iv.Stack, bool, error) {
+	createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (*iv.Stack, bool, error) {
 	updateObjectInfo := rest.DefaultUpdatedObjectInfo(nil,
 		func(ctx context.Context, newObj runtime.Object, oldObj runtime.Object) (transformedNewObj runtime.Object, err error) {
 			if newObj == nil {
@@ -82,7 +83,7 @@ func (s *StackREST) UpdateStack(ctx context.Context, name string, transform Stac
 			}
 			return transform(ctx, newStack, oldStack)
 		})
-	obj, created, err := s.Update(ctx, name, updateObjectInfo, createValidation, updateValidation)
+	obj, created, err := s.Update(ctx, name, updateObjectInfo, createValidation, updateValidation, forceAllowCreate, options)
 	if err != nil {
 		return nil, false, err
 	}
