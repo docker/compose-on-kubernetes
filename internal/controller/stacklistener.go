@@ -88,9 +88,7 @@ func NewStackListener(clientSet clientset.Interface,
 	reconcileQueue chan<- string,
 	reconcileDeletionQueue chan<- *latest.Stack,
 	ownerCache StackOwnerCacher) *StackListener {
-	stacksInformer := v1alpha3.NewFilteredStackInformer(clientSet, reconciliationInterval, func(o *metav1.ListOptions) {
-		o.IncludeUninitialized = true
-	})
+	stacksInformer := v1alpha3.NewFilteredStackInformer(clientSet, reconciliationInterval, func(o *metav1.ListOptions) {})
 	result := &StackListener{
 		stacks:                 stacksInformer,
 		reconcileQueue:         reconcileQueue,

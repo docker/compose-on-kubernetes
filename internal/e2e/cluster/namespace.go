@@ -5,7 +5,7 @@ import (
 
 	"github.com/docker/compose-on-kubernetes/internal/e2e/wait"
 	"github.com/onsi/ginkgo"
-	"k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
@@ -23,7 +23,7 @@ func CreateNamespace(createConfig, config *rest.Config, name string) (*Namespace
 
 	namespaces := coreV1Set.Namespaces()
 
-	_, err = namespaces.Get(name, metav1.GetOptions{IncludeUninitialized: true})
+	_, err = namespaces.Get(name, metav1.GetOptions{})
 	if err == nil {
 		err := DeleteNamespace(namespaces, name, true)
 		if err != nil {
@@ -70,6 +70,6 @@ func DeleteNamespace(namespaces corev1.NamespaceInterface, ns string, waitForDel
 }
 
 func isDeleted(namespaces corev1.NamespaceInterface, ns string) (bool, error) {
-	_, err := namespaces.Get(ns, metav1.GetOptions{IncludeUninitialized: true})
+	_, err := namespaces.Get(ns, metav1.GetOptions{})
 	return err != nil, nil
 }

@@ -1,10 +1,17 @@
 package cli
 
 import (
+	"crypto"
+	cryptorand "crypto/rand"
+	"crypto/rsa"
 	"crypto/x509"
+	"crypto/x509/pkix"
+	"encoding/pem"
 	"errors"
 	"fmt"
 	"io/ioutil"
+	"math"
+	"math/big"
 	"math/rand"
 	"net"
 	"net/http"
@@ -27,6 +34,7 @@ import (
 	"k8s.io/apiserver/pkg/server/healthz"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
 	certutil "k8s.io/client-go/util/cert"
+	"k8s.io/client-go/util/keyutil"
 	apiregistrationv1beta1types "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1"
 	kubeaggreagatorv1beta1 "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset/typed/apiregistration/v1beta1"
 )
@@ -72,12 +80,28 @@ func NewCommandStartComposeServer(stopCh <-chan struct{}) *cobra.Command {
 	return cmd
 }
 
+func parsePrivateKeyToSigner(pemData []byte) (crypto.Signer, error) {
+	key, err := keyutil.ParsePrivateKeyPEM(pemData)
+	if err != nil {
+		return nil, err
+	}
+	result, ok := key.(crypto.Signer)
+	if !ok {
+		return nil, fmt.Errorf("Key of type %T does not implement crypto.Signer", key)
+	}
+	return result, nil
+}
+
 func generateCertificateIfRequired(o *apiServerOptions) error {
 	if o.RecommendedOptions.SecureServing.ServerCert.CertKey.CertFile != "" && o.RecommendedOptions.SecureServing.ServerCert.CertKey.KeyFile != "" {
 		return nil
 	}
 	// generate tls bundle
-	caKey, err := certutil.NewPrivateKey()
+	caKey, err := keyutil.MakeEllipticPrivateKeyPEM()
+	if err != nil {
+		return err
+	}
+	caSigner, err := parsePrivateKeyToSigner(caKey)
 	if err != nil {
 		return err
 	}
@@ -87,11 +111,11 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 	}
 	caCert, err := certutil.NewSelfSignedCACert(certutil.Config{
 		CommonName: "compose-api-ca-" + strings.ToLower(hostName),
-	}, caKey)
+	}, caSigner)
 	if err != nil {
 		return err
 	}
-	key, err := certutil.NewPrivateKey()
+	key, err := rsa.GenerateKey(cryptorand.Reader, 2048)
 	if err != nil {
 		return err
 	}
@@ -103,15 +127,19 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 		},
 		Usages: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 	}
-	cert, err := certutil.NewSignedCert(cfg, key, caCert, caKey)
+
+	cert, err := newSignedCert(cfg, key, caCert, caSigner)
 
 	if err != nil {
 		return err
 	}
 
-	keyPEM := certutil.EncodePrivateKeyPEM(key)
-	certPEM := certutil.EncodeCertPEM(cert)
-	caPEM := certutil.EncodeCertPEM(caCert)
+	keyPEM, err := keyutil.MarshalPrivateKeyToPEM(key)
+	if err != nil {
+		return err
+	}
+	certPEM := encodeCertPEM(cert)
+	caPEM := encodeCertPEM(caCert)
 
 	dir, err := ioutil.TempDir("", "compose-tls-generated")
 	if err != nil {
@@ -154,6 +182,43 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 
 	}()
 	return nil
+}
+
+func encodeCertPEM(cert *x509.Certificate) []byte {
+	block := pem.Block{
+		Type:  "CERTIFICATE",
+		Bytes: cert.Raw,
+	}
+	return pem.EncodeToMemory(&block)
+}
+
+func newSignedCert(cfg certutil.Config, key crypto.Signer, caCert *x509.Certificate, caKey crypto.Signer) (*x509.Certificate, error) {
+	serial, err := cryptorand.Int(cryptorand.Reader, new(big.Int).SetInt64(math.MaxInt64))
+	if len(cfg.CommonName) == 0 {
+		return nil, errors.New("must specify a CommonName")
+	}
+	if len(cfg.Usages) == 0 {
+		return nil, errors.New("must specify at least one ExtKeyUsage")
+	}
+
+	certTmpl := x509.Certificate{
+		Subject: pkix.Name{
+			CommonName:   cfg.CommonName,
+			Organization: cfg.Organization,
+		},
+		DNSNames:     cfg.AltNames.DNSNames,
+		IPAddresses:  cfg.AltNames.IPs,
+		SerialNumber: serial,
+		NotBefore:    caCert.NotBefore,
+		NotAfter:     time.Now().Add(time.Hour * 24 * 365).UTC(),
+		KeyUsage:     x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
+		ExtKeyUsage:  cfg.Usages,
+	}
+	certDERBytes, err := x509.CreateCertificate(cryptorand.Reader, &certTmpl, caCert, key.Public(), caKey)
+	if err != nil {
+		return nil, err
+	}
+	return x509.ParseCertificate(certDERBytes)
 }
 
 func getTimeout(tlsExpireTimeout time.Duration) time.Duration {
@@ -224,7 +289,7 @@ func runComposeServer(o *apiServerOptions, stopCh <-chan struct{}) error {
 		return err
 	}
 	serverConfig := genericapiserver.NewRecommendedConfig(apiserver.Codecs)
-	if err := o.RecommendedOptions.ApplyTo(serverConfig, apiserver.Scheme); err != nil {
+	if err := o.RecommendedOptions.ApplyTo(serverConfig); err != nil {
 		return err
 	}
 	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(openapi.GetOpenAPIDefinitions, genericopenapi.NewDefinitionNamer(apiserver.Scheme))
@@ -301,7 +366,7 @@ func mergeCABundle(existingPEM, newBundlePEM []byte) ([]byte, error) {
 	var result []byte
 	for _, existingCert := range existing {
 		if existingCert.Subject.CommonName != commonName {
-			result = append(result, certutil.EncodeCertPEM(existingCert)...)
+			result = append(result, encodeCertPEM(existingCert)...)
 		}
 	}
 	result = append(result, newBundlePEM...)

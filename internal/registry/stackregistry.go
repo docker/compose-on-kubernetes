@@ -126,12 +126,12 @@ func NewStackREST(version APIVersion, scheme rest.RESTDeleteStrategy, optsGetter
 	return store, nil
 }
 
-func getStackAttrs(obj runtime.Object) (labels.Set, fields.Set, bool, error) {
+func getStackAttrs(obj runtime.Object) (labels.Set, fields.Set, error) {
 	stack, ok := obj.(*iv.Stack)
 	if !ok {
-		return nil, nil, false, errors.New("given object is not a Stack")
+		return nil, nil, errors.New("given object is not a Stack")
 	}
-	return labels.Set(stack.ObjectMeta.Labels), stackToSelectableFields(stack), stack.Initializers != nil, nil
+	return labels.Set(stack.ObjectMeta.Labels), stackToSelectableFields(stack), nil
 }
 
 func matchStack(label labels.Selector, field fields.Selector) storage.SelectionPredicate {

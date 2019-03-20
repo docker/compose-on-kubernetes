@@ -191,8 +191,7 @@ func (u *k8sResourceUpdater) deleteConfigMapsNoCollection() error {
 }
 func (u *k8sResourceUpdater) deleteSecretsAndConfigMaps() error {
 	listOptions := metav1.ListOptions{
-		LabelSelector:        labels.SelectorForStack(u.originalStack.Name),
-		IncludeUninitialized: true,
+		LabelSelector: labels.SelectorForStack(u.originalStack.Name),
 	}
 	if err := u.k8sclient.CoreV1().Secrets(u.originalStack.Namespace).DeleteCollection(nil, listOptions); err != nil {
 		if kerrors.IsForbidden(err) {

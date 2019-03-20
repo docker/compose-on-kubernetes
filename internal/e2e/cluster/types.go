@@ -396,12 +396,12 @@ func (ns *Namespace) UpdateStackFromSpec(name string, newStack *v1alpha3.Stack) 
 
 // GetStack gets a stack.
 func (ns *Namespace) GetStack(name string) (*v1alpha3.Stack, error) {
-	return ns.stacksv1alpha3.Get(name, metav1.GetOptions{IncludeUninitialized: true})
+	return ns.stacksv1alpha3.Get(name, metav1.GetOptions{})
 }
 
 // ListStacks lists the stacks.
 func (ns *Namespace) ListStacks() ([]v1alpha3.Stack, error) {
-	stacks, err := ns.stacksv1alpha3.List(metav1.ListOptions{IncludeUninitialized: true})
+	stacks, err := ns.stacksv1alpha3.List(metav1.ListOptions{})
 	if err != nil {
 		return nil, err
 	}
@@ -443,7 +443,7 @@ func (ns *Namespace) ContainsNPods(count int) wait.ConditionFunc {
 // PodIsActuallyRemoved is a poller that checks that a pod has been terminated
 func (ns *Namespace) PodIsActuallyRemoved(name string) wait.ConditionFunc {
 	return func() (bool, error) {
-		_, err := ns.pods.Get(name, metav1.GetOptions{IncludeUninitialized: true})
+		_, err := ns.pods.Get(name, metav1.GetOptions{})
 		if kerrors.IsNotFound(err) {
 			return true, nil
 		}
@@ -602,8 +602,7 @@ func (ns *Namespace) IsServiceResponding(service string, url string, expectedTex
 // ListPods lists the pods that match a given selector.
 func (ns *Namespace) ListPods(labelSelector string) ([]apiv1.Pod, error) {
 	pods, err := ns.pods.List(metav1.ListOptions{
-		LabelSelector:        labelSelector,
-		IncludeUninitialized: true,
+		LabelSelector: labelSelector,
 	})
 	if err != nil {
 		return nil, err
@@ -620,8 +619,7 @@ func (ns *Namespace) ListAllPods() ([]apiv1.Pod, error) {
 // ListDeployments lists the deployments that match a given selector.
 func (ns *Namespace) ListDeployments(labelSelector string) ([]appsv1beta2.Deployment, error) {
 	deployments, err := ns.deployments.List(metav1.ListOptions{
-		LabelSelector:        labelSelector,
-		IncludeUninitialized: true,
+		LabelSelector: labelSelector,
 	})
 	if err != nil {
 		return nil, err
@@ -633,8 +631,7 @@ func (ns *Namespace) ListDeployments(labelSelector string) ([]appsv1beta2.Deploy
 // ListServices lists the services that match a given selector.
 func (ns *Namespace) ListServices(labelSelector string) ([]apiv1.Service, error) {
 	services, err := ns.services.List(metav1.ListOptions{
-		LabelSelector:        labelSelector,
-		IncludeUninitialized: true,
+		LabelSelector: labelSelector,
 	})
 	if err != nil {
 		return nil, err
