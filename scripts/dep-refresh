@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-dep ensure -v
+dep ensure -v $*
 
 # remove links to outer directories
 find ./vendor -type l | while read filename
@@ -11,3 +11,6 @@ done
 
 # remove broken links
 find ./vendor -type l -exec test ! -e {} \; -print | xargs rm -f
+
+# for some reason, etcd/cmd/etcd symlink symlink (which is not referenced anywhere) is buggy when vendoring on windows. just remove it for now
+rm ./vendor/github.com/coreos/etcd/cmd/etcd

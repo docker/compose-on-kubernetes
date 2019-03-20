@@ -1,8 +1,8 @@
 ARG     BUILD_BASE
 
-FROM    ${BUILD_BASE}
+FROM    ${BUILD_BASE} as dev
 
-RUN     apk add -U git bash
+RUN     apk add -U git bash curl make mercurial
 
 ARG     GOMETALINTER_TAG=v2.0.11
 RUN     go get -d github.com/alecthomas/gometalinter && \
@@ -19,8 +19,15 @@ RUN     go get -d github.com/alexkohler/nakedret && \
         go build -v -o /usr/local/bin/nakedret . && \
         rm -rf /go/src/* /go/pkg/*
 
+ARG     DEP_VERSION=v0.5.0
+RUN     curl -o /usr/bin/dep -L https://github.com/golang/dep/releases/download/${DEP_VERSION}/dep-linux-amd64 && \
+        chmod +x /usr/bin/dep
+
 WORKDIR /go/src/github.com/docker/compose-on-kubernetes
 COPY    . /go/src/github.com/docker/compose-on-kubernetes
+RUN     chmod +x ./scripts/*
 ENV     CGO_ENABLED=0
+
+FROM    dev as lint
 ENTRYPOINT ["/usr/local/bin/gometalinter"]
 CMD     ["--config=gometalinter.json", "./..."]
