@@ -1,17 +1,10 @@
 package cli
 
 import (
-	"crypto"
-	cryptorand "crypto/rand"
-	"crypto/rsa"
 	"crypto/x509"
-	"crypto/x509/pkix"
-	"encoding/pem"
 	"errors"
 	"fmt"
 	"io/ioutil"
-	"math"
-	"math/big"
 	"math/rand"
 	"net"
 	"net/http"
@@ -26,6 +19,7 @@ import (
 	"github.com/docker/compose-on-kubernetes/api/openapi"
 	"github.com/docker/compose-on-kubernetes/internal/apiserver"
 	"github.com/docker/compose-on-kubernetes/internal/internalversion"
+	"github.com/docker/compose-on-kubernetes/internal/keys"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
@@ -34,7 +28,6 @@ import (
 	"k8s.io/apiserver/pkg/server/healthz"
 	genericoptions "k8s.io/apiserver/pkg/server/options"
 	certutil "k8s.io/client-go/util/cert"
-	"k8s.io/client-go/util/keyutil"
 	apiregistrationv1beta1types "k8s.io/kube-aggregator/pkg/apis/apiregistration/v1beta1"
 	kubeaggreagatorv1beta1 "k8s.io/kube-aggregator/pkg/client/clientset_generated/clientset/typed/apiregistration/v1beta1"
 )
@@ -80,45 +73,24 @@ func NewCommandStartComposeServer(stopCh <-chan struct{}) *cobra.Command {
 	return cmd
 }
 
-func parsePrivateKeyToSigner(pemData []byte) (crypto.Signer, error) {
-	key, err := keyutil.ParsePrivateKeyPEM(pemData)
-	if err != nil {
-		return nil, err
-	}
-	result, ok := key.(crypto.Signer)
-	if !ok {
-		return nil, fmt.Errorf("Key of type %T does not implement crypto.Signer", key)
-	}
-	return result, nil
-}
-
 func generateCertificateIfRequired(o *apiServerOptions) error {
 	if o.RecommendedOptions.SecureServing.ServerCert.CertKey.CertFile != "" && o.RecommendedOptions.SecureServing.ServerCert.CertKey.KeyFile != "" {
 		return nil
 	}
 	// generate tls bundle
-	caKey, err := keyutil.MakeEllipticPrivateKeyPEM()
-	if err != nil {
-		return err
-	}
-	caSigner, err := parsePrivateKeyToSigner(caKey)
-	if err != nil {
-		return err
-	}
 	hostName, err := os.Hostname()
 	if err != nil {
 		return err
 	}
-	caCert, err := certutil.NewSelfSignedCACert(certutil.Config{
-		CommonName: "compose-api-ca-" + strings.ToLower(hostName),
-	}, caSigner)
+	ca, err := keys.NewSelfSignedCA("compose-api-ca-"+strings.ToLower(hostName), nil)
 	if err != nil {
 		return err
 	}
-	key, err := rsa.GenerateKey(cryptorand.Reader, 2048)
+	key, err := keys.NewRSASigner()
 	if err != nil {
 		return err
 	}
+
 	cfg := certutil.Config{
 		CommonName: fmt.Sprintf("%s.%s.svc", o.serviceName, o.serviceNamespace),
 		AltNames: certutil.AltNames{
@@ -128,18 +100,10 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 		Usages: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 	}
 
-	cert, err := newSignedCert(cfg, key, caCert, caSigner)
-
+	cert, err := ca.NewSignedCert(cfg, key.Public())
 	if err != nil {
 		return err
 	}
-
-	keyPEM, err := keyutil.MarshalPrivateKeyToPEM(key)
-	if err != nil {
-		return err
-	}
-	certPEM := encodeCertPEM(cert)
-	caPEM := encodeCertPEM(caCert)
 
 	dir, err := ioutil.TempDir("", "compose-tls-generated")
 	if err != nil {
@@ -157,13 +121,13 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 			KeyFile:  keyPath,
 		},
 	}
-	if err = ioutil.WriteFile(keyPath, keyPEM, 0600); err != nil {
+	if err = ioutil.WriteFile(keyPath, key.PEM(), 0600); err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(certPath, certPEM, 0600); err != nil {
+	if err = ioutil.WriteFile(certPath, keys.EncodeCertPEM(cert), 0600); err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(caPath, caPEM, 0600); err != nil {
+	if err = ioutil.WriteFile(caPath, keys.EncodeCertPEM(ca.Cert()), 0600); err != nil {
 		return err
 	}
 
@@ -171,7 +135,7 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 		// We don't want to actually reach tls timeout
 		// so before it is reached, we exit with non-zero result code in order to let Kubernetes
 		// restart the POD which will re-create a new TLS bundle
-		expiry := caCert.NotAfter
+		expiry := ca.Cert().NotAfter
 		if cert.NotAfter.Before(expiry) {
 			expiry = cert.NotAfter
 		}
@@ -182,43 +146,6 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 
 	}()
 	return nil
-}
-
-func encodeCertPEM(cert *x509.Certificate) []byte {
-	block := pem.Block{
-		Type:  "CERTIFICATE",
-		Bytes: cert.Raw,
-	}
-	return pem.EncodeToMemory(&block)
-}
-
-func newSignedCert(cfg certutil.Config, key crypto.Signer, caCert *x509.Certificate, caKey crypto.Signer) (*x509.Certificate, error) {
-	serial, err := cryptorand.Int(cryptorand.Reader, new(big.Int).SetInt64(math.MaxInt64))
-	if len(cfg.CommonName) == 0 {
-		return nil, errors.New("must specify a CommonName")
-	}
-	if len(cfg.Usages) == 0 {
-		return nil, errors.New("must specify at least one ExtKeyUsage")
-	}
-
-	certTmpl := x509.Certificate{
-		Subject: pkix.Name{
-			CommonName:   cfg.CommonName,
-			Organization: cfg.Organization,
-		},
-		DNSNames:     cfg.AltNames.DNSNames,
-		IPAddresses:  cfg.AltNames.IPs,
-		SerialNumber: serial,
-		NotBefore:    caCert.NotBefore,
-		NotAfter:     time.Now().Add(time.Hour * 24 * 365).UTC(),
-		KeyUsage:     x509.KeyUsageKeyEncipherment | x509.KeyUsageDigitalSignature,
-		ExtKeyUsage:  cfg.Usages,
-	}
-	certDERBytes, err := x509.CreateCertificate(cryptorand.Reader, &certTmpl, caCert, key.Public(), caKey)
-	if err != nil {
-		return nil, err
-	}
-	return x509.ParseCertificate(certDERBytes)
 }
 
 func getTimeout(tlsExpireTimeout time.Duration) time.Duration {
@@ -366,7 +293,7 @@ func mergeCABundle(existingPEM, newBundlePEM []byte) ([]byte, error) {
 	var result []byte
 	for _, existingCert := range existing {
 		if existingCert.Subject.CommonName != commonName {
-			result = append(result, encodeCertPEM(existingCert)...)
+			result = append(result, keys.EncodeCertPEM(existingCert)...)
 		}
 	}
 	result = append(result, newBundlePEM...)
