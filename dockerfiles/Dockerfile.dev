@@ -2,7 +2,11 @@ ARG     BUILD_BASE
 
 FROM    ${BUILD_BASE} as dev
 
-RUN     apk add -U git bash curl make mercurial
+RUN     apk --no-chache add -U git
+RUN     apk --no-chache add -U bash 
+RUN     apk --no-chache add -U curl 
+RUN     apk --no-chache add -U make 
+RUN     apk --no-chache add -U mercurial
 
 ARG     GOMETALINTER_TAG=v2.0.11
 RUN     go get -d github.com/alecthomas/gometalinter && \
@@ -19,7 +23,7 @@ RUN     go get -d github.com/alexkohler/nakedret && \
         go build -v -o /usr/local/bin/nakedret . && \
         rm -rf /go/src/* /go/pkg/*
 
-ARG     DEP_VERSION=v0.5.0
+ARG     DEP_VERSION=v0.5.1
 RUN     curl -o /usr/bin/dep -L https://github.com/golang/dep/releases/download/${DEP_VERSION}/dep-linux-amd64 && \
         chmod +x /usr/bin/dep
 
