@@ -109,7 +109,8 @@ e2e-no-provisioning: e2e-binary ## run the e2e tests on an already provisionned 
 validate-vendor: ## validate vendoring
 	./scripts/validate-vendor
 
-dep: ## refresh dependencies
+vendor: ## do vendoring actions
+	rm -rf ./vendor
 	./scripts/dep-refresh
 
 help: ## this help
