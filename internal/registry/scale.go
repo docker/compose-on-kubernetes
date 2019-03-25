@@ -106,7 +106,7 @@ func (r *stackScaleRest) Get(ctx context.Context, name string, options *metav1.G
 }
 
 func (r *stackScaleRest) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo,
-	createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc) (runtime.Object, bool, error) {
+	createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
 	scale, err := r.Get(ctx, name, &metav1.GetOptions{})
 	if err != nil {
 		return nil, false, err
@@ -137,5 +137,5 @@ func (r *stackScaleRest) Update(ctx context.Context, name string, objInfo rest.U
 			newObj.Generation = oldObj.Generation + 1
 		}
 		return newObj, nil
-	}, createValidation, updateValidation)
+	}, createValidation, updateValidation, forceAllowCreate, options)
 }

@@ -46,13 +46,14 @@ func NewCommandStartComposeServer(stopCh <-chan struct{}) *cobra.Command {
 	codec := apiserver.Codecs.LegacyCodec(internalversion.StorageSchemeGroupVersion)
 
 	o := &apiServerOptions{
-		RecommendedOptions: genericoptions.NewRecommendedOptions(defaultEtcdPathPrefix, codec),
+		RecommendedOptions: genericoptions.NewRecommendedOptions(defaultEtcdPathPrefix, codec, nil),
 	}
 
 	cmd := &cobra.Command{
 		Short: "Launch a compose API server",
 		Long:  "Launch a compose API server",
 		RunE: func(c *cobra.Command, args []string) error {
+			o.RecommendedOptions.ProcessInfo = genericoptions.NewProcessInfo("compose-on-kubernetes", o.serviceNamespace)
 			errors := []error{}
 			errors = append(errors, o.RecommendedOptions.Validate()...)
 			if err := utilerrors.NewAggregate(errors); err != nil {

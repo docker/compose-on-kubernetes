@@ -40,7 +40,7 @@ func (r *stackComposeFileRest) Get(ctx context.Context, name string, options *me
 	return &res, nil
 }
 
-func (r *stackComposeFileRest) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, includeUninitialized bool) (runtime.Object, error) {
+func (r *stackComposeFileRest) Create(ctx context.Context, obj runtime.Object, createValidation rest.ValidateObjectFunc, options *metav1.CreateOptions) (runtime.Object, error) {
 	compose := obj.(*latest.ComposeFile)
 	n, _ := genericapirequest.NamespaceFrom(ctx)
 	log.Infof("Compose create from compose file %s/%s", n, compose.Name)
@@ -49,12 +49,11 @@ func (r *stackComposeFileRest) Create(ctx context.Context, obj runtime.Object, c
 	stack.Namespace = n
 	stack.Spec.ComposeFile = compose.ComposeFile
 	stack.Generation = 1
-	return r.storage.CreateStack(ctx, &stack, createValidation, includeUninitialized)
-	//kube1.9 return r.storage.Create(ctx, &stack, nil, includeUninitialized)
+	return r.storage.CreateStack(ctx, &stack, createValidation, options)
 }
 
 func (r *stackComposeFileRest) Update(ctx context.Context, name string, objInfo rest.UpdatedObjectInfo,
-	createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc) (runtime.Object, bool, error) {
+	createValidation rest.ValidateObjectFunc, updateValidation rest.ValidateObjectUpdateFunc, forceAllowCreate bool, options *metav1.UpdateOptions) (runtime.Object, bool, error) {
 	n, _ := genericapirequest.NamespaceFrom(ctx)
 	log.Infof("Compose update from compose file %s/%s", n, name)
 	return r.storage.UpdateStack(ctx, name, func(ctx context.Context, newObj *iv.Stack, oldObj *iv.Stack) (transformedNewObj *iv.Stack, err error) {
@@ -71,5 +70,5 @@ func (r *stackComposeFileRest) Update(ctx context.Context, name string, objInfo 
 			newObj.Generation = oldObj.Generation + 1
 		}
 		return newObj, nil
-	}, createValidation, updateValidation)
+	}, createValidation, updateValidation, forceAllowCreate, options)
 }
