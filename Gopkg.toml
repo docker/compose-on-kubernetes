@@ -24,19 +24,23 @@
 
 [[constraint]]
   name = "k8s.io/apiextensions-apiserver"
-  revision = "kubernetes-1.11.5"
+  revision = "kubernetes-1.14.0-rc.1"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  revision = "kubernetes-1.11.5"
+  revision = "kubernetes-1.14.0-rc.1"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  revision = "kubernetes-1.11.5"
+  revision = "kubernetes-1.14.0-rc.1"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  revision = "kubernetes-1.11.5"
+  revision = "kubernetes-1.14.0-rc.1"
+
+[[constraint]]
+  name = "k8s.io/component-base"
+  revision = "kubernetes-1.14.0-rc.1"
 
 [[constraint]]
   name = "github.com/mitchellh/go-homedir"
@@ -95,19 +99,23 @@
 
 [[override]]
   name = "k8s.io/api"
-  revision = "kubernetes-1.11.5"
+  revision = "kubernetes-1.14.0-rc.1"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  revision = "v1.11.5"
+  revision = "v1.14.0-rc.1"
 
 [[override]]
   name = "k8s.io/kube-aggregator"
-  revision = "kubernetes-1.11.5"
+  revision = "kubernetes-1.14.0-rc.1"
 
 [[override]]
   name = "k8s.io/kube-openapi"
-  branch = "master"
+  revision = "c59034cc13d587f5ef4e85ca0ade0c1866ae8e1d"
+
+[[override]]
+  name = "github.com/evanphx/json-patch"
+  revision = "5858425f75500d40c52783dce87d085a483ce135"
 
 [prune]
   non-go = true

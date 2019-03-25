@@ -21,15 +21,34 @@ BUILD_ARGS = \
   --build-arg IMAGE_REPO_PREFIX=${IMAGE_REPO_PREFIX}
 
 build-validate-image: ## create the image used for validation
-	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e dockerfiles scripts gometalinter.json | docker build --build-arg BUILD_BASE=${BUILD_BASE_IMAGE} -t kube-compose-validate -f ./dockerfiles/Dockerfile.lint -
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e dockerfiles scripts gometalinter.json Gopkg.toml Gopkg.lock .git | docker build --build-arg BUILD_BASE=${BUILD_BASE_IMAGE} -t kube-compose-validate -f ./dockerfiles/Dockerfile.dev --target lint -
 
-validate: validate-lint validate-pkg ## validate lint and package dependencies
+build-vendor-image:
+	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal e2e dockerfiles scripts gometalinter.json Gopkg.toml Gopkg.lock .git | docker build --build-arg BUILD_BASE=${BUILD_BASE_IMAGE} -t kube-compose-vendor -f ./dockerfiles/Dockerfile.dev --target dev -
+
+validate: validate-lint validate-pkg validate-vendor ## validate lint and package dependencies
 
 validate-lint: build-validate-image ## linter
-	docker run -ti kube-compose-validate
+	docker run -ti --rm kube-compose-validate
 
 validate-pkg: build-validate-image ## validate that no public package used in the CLI depends on internal stuff
-	docker run -ti --entrypoint=/bin/bash kube-compose-validate ./scripts/validate-pkg
+	docker run -ti --rm --entrypoint=/bin/bash kube-compose-validate ./scripts/validate-pkg
+
+validate-vendor: build-vendor-image
+	docker run -ti --rm -v kube-compose-vendor-cache://dep-cache -e DEPCACHEDIR=//dep-cache kube-compose-vendor make validate-vendor
+
+vendor: build-vendor-image
+	$(info Update Vendoring...)
+	docker rm -f kube-compose-vendoring || true
+	# git bash, mingw and msys by default rewrite args that seems to be linux paths and try to expand that to a meaningful windows path
+	# we don't want that to happen when mounting paths referring to files located in the container. Thus we use the double "//" prefix that works
+	# both on windows, linux and macos
+	docker run -it --name kube-compose-vendoring -v kube-compose-vendor-cache://dep-cache -e DEPCACHEDIR=//dep-cache kube-compose-vendor sh -c "make vendor DEP_ARGS=\"$(DEP_ARGS)\""	
+	rm -rf ./vendor
+	docker cp kube-compose-vendoring:/go/src/github.com/docker/compose-on-kubernetes/vendor .
+	docker cp kube-compose-vendoring:/go/src/github.com/docker/compose-on-kubernetes/Gopkg.lock .
+	docker rm -f kube-compose-vendoring
+	$(warning You may need to reset permissions on vendor/*)
 
 ${IMAGE_REPO_PREFIX}e2e-tests:
 	@echo "🌟 build ${IMAGE_REPO_PREFIX}e2e-tests:${TAG}"

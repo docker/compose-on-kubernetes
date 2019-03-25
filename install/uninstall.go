@@ -27,8 +27,7 @@ var (
 		PropagationPolicy: &deleteBackgroundPolicy,
 	}
 	listOptions = metav1.ListOptions{
-		LabelSelector:        everythingSelector,
-		IncludeUninitialized: true,
+		LabelSelector: everythingSelector,
 	}
 )
 
@@ -158,7 +157,7 @@ func UninstallCRD(config *rest.Config) error {
 	}
 	// wait for crd removal
 	for {
-		_, err = crds.ApiextensionsV1beta1().CustomResourceDefinitions().Get("stacks.compose.docker.com", metav1.GetOptions{IncludeUninitialized: true})
+		_, err = crds.ApiextensionsV1beta1().CustomResourceDefinitions().Get("stacks.compose.docker.com", metav1.GetOptions{})
 		if err != nil {
 			if apierrors.IsNotFound(err) {
 				return nil
