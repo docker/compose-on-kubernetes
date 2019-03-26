@@ -24,19 +24,19 @@
 
 [[constraint]]
   name = "k8s.io/apiextensions-apiserver"
-  revision = "kubernetes-1.13.4"
+  version = "kubernetes-1.13.4"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  revision = "kubernetes-1.13.4"
+  version = "kubernetes-1.13.4"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  revision = "kubernetes-1.13.4"
+  version = "kubernetes-1.13.4"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  revision = "kubernetes-1.13.4"
+  version = "kubernetes-1.13.4"
 
 [[constraint]]
   name = "github.com/mitchellh/go-homedir"
@@ -54,15 +54,14 @@
   name = "github.com/stretchr/testify"
   version = "1.1.4"
 
-
-[[constraint]]
+[[override]]
   name = "github.com/Masterminds/semver"
-  revision = "v1.3.1"
+  version = "v1.3.1"
 
 [[override]]
   name = "gopkg.in/yaml.v2"
   source = "https://github.com/simonferquel/yaml"
-  revision="c86e64ed9581b7588e736f0c3e6ecc02cc22996e"
+  revision = "c86e64ed9581b7588e736f0c3e6ecc02cc22996e"
 
 # Transitive dependencies that cannot use tip version.
 [[override]]
@@ -95,15 +94,15 @@
 
 [[override]]
   name = "k8s.io/api"
-  revision = "kubernetes-1.13.4"
+  version = "kubernetes-1.13.4"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  revision = "1.13.4"
+  version = "1.13.4"
 
 [[override]]
   name = "k8s.io/kube-aggregator"
-  revision = "kubernetes-1.13.4"
+  version = "kubernetes-1.13.4"
 
 [[override]]
   name = "k8s.io/kube-openapi"
