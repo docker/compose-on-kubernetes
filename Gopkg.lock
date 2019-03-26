@@ -842,7 +842,7 @@
   ]
   pruneopts = "NUT"
   revision = "40a48860b5abbba9aa891b02b32da429b08d96a0"
-  version = "kubernetes-1.14.0-rc.1"
+  version = "kubernetes-1.14.0"
 
 [[projects]]
   digest = "1:edf8a3c5c2f8f46ae492c7272bb451f18a423639e86b10cd0ec72b56fe50f60a"
@@ -856,7 +856,7 @@
   ]
   pruneopts = "NUT"
   revision = "53c4693659ed354d76121458fb819202dd1635fa"
-  version = "kubernetes-1.14.0-rc.1"
+  version = "kubernetes-1.14.0"
 
 [[projects]]
   digest = "1:2300b34073d3083e4e6808deb63efc33ac53405f169b763861d41f9e58c046b3"
@@ -914,7 +914,7 @@
   ]
   pruneopts = "NUT"
   revision = "d7deff9243b165ee192f5551710ea4285dcfd615"
-  version = "kubernetes-1.14.0-rc.1"
+  version = "kubernetes-1.14.0"
 
 [[projects]]
   digest = "1:87d787517a422043b6cad8a83d0ae43238b930ec50719ac8dee35135a87bedee"
@@ -1017,7 +1017,7 @@
   ]
   pruneopts = "NUT"
   revision = "8b27c41bdbb11ff103caa673315e097bf0289171"
-  version = "kubernetes-1.14.0-rc.1"
+  version = "kubernetes-1.14.0"
 
 [[projects]]
   digest = "1:77b3070d70c87c7d20fe82aa7b3badcad35ae99d1b504abe11f8be482dffc21d"
@@ -1215,7 +1215,7 @@
   ]
   pruneopts = "NUT"
   revision = "6ee68ca5fd8355d024d02f9db0b3b667e8357a0f"
-  version = "kubernetes-1.14.0-rc.1"
+  version = "kubernetes-1.14.0"
 
 [[projects]]
   digest = "1:62505062b5c666aa8a7713dbd199cae0469e08f2df6c61af56970f2a1a4a2a57"
@@ -1226,7 +1226,7 @@
   ]
   pruneopts = "NUT"
   revision = "4a91899592f42b2f5859587cc5a676a5b94d2ee3"
-  version = "kubernetes-1.14.0-rc.1"
+  version = "kubernetes-1.14.0"
 
 [[projects]]
   digest = "1:c263611800c3a97991dbcf9d3bc4de390f6224aaa8ca0a7226a9d734f65a416a"
@@ -1248,7 +1248,7 @@
   ]
   pruneopts = "NUT"
   revision = "da8327669ac57b6e6a06676eeb7de19c9780f76d"
-  version = "kubernetes-1.14.0-rc.1"
+  version = "kubernetes-1.14.0"
 
 [[projects]]
   digest = "1:66a70627ed507b51d7f44e3e8510d234d72c3fa3bf4ad9d99292176b7f33f5be"
