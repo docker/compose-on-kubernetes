@@ -112,7 +112,7 @@ func Backup(config *rest.Config, mode int) error {
 				return err
 			}
 			for i := 0; i < 60; i++ {
-				_, err = crds.Get("stackbackups."+backupAPIGroup, v1.GetOptions{IncludeUninitialized: true})
+				_, err = crds.Get("stackbackups."+backupAPIGroup, v1.GetOptions{})
 				if err != nil {
 					break
 				}
@@ -293,7 +293,7 @@ func DeleteBackup(config *rest.Config) error {
 		return err
 	}
 	for {
-		_, err = crds.Get("stackbackups."+backupAPIGroup, metav1.GetOptions{IncludeUninitialized: true})
+		_, err = crds.Get("stackbackups."+backupAPIGroup, metav1.GetOptions{})
 		if err != nil {
 			if apierrors.IsNotFound(err) {
 				return nil

@@ -91,7 +91,6 @@ func randomDuration(baseDuration time.Duration) time.Duration {
 // NewChildrenListener creates a ChildrenListener
 func NewChildrenListener(clientSet k8sclientset.Interface, reconciliationInterval time.Duration, reconcileQueue chan<- string) (*ChildrenListener, error) {
 	sharedInformersOption := func(o *metav1.ListOptions) {
-		o.IncludeUninitialized = true
 		o.LabelSelector = labels.ForStackName
 	}
 

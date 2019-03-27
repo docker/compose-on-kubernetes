@@ -19,6 +19,7 @@ import (
 	"github.com/docker/compose-on-kubernetes/api/openapi"
 	"github.com/docker/compose-on-kubernetes/internal/apiserver"
 	"github.com/docker/compose-on-kubernetes/internal/internalversion"
+	"github.com/docker/compose-on-kubernetes/internal/keys"
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	utilerrors "k8s.io/apimachinery/pkg/util/errors"
@@ -77,24 +78,19 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 		return nil
 	}
 	// generate tls bundle
-	caKey, err := certutil.NewPrivateKey()
-	if err != nil {
-		return err
-	}
 	hostName, err := os.Hostname()
 	if err != nil {
 		return err
 	}
-	caCert, err := certutil.NewSelfSignedCACert(certutil.Config{
-		CommonName: "compose-api-ca-" + strings.ToLower(hostName),
-	}, caKey)
+	ca, err := keys.NewSelfSignedCA("compose-api-ca-"+strings.ToLower(hostName), nil)
 	if err != nil {
 		return err
 	}
-	key, err := certutil.NewPrivateKey()
+	key, err := keys.NewRSASigner()
 	if err != nil {
 		return err
 	}
+
 	cfg := certutil.Config{
 		CommonName: fmt.Sprintf("%s.%s.svc", o.serviceName, o.serviceNamespace),
 		AltNames: certutil.AltNames{
@@ -103,15 +99,11 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 		},
 		Usages: []x509.ExtKeyUsage{x509.ExtKeyUsageServerAuth},
 	}
-	cert, err := certutil.NewSignedCert(cfg, key, caCert, caKey)
 
+	cert, err := ca.NewSignedCert(cfg, key.Public())
 	if err != nil {
 		return err
 	}
-
-	keyPEM := certutil.EncodePrivateKeyPEM(key)
-	certPEM := certutil.EncodeCertPEM(cert)
-	caPEM := certutil.EncodeCertPEM(caCert)
 
 	dir, err := ioutil.TempDir("", "compose-tls-generated")
 	if err != nil {
@@ -129,13 +121,13 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 			KeyFile:  keyPath,
 		},
 	}
-	if err = ioutil.WriteFile(keyPath, keyPEM, 0600); err != nil {
+	if err = ioutil.WriteFile(keyPath, key.PEM(), 0600); err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(certPath, certPEM, 0600); err != nil {
+	if err = ioutil.WriteFile(certPath, keys.EncodeCertPEM(cert), 0600); err != nil {
 		return err
 	}
-	if err = ioutil.WriteFile(caPath, caPEM, 0600); err != nil {
+	if err = ioutil.WriteFile(caPath, keys.EncodeCertPEM(ca.Cert()), 0600); err != nil {
 		return err
 	}
 
@@ -143,7 +135,7 @@ func generateCertificateIfRequired(o *apiServerOptions) error {
 		// We don't want to actually reach tls timeout
 		// so before it is reached, we exit with non-zero result code in order to let Kubernetes
 		// restart the POD which will re-create a new TLS bundle
-		expiry := caCert.NotAfter
+		expiry := ca.Cert().NotAfter
 		if cert.NotAfter.Before(expiry) {
 			expiry = cert.NotAfter
 		}
@@ -224,7 +216,7 @@ func runComposeServer(o *apiServerOptions, stopCh <-chan struct{}) error {
 		return err
 	}
 	serverConfig := genericapiserver.NewRecommendedConfig(apiserver.Codecs)
-	if err := o.RecommendedOptions.ApplyTo(serverConfig, apiserver.Scheme); err != nil {
+	if err := o.RecommendedOptions.ApplyTo(serverConfig); err != nil {
 		return err
 	}
 	serverConfig.OpenAPIConfig = genericapiserver.DefaultOpenAPIConfig(openapi.GetOpenAPIDefinitions, genericopenapi.NewDefinitionNamer(apiserver.Scheme))
@@ -301,7 +293,7 @@ func mergeCABundle(existingPEM, newBundlePEM []byte) ([]byte, error) {
 	var result []byte
 	for _, existingCert := range existing {
 		if existingCert.Subject.CommonName != commonName {
-			result = append(result, certutil.EncodeCertPEM(existingCert)...)
+			result = append(result, keys.EncodeCertPEM(existingCert)...)
 		}
 	}
 	result = append(result, newBundlePEM...)

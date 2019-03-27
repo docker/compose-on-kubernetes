@@ -258,8 +258,7 @@ func (c *installer) isInstalled() (Status, error) {
 		}
 	}
 	apps, err := c.appsClient.Deployments(metav1.NamespaceAll).List(metav1.ListOptions{
-		LabelSelector:        everythingSelector,
-		IncludeUninitialized: true,
+		LabelSelector: everythingSelector,
 	})
 	if err != nil {
 		return Status{}, err
