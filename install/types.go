@@ -18,6 +18,7 @@ type OptionsCommon struct {
 	ControllerAffinity     *corev1types.Affinity
 	HealthzCheckPort       int
 	PullPolicy             corev1types.PullPolicy
+	APIServerReplicas      *int32
 }
 
 // UnsafeOptions holds install options for the api extension

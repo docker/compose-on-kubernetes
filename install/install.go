@@ -14,8 +14,8 @@ import (
 	"github.com/docker/compose-on-kubernetes/internal/e2e/wait"
 	log "github.com/sirupsen/logrus"
 	appsv1beta2types "k8s.io/api/apps/v1beta2"
-	"k8s.io/api/core/v1"
 	corev1types "k8s.io/api/core/v1"
+	v1 "k8s.io/api/core/v1"
 	rbacv1types "k8s.io/api/rbac/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -637,6 +637,15 @@ func (c *installer) configureAPIServerImage() (string, []string, []corev1types.E
 		c.commonOptions.PullPolicy
 }
 
+func (c *installer) validateOptions() error {
+	if c.etcdOptions == nil && c.commonOptions.APIServerReplicas != nil && *c.commonOptions.APIServerReplicas != 1 {
+		// etcdOptions == nil makes the installer run etcd as a sidecar container of the APIServer
+		// thus, the user cannot scale it
+		return errors.New("can't specify the API server replicas without referencing an external etcd instance")
+	}
+	return nil
+}
+
 func (c *installer) createAPIServer(ctx *installerContext) error {
 	log.Debugf("Create API server deployment and service in namespace %q", c.commonOptions.Namespace)
 	image, args, env, pullPolicy := c.configureAPIServerImage()
@@ -692,6 +701,7 @@ func (c *installer) createAPIServer(ctx *installerContext) error {
 					Affinity: affinity,
 				},
 			},
+			Replicas: c.commonOptions.APIServerReplicas,
 		},
 	}
 	if c.commonOptions.HealthzCheckPort == 0 {

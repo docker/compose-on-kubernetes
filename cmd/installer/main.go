@@ -82,6 +82,10 @@ func parseOptions() (installerConfig, error) {
 	if flags.skipLivenessProbes {
 		options.HealthzCheckPort = 0
 	}
+	if flags.apiServerReplicas != 1 {
+		replicas := int32(flags.apiServerReplicas)
+		options.APIServerReplicas = &replicas
+	}
 	return installerConfig{
 		options:    options,
 		restConfig: config,
@@ -106,6 +110,7 @@ type additionalFlags struct {
 	kubeconfig         string
 	uninstall          bool
 	skipLivenessProbes bool
+	apiServerReplicas  int
 }
 
 func parseFlags(customFlags *additionalFlags, options *install.SafeOptions) {
@@ -128,6 +133,7 @@ func parseFlags(customFlags *additionalFlags, options *install.SafeOptions) {
 	flag.StringVar(&customFlags.tlsBundle.key, "tls-key-file", "", "Server TLS private key")
 	flag.BoolVar(&customFlags.uninstall, "uninstall", false, "Uninstall")
 	flag.StringVar(&customFlags.logLevel, "log-level", "info", `Set the log level ("debug"|"info"|"warn"|"error"|"fatal")`)
+	flag.IntVar(&customFlags.apiServerReplicas, "apiserver-replicas", 1, "Number of replicas for the API Server")
 	kubeconfigFlag := customflags.EnvString("kubeconfig", "~/.kube/config", "KUBECONFIG", "Path to a kubeconfig file (set to \"\" to use incluster config)")
 	flag.Parse()
 	customFlags.kubeconfig = kubeconfigFlag.String()
