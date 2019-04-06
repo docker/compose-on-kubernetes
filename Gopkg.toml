@@ -92,7 +92,7 @@
 
 [[override]]
   name = "google.golang.org/grpc"
-  version = "~v1.7.5"
+  version = "~v1.12.2"
 
 [[override]]
   name = "github.com/ugorji/go"
