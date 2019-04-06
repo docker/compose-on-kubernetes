@@ -67,6 +67,12 @@
   source = "https://github.com/simonferquel/yaml"
   revision = "c86e64ed9581b7588e736f0c3e6ecc02cc22996e"
 
+# Use GitHub mirror to not require Mercurial
+[[override]]
+  name = "bitbucket.org/ww/goautoneg"
+  source = "https://github.com/adjust/goautoneg"
+  revision = "d788f35a0315672bc90f50a6145d1252a230ee0d"
+
 # Transitive dependencies that cannot use tip version.
 [[override]]
   name = "github.com/xeipuuv/gojsonschema"
