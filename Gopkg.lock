@@ -82,7 +82,7 @@
   revision = "004b46473808b3e7a4a3049c20e4376c91eb966d"
 
 [[projects]]
-  digest = "1:a39261d0a65ff4366da29999603605a05da8efe1ad347271df0a0f1bed2df4b9"
+  digest = "1:272e1c861ec1c8f9799f40b9a3fab037a927475b8c9771f738e6cedca6ca9f28"
   name = "github.com/coreos/etcd"
   packages = [
     "auth/authpb",
@@ -95,8 +95,7 @@
     "pkg/types",
   ]
   pruneopts = "NUT"
-  revision = "56536de5511128d0c7997aa2b792a4de575da536"
-  version = "v3.3.7"
+  revision = "v3.3.9"
 
 [[projects]]
   digest = "1:1da3a221f0bc090792d3a2a080ff09008427c0e0f0533a4ed6abd8994421da73"

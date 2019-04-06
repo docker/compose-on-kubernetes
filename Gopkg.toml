@@ -100,7 +100,7 @@
 
 [[override]]
   name = "github.com/coreos/etcd"
-  version = "~v3.3.6"
+  revision = "v3.3.9"
 
 [[override]]
   name = "k8s.io/api"
