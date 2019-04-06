@@ -78,17 +78,18 @@
   name = "github.com/xeipuuv/gojsonschema"
   revision = "93e72a773fade158921402d6a24c819b48aba29d"
 
-[[constraint]]
+[[override]]
   name = "github.com/docker/cli"
-  branch = "master"
+  branch = "19.03"
 
 [[override]]
   name = "github.com/docker/docker"
-  revision = "c752b0991e31ba9869ab6a0661af57e9423874fb"
+  source = "https://github.com/docker/engine"
+  branch = "19.03"
 
 [[override]]
   name = "github.com/docker/distribution"
-  revision = "83389a148052d74ac602f5f1d62f86ff2f3c4aa5"
+  revision = "0d3efadf0154c2b8a4e7b6621fff9809655cc580"
 
 [[override]]
   name = "google.golang.org/grpc"

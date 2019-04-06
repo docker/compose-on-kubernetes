@@ -114,8 +114,8 @@
   version = "v1.1.1"
 
 [[projects]]
-  branch = "master"
-  digest = "1:855a173bf0271b34d5e8ca6a133b026973fb00fcd951d45a8bb9c0f6c7119c0b"
+  branch = "19.03"
+  digest = "1:420ab627461ceb5bdf306478598e433bab5691fefaef28b424a9d43fb590c325"
   name = "github.com/docker/cli"
   packages = [
     "cli/compose/interpolation",
@@ -126,10 +126,18 @@
     "opts",
   ]
   pruneopts = "NUT"
-  revision = "f5393c904aa24c1dae41e1112bf70d1ed5c6bb15"
+  revision = "ba9934d4041e37c32160316aad863d7d2dbebded"
 
 [[projects]]
-  digest = "1:f83510fa83565934a82783cb5f0e98af08abd62007d9022ec0aebbbeeab5bd0d"
+  digest = "1:de4a141036d93a75ae89ed0868ab7759c1f1b74131cd3a6a7ce4071bce006fd6"
+  name = "github.com/docker/distribution"
+  packages = ["registry/api/errcode"]
+  pruneopts = "NUT"
+  revision = "0d3efadf0154c2b8a4e7b6621fff9809655cc580"
+
+[[projects]]
+  branch = "19.03"
+  digest = "1:3f2c381c5401736d9dbc1f9bc73dd83953ecc150689eddddec15bc6b2284b1e3"
   name = "github.com/docker/docker"
   packages = [
     "api/types",
@@ -143,13 +151,15 @@
     "api/types/swarm",
     "api/types/swarm/runtime",
     "api/types/versions",
+    "errdefs",
     "pkg/homedir",
     "pkg/idtools",
     "pkg/mount",
     "pkg/system",
   ]
   pruneopts = "NUT"
-  revision = "c752b0991e31ba9869ab6a0661af57e9423874fb"
+  revision = "dbe4a30928d418e0570891a09703bcbc0e4997a1"
+  source = "https://github.com/docker/engine"
 
 [[projects]]
   digest = "1:ade935c55cd6d0367c843b109b09c9d748b1982952031414740750fdf94747eb"
