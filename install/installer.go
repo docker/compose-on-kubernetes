@@ -342,6 +342,9 @@ func (c *installer) install(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+	if err := c.validateOptions(); err != nil {
+		return err
+	}
 	if installStatus.IsInstalled && !c.controllerOnly {
 		match, message := installStatus.match(c)
 		log.Info(message)
