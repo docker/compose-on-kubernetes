@@ -67,26 +67,33 @@
   source = "https://github.com/simonferquel/yaml"
   revision = "c86e64ed9581b7588e736f0c3e6ecc02cc22996e"
 
+# Use GitHub mirror to not require Mercurial
+[[override]]
+  name = "bitbucket.org/ww/goautoneg"
+  source = "https://github.com/adjust/goautoneg"
+  revision = "d788f35a0315672bc90f50a6145d1252a230ee0d"
+
 # Transitive dependencies that cannot use tip version.
 [[override]]
   name = "github.com/xeipuuv/gojsonschema"
   revision = "93e72a773fade158921402d6a24c819b48aba29d"
 
-[[constraint]]
+[[override]]
   name = "github.com/docker/cli"
-  branch = "master"
+  branch = "19.03"
 
 [[override]]
   name = "github.com/docker/docker"
-  revision = "c752b0991e31ba9869ab6a0661af57e9423874fb"
+  source = "https://github.com/docker/engine"
+  branch = "19.03"
 
 [[override]]
   name = "github.com/docker/distribution"
-  revision = "83389a148052d74ac602f5f1d62f86ff2f3c4aa5"
+  revision = "0d3efadf0154c2b8a4e7b6621fff9809655cc580"
 
 [[override]]
   name = "google.golang.org/grpc"
-  version = "~v1.7.5"
+  version = "~v1.12.2"
 
 [[override]]
   name = "github.com/ugorji/go"
@@ -94,7 +101,7 @@
 
 [[override]]
   name = "github.com/coreos/etcd"
-  version = "~v3.3.6"
+  revision = "v3.3.9"
 
 [[override]]
   name = "k8s.io/api"

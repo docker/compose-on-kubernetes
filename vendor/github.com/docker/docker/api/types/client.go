@@ -7,7 +7,7 @@ import (
 
 	"github.com/docker/docker/api/types/container"
 	"github.com/docker/docker/api/types/filters"
-	"github.com/docker/go-units"
+	units "github.com/docker/go-units"
 )
 
 // CheckpointCreateOptions holds parameters to create a checkpoint from a container
@@ -187,6 +187,15 @@ type ImageBuildOptions struct {
 	// build request. The same identifier can be used to gracefully cancel the
 	// build with the cancel request.
 	BuildID string
+	// Outputs defines configurations for exporting build results. Only supported
+	// in BuildKit mode
+	Outputs []ImageBuildOutput
+}
+
+// ImageBuildOutput defines configuration for exporting a build result
+type ImageBuildOutput struct {
+	Type  string
+	Attrs map[string]string
 }
 
 // BuilderVersion sets the version of underlying builder to use
