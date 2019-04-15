@@ -1,8 +1,8 @@
 include common.mk
 
-BUILD_BASE_IMAGE = golang:1.12.2-alpine3.9
-TEST_BASE_IMAGE = golang:1.12.2
-RUN_BASE_IMAGE = alpine:3.9.2
+BUILD_BASE_IMAGE = golang:1.12.4-alpine3.9
+TEST_BASE_IMAGE = golang:1.12.4
+RUN_BASE_IMAGE = alpine:3.9.3
 KUBERNETES_VERSION ?= 1.13.3
 KIND_TAG = v$(KUBERNETES_VERSION)-$(TAG)
 IMAGES = ${IMAGE_REPO_PREFIX}controller ${IMAGE_REPO_PREFIX}controller-coverage ${IMAGE_REPO_PREFIX}e2e-tests ${IMAGE_REPO_PREFIX}e2e-benchmark ${IMAGE_REPO_PREFIX}api-server ${IMAGE_REPO_PREFIX}api-server-coverage ${IMAGE_REPO_PREFIX}installer
