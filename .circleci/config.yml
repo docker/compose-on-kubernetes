@@ -30,7 +30,7 @@ aliases:
           cd /root/src/sigs.k8s.io/kind
           git reset --hard 302bb7dbb611236aeadd6d1741c9f237d1ec28d2
           go install
-          cd -        
+          cd -
           export PATH="$PATH:/root/bin"
           export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
           export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
@@ -46,7 +46,7 @@ aliases:
     - persist_to_workspace:
         root: /root/
         paths:
-          - 'src/github.com/docker/compose-on-kubernetes/e2e-coverage/compose-*/coverage.txt'    
+          - 'src/github.com/docker/compose-on-kubernetes/e2e-coverage/compose-*/coverage.txt'
 
   e2e-benchmark-kind-steps: &e2e-benchmark-kind-steps
     - attach_workspace:
@@ -60,7 +60,7 @@ aliases:
           cd /root/src/sigs.k8s.io/kind
           git reset --hard 302bb7dbb611236aeadd6d1741c9f237d1ec28d2
           go install
-          cd -        
+          cd -
           export PATH="$PATH:/root/bin"
           export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
           export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
@@ -99,7 +99,7 @@ jobs:
           paths:
             - 'src'
             - '.docker'
-  
+
   checkout-pr:
     docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -109,7 +109,7 @@ jobs:
         root: /root/
         paths:
           - 'src'
-    
+
   validate:
     docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
@@ -275,15 +275,15 @@ jobs:
           version: 17.07.0-ce
       - deploy:
           name: push-to-hub
-          command: |      
+          command: |
             if [ "$CIRCLE_TAG" == "" ]; then
               # case where we are not on a tag
               exit 0
-            fi      
+            fi
             export IMAGE_REPOSITORY=docker
             export IMAGE_PREFIX=kube-compose-
             export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY}/${IMAGE_PREFIX}
-            TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}}          
+            TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}}
             GOOS=linux make bin/installer
             mv bin/installer bin/installer-linux
             GOOS=darwin make bin/installer
@@ -354,7 +354,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       - test-unit:
           requires:
@@ -362,7 +362,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       - images:
           requires:
@@ -370,7 +370,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       - validate:
           requires:
@@ -378,7 +378,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       - validate-vendor:
           requires:
@@ -386,7 +386,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       - check-licenses:
           requires:
@@ -394,7 +394,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       - test-unit:
           requires:
@@ -402,7 +402,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       - e2e-kind-1_11:
           requires:
@@ -410,7 +410,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       - e2e-kind-1_13:
           requires:
@@ -418,7 +418,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       - e2e-kind-1_14:
           requires:
@@ -426,7 +426,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       # - e2e-benchmark-kind:
       #     requires:
@@ -446,7 +446,7 @@ workflows:
           filters:
             tags:
               only: /v.*/
-            branches:              
+            branches:
               only: /^(?!pull\/).*$/
       - push-to-hub:
           requires:
@@ -470,4 +470,4 @@ workflows:
               only: master
             tags:
               only: /v.*/
-              
+
