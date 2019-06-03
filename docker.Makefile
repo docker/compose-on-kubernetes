@@ -1,8 +1,8 @@
 include common.mk
 
-BUILD_BASE_IMAGE = golang:1.12.4-alpine3.9
-TEST_BASE_IMAGE = golang:1.12.4
-RUN_BASE_IMAGE = alpine:3.9.3
+BUILD_BASE_IMAGE = golang:1.12.5-alpine3.9
+TEST_BASE_IMAGE = golang:1.12.5
+RUN_BASE_IMAGE = alpine:3.9.4
 KUBERNETES_VERSION ?= 1.13.3
 KIND_TAG = v$(KUBERNETES_VERSION)-$(TAG)
 IMAGES = ${IMAGE_REPO_PREFIX}controller ${IMAGE_REPO_PREFIX}controller-coverage ${IMAGE_REPO_PREFIX}e2e-tests ${IMAGE_REPO_PREFIX}e2e-benchmark ${IMAGE_REPO_PREFIX}api-server ${IMAGE_REPO_PREFIX}api-server-coverage ${IMAGE_REPO_PREFIX}installer
@@ -43,7 +43,7 @@ vendor: build-vendor-image
 	# git bash, mingw and msys by default rewrite args that seems to be linux paths and try to expand that to a meaningful windows path
 	# we don't want that to happen when mounting paths referring to files located in the container. Thus we use the double "//" prefix that works
 	# both on windows, linux and macos
-	docker run -it --name kube-compose-vendoring -v kube-compose-vendor-cache://dep-cache -e DEPCACHEDIR=//dep-cache kube-compose-vendor sh -c "make vendor DEP_ARGS=\"$(DEP_ARGS)\""	
+	docker run -it --name kube-compose-vendoring -v kube-compose-vendor-cache://dep-cache -e DEPCACHEDIR=//dep-cache kube-compose-vendor sh -c "make vendor DEP_ARGS=\"$(DEP_ARGS)\""
 	rm -rf ./vendor
 	docker cp kube-compose-vendoring:/go/src/github.com/docker/compose-on-kubernetes/vendor .
 	docker cp kube-compose-vendoring:/go/src/github.com/docker/compose-on-kubernetes/Gopkg.lock .
@@ -81,7 +81,7 @@ ${IMAGE_REPO_PREFIX}installer:
 images: $(IMAGES) ## build images
 	@echo $(IMAGES)
 
-save-coverage-images: 
+save-coverage-images:
 	@echo "🌟 save ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG)"
 	@mkdir -p pre-loaded-images
 	@docker save -o pre-loaded-images/coverage-enabled-images.tar ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG)
