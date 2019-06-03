@@ -1,7 +1,7 @@
 include common.mk
 
-BUILD_BASE_IMAGE = golang:1.12.4-alpine3.9
-TEST_BASE_IMAGE = golang:1.12.4
+BUILD_BASE_IMAGE = golang:1.12.5-alpine3.9
+TEST_BASE_IMAGE = golang:1.12.5
 RUN_BASE_IMAGE = alpine:3.9.3
 KUBERNETES_VERSION ?= 1.13.3
 KIND_TAG = v$(KUBERNETES_VERSION)-$(TAG)
