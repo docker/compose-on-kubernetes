@@ -875,6 +875,7 @@ services
 	})
 
 	It("Should support bind volumes", func() {
+		Skip("FIXME (chris-crone): Flaky test")
 		_, err := ns.CreateStack(defaultStrategy, "app", `version: "3.4"
 services:
   test:

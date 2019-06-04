@@ -4,8 +4,9 @@ BINARIES = bin/compose-controller bin/api-server bin/installer bin/reconciliatio
 TEST_PACKAGES := ${shell go list ./internal/... ./cmd/... ./api/... ./install/... | grep -v "_generated" | sed 's,github.com/docker/compose-on-kubernetes/,,' | uniq}
 # Number of tests we expect to be skipped in e2e suite. Rule will fail if mismatch.
 # We currently expect the two volume tests to fail on cluster without a default
-# dynamic volume provisioner ('kubectl get storageclass' to check).
-E2E_EXPECTED_SKIP ?= 2
+# dynamic volume provisioner ('kubectl get storageclass' to check) along with
+# the bind mount test which has been reported flaky.
+E2E_EXPECTED_SKIP ?= 3
 
 VERBOSE_GO :=
 ifeq ($(VERBOSE),true)
