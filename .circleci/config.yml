@@ -2,9 +2,9 @@ version: 2
 
 aliases:
   kube_versions:
-    - kube_1_11: &kube_1_11 "1.11.7"
-    - kube_1_13: &kube_1_13 "1.13.3"
-    - kube_1_14: &kube_1_14 "1.14.1"
+    - kube_1_11: &kube_1_11 "1.11.10"
+    - kube_1_13: &kube_1_13 "1.13.7"
+    - kube_1_14: &kube_1_14 "1.14.3"
   docker-login: &docker-login
     username: $DOCKER_USER
     password: $DOCKER_PASS
@@ -28,7 +28,8 @@ aliases:
         command: |
           git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
           cd /root/src/sigs.k8s.io/kind
-          git reset --hard 302bb7dbb611236aeadd6d1741c9f237d1ec28d2
+          git reset --hard cb35e540987e58257c842aaeef0fee350d8967fb
+          GO111MODULE=on go mod vendor
           go install
           cd -
           export PATH="$PATH:/root/bin"
@@ -37,9 +38,9 @@ aliases:
           export IMAGE_PREFIX=kube-compose-
           export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
           export KUBERNETES_VERSION_PARAM="${KUBERNETES_VERSION:+KUBERNETES_VERSION=$KUBERNETES_VERSION}"
-          mkdir -p ./pre-loaded-images
-          cp /root/kube-compose-api-server-coverage.tar /root/kube-compose-controller-coverage.tar ./pre-loaded-images/
-          make -f docker.Makefile ${KUBERNETES_VERSION_PARAM} TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
+          make -f docker.Makefile ${KUBERNETES_VERSION_PARAM} create-kind-cluster
+          make -f docker.Makefile IMAGE_ARCHIVE=/root/kube-compose-api-server-coverage.tar load-kind-image-archive
+          make -f docker.Makefile IMAGE_ARCHIVE=/root/kube-compose-controller-coverage.tar load-kind-image-archive
           docker load -i /root/kube-compose-e2e-tests.tar
           make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-kind-circleci
         no_output_timeout: 15m
@@ -58,7 +59,8 @@ aliases:
         command: |
           git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
           cd /root/src/sigs.k8s.io/kind
-          git reset --hard 302bb7dbb611236aeadd6d1741c9f237d1ec28d2
+          git reset --hard cb35e540987e58257c842aaeef0fee350d8967fb
+          GO111MODULE=on go mod vendor
           go install
           cd -
           export PATH="$PATH:/root/bin"
@@ -67,9 +69,9 @@ aliases:
           export IMAGE_PREFIX=kube-compose-
           export IMAGE_REPO_PREFIX=${IMAGE_REPOSITORY:-dockereng}/${IMAGE_PREFIX}
           export KUBERNETES_VERSION_PARAM="${KUBERNETES_VERSION:+KUBERNETES_VERSION=$KUBERNETES_VERSION}"
-          mkdir -p ./pre-loaded-images
-          cp /root/kube-compose-api-server.tar /root/kube-compose-controller.tar ./pre-loaded-images/
-          make -f docker.Makefile ${KUBERNETES_VERSION_PARAM} TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} create-kind-cluster
+          make -f docker.Makefile ${KUBERNETES_VERSION_PARAM} create-kind-cluster
+          make -f docker.Makefile IMAGE_ARCHIVE=/root/kube-compose-api-server-coverage.tar load-kind-image-archive
+          make -f docker.Makefile IMAGE_ARCHIVE=/root/kube-compose-controller-coverage.tar load-kind-image-archive
           docker load -i /root/kube-compose-e2e-benchmark.tar
           make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-benchmark-kind-circleci
         no_output_timeout: 15m
@@ -185,6 +187,7 @@ jobs:
     environment:
       GOPATH: "/root"
       KUBERNETES_VERSION: *kube_1_11
+      KIND_VERSION: "0.4.0"
     steps: *e2e-kind-steps
   e2e-kind-1_13:
     docker: *public-golang
@@ -192,6 +195,7 @@ jobs:
     environment:
       GOPATH: "/root"
       KUBERNETES_VERSION: *kube_1_13
+      KIND_VERSION: "0.4.0"
     steps: *e2e-kind-steps
   e2e-kind-1_14:
     docker: *public-golang
@@ -199,13 +203,14 @@ jobs:
     environment:
       GOPATH: "/root"
       KUBERNETES_VERSION: *kube_1_14
+      KIND_VERSION: "0.4.0"
     steps: *e2e-kind-steps
   e2e-benchmark-kind:
     docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
-      KUBERNETES_VERSION: "1.13.3"
+      KUBERNETES_VERSION: *kube_1_13
     steps: *e2e-benchmark-kind-steps
   test-unit:
     docker: *public-golang

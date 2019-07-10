@@ -3,8 +3,8 @@ include common.mk
 BUILD_BASE_IMAGE = golang:1.12.6-alpine3.10
 TEST_BASE_IMAGE = golang:1.12.6
 RUN_BASE_IMAGE = alpine:3.10.0
-KUBERNETES_VERSION ?= 1.13.3
-KIND_TAG = v$(KUBERNETES_VERSION)-$(TAG)
+KUBERNETES_VERSION ?= 1.13.7
+KIND_VERSION ?= 0.4.0
 IMAGES = ${IMAGE_REPO_PREFIX}controller ${IMAGE_REPO_PREFIX}controller-coverage ${IMAGE_REPO_PREFIX}e2e-tests ${IMAGE_REPO_PREFIX}e2e-benchmark ${IMAGE_REPO_PREFIX}api-server ${IMAGE_REPO_PREFIX}api-server-coverage ${IMAGE_REPO_PREFIX}installer
 PUSH_IMAGES = push/${IMAGE_REPO_PREFIX}controller push/${IMAGE_REPO_PREFIX}api-server push/${IMAGE_REPO_PREFIX}installer
 DOCKERFILE = Dockerfile
@@ -86,13 +86,13 @@ save-coverage-images:
 	@mkdir -p pre-loaded-images
 	@docker save -o pre-loaded-images/coverage-enabled-images.tar ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG)
 
-build-kind-image:
-	@echo "🌟 build ${IMAGE_REPO_PREFIX}e2e-kind-node:$(KIND_TAG)"
-	@tar cf - Dockerfile.kind pre-loaded-images | docker build -t ${IMAGE_REPO_PREFIX}e2e-kind-node:$(KIND_TAG) --build-arg BASE_IMAGE=dockertesteng/kind-node:v$(KUBERNETES_VERSION) -f Dockerfile.kind -
-
-create-kind-cluster: build-kind-image
+create-kind-cluster:
 	@echo "🌟 Create kind cluster"
-	@kind create cluster --name compose-on-kube --image ${IMAGE_REPO_PREFIX}e2e-kind-node:$(KIND_TAG)
+	@kind create cluster --name compose-on-kube --image dockertesteng/kind-node:v$(KUBERNETES_VERSION)-kind$(KIND_VERSION)
+
+load-kind-image-archive:
+	@echo "🌟 Load archive $(IMAGE_ARCHIVE) in kind cluster"
+	@kind load image-archive --name compose-on-kube $(IMAGE_ARCHIVE)
 
 delete-kind-cluster:
 	@echo "🌟 Delete kind cluster"
