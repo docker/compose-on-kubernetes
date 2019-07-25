@@ -60,7 +60,17 @@ func NewCommandStartComposeServer(stopCh <-chan struct{}) *cobra.Command {
 			if err := utilerrors.NewAggregate(errors); err != nil {
 				return err
 			}
-			return runComposeServer(o, stopCh)
+			for {
+				err := runComposeServer(o, stopCh)
+				// If the compose-api starts before the API server is listening then we can get a transient connection refused
+				// while looking up missing authentication information in the cluster (see #120).
+				if err != nil && strings.HasSuffix(err.Error(), "connection refused") {
+					fmt.Fprintf(os.Stderr, "unable to start compose server: %s. Will retry in 5s\n", err)
+					time.Sleep(5 * time.Second)
+					continue
+				}
+				return err
+			}
 		},
 	}
 
