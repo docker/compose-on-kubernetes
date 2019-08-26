@@ -4,9 +4,9 @@ aliases:
   kube_versions:
     - kube_1_11: &kube_1_11 "1.11.10"
     - kube_1_13: &kube_1_13 "1.13.7"
-    - kube_1_14: &kube_1_14 "1.14.3"
+    - kube_1_14: &kube_1_14 "1.14.6"
     - kube_1_15: &kube_1_15 "1.15.0"
-  kind_version: &kind_version "0.4.0"
+  kind_version: &kind_version "0.5.1"
   docker-login: &docker-login
     username: $DOCKER_USER
     password: $DOCKER_PASS
@@ -17,7 +17,7 @@ aliases:
     - image: dockereng/kube-compose-ci-golang
       auth: *docker-login
   public-golang: &public-golang
-    - image: circleci/golang:1.12.6
+    - image: circleci/golang:1.12.9
       user: root
 
   e2e-kind-steps: &e2e-kind-steps
@@ -30,7 +30,7 @@ aliases:
         command: |
           git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
           cd /root/src/sigs.k8s.io/kind
-          git reset --hard cb35e540987e58257c842aaeef0fee350d8967fb
+          git reset --hard 3907329b4ece1feab97d6281de23ea6e11812a1a
           GO111MODULE=on go mod vendor
           go install
           cd -
@@ -61,7 +61,7 @@ aliases:
         command: |
           git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
           cd /root/src/sigs.k8s.io/kind
-          git reset --hard cb35e540987e58257c842aaeef0fee350d8967fb
+          git reset --hard 3907329b4ece1feab97d6281de23ea6e11812a1a
           GO111MODULE=on go mod vendor
           go install
           cd -
