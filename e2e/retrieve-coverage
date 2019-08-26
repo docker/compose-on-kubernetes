@@ -4,7 +4,7 @@ kubectlx ()
     kubectl -n e2e "$@"
 }
 
-PODS=$(kubectlx get pods -o json | jq ".items[].metadata.name" | tr -d '"')
+PODS=$(kubectlx get pods -o jsonpath="{.items[*].metadata.name}")
 
 for p in $PODS; do
     echo "Retrieving coverage from $p"

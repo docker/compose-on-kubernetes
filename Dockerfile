@@ -37,7 +37,6 @@ RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.12.4/b
 # e2e-tests (retrieved with --target=compose-e2e-tests)
 # image is publised as docker/kube-compose-e2e-tests, and used for docker/orca e2e tests
 FROM runbase AS compose-e2e-tests
-RUN apk add jq --no-cache
 ENTRYPOINT ["/ginkgo","-v", "-p", "--nodes=10", "/e2e.test", "--"]
 COPY --from=build /go/bin/ginkgo /ginkgo
 COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/e2e/e2e.test /e2e.test
