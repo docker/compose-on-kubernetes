@@ -6,7 +6,6 @@ aliases:
     - kube_1_13: &kube_1_13 "1.13.7"
     - kube_1_14: &kube_1_14 "1.14.6"
     - kube_1_15: &kube_1_15 "1.15.0"
-  kind_version: &kind_version "0.5.1"
   docker-login: &docker-login
     username: $DOCKER_USER
     password: $DOCKER_PASS
@@ -28,12 +27,8 @@ aliases:
     - run:
         name: "Prepare Kind and run e2e tests"
         command: |
-          git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
-          cd /root/src/sigs.k8s.io/kind
-          git reset --hard 3907329b4ece1feab97d6281de23ea6e11812a1a
-          GO111MODULE=on go mod vendor
-          go install
-          cd -
+          curl -Lo /root/bin/kind --create-dirs https://github.com/kubernetes-sigs/kind/releases/download/v0.5.1/kind-$(uname)-amd64
+          chmod +x /root/bin/kind
           export PATH="$PATH:/root/bin"
           export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
           export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
@@ -59,12 +54,8 @@ aliases:
     - run:
         name: "Prepare Kind and run e2e benchmark"
         command: |
-          git clone https://github.com/kubernetes-sigs/kind.git /root/src/sigs.k8s.io/kind
-          cd /root/src/sigs.k8s.io/kind
-          git reset --hard 3907329b4ece1feab97d6281de23ea6e11812a1a
-          GO111MODULE=on go mod vendor
-          go install
-          cd -
+          curl -Lo /root/bin/kind --create-dirs https://github.com/kubernetes-sigs/kind/releases/download/v0.5.1/kind-$(uname)-amd64
+          chmod +x /root/bin/kind
           export PATH="$PATH:/root/bin"
           export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
           export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
@@ -189,7 +180,6 @@ jobs:
     environment:
       GOPATH: "/root"
       KUBERNETES_VERSION: *kube_1_11
-      KIND_VERSION: *kind_version
     steps: *e2e-kind-steps
   e2e-kind-1_13:
     docker: *public-golang
@@ -197,7 +187,6 @@ jobs:
     environment:
       GOPATH: "/root"
       KUBERNETES_VERSION: *kube_1_13
-      KIND_VERSION: *kind_version
     steps: *e2e-kind-steps
   e2e-kind-1_14:
     docker: *public-golang
@@ -205,7 +194,6 @@ jobs:
     environment:
       GOPATH: "/root"
       KUBERNETES_VERSION: *kube_1_14
-      KIND_VERSION: *kind_version
     steps: *e2e-kind-steps
   e2e-kind-1_15:
     docker: *public-golang
@@ -213,7 +201,6 @@ jobs:
     environment:
       GOPATH: "/root"
       KUBERNETES_VERSION: *kube_1_15
-      KIND_VERSION: *kind_version
     steps: *e2e-kind-steps
   e2e-benchmark-kind:
     docker: *public-golang
@@ -221,7 +208,6 @@ jobs:
     environment:
       GOPATH: "/root"
       KUBERNETES_VERSION: *kube_1_13
-      KIND_VERSION: *kind_version
     steps: *e2e-benchmark-kind-steps
   test-unit:
     docker: *public-golang
