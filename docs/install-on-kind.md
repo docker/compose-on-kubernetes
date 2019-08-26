@@ -1,20 +1,19 @@
-# Install on MicroK8s
+# Install on Kind (Kubernetes in Docker)
 
 ## Pre-requisites
-- [MicroK8s](https://microk8s.io/)
+- [Kind](https://kind.sigs.k8s.io/ 0.5 or later
 - To install etcd using these instructions, you must have [Helm](https://helm.sh) in your client environment.
 - [Download the Compose on Kubernetes installer](https://github.com/docker/compose-on-kubernetes/releases).
-- Ensure storage and dns are enabled: `microk8s.enable storage dns`
-- `kubectl` availabe in path - if it's not already available it can be aliased from the snap with: `sudo snap alias microk8s.kubectl kubectl`.
+- [kubectl](https://kubernetes.io/docs/tasks/tools/install-kubectl/) availabe in path.
 
 ## Create compose namespace
 
-- Confirm that MicroK8s is working with `microk8s.inspect`.
-- Create a compose namespace by running `microk8s.kubectl create namespace compose`.
+Create a Kind cluster with `kind create cluster`
 
 ## Populate Kubernetes Config
 
-If you do not already have a `~/.kube/config` file create it with `microk8s.kubectl config view --raw > ~/.kube/config`.
+Configure kubectl so it points to your freshly created Kind cluster
+`export KUBECONFIG="$(kind get kubeconfig-path)"`
 
 ## Deploy etcd
 
@@ -29,7 +28,7 @@ Run `./installer-[darwin|linux|windows.exe] -namespace=compose -etcd-servers=htt
 By now you should be able to [Check that Compose on Kubernetes is installed](../README.md#check-that-compose-on-kubernetes-is-installed):
 
 ```bash
-$ microk8s.kubectl api-versions | grep compose
+$ kubectl api-versions | grep compose
 compose.docker.com/v1beta1
 compose.docker.com/v1beta2
 ```
