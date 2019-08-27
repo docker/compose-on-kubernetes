@@ -5,7 +5,7 @@ ARG KUBERNETES_VERSION
 FROM ${RUN_BASE} AS runbase
 RUN apk add ca-certificates --no-cache
 
-FROM ${BUILD_BASE} AS unprivileged
+FROM runbase AS unprivileged
 RUN adduser -D compose
 USER compose
 WORKDIR /home/compose

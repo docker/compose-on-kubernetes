@@ -6,6 +6,11 @@ ARG KUBERNETES_VERSION
 FROM ${RUN_BASE} AS runbase
 RUN apk add ca-certificates --no-cache
 
+FROM runbase AS unprivileged
+RUN adduser -D compose
+USER compose
+WORKDIR /home/compose
+
 FROM ${BUILD_BASE} AS build
 
 RUN apk add --no-cache \
@@ -53,23 +58,23 @@ ENTRYPOINT ["/installer"]
 COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/bin/installer /installer
 
 # compose-api-server (retrieved with --target=compose-api-server)
-FROM runbase AS compose-api-server
+FROM unprivileged AS compose-api-server
 ENTRYPOINT ["/api-server"]
 COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/bin/api-server /api-server
 
 # compose-api-server with instrumentation (retrieved with --target=compose-api-server-coverage)
-FROM runbase AS compose-api-server-coverage
+FROM unprivileged AS compose-api-server-coverage
 ENTRYPOINT ["/api-server-coverage"]
 ADD e2e/api-server-coverage /
 COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/bin/api-server.test /api-server.test
 
 # instrumented runtime image (retrieved with --target=compose-controller-coverage)
-FROM runbase AS compose-controller-coverage
+FROM unprivileged AS compose-controller-coverage
 ENTRYPOINT ["/compose-controller-coverage"]
 ADD e2e/compose-controller-coverage /
 COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/bin/compose-controller.test /compose-controller.test
 
 # main runtime image (default target)
-FROM runbase
+FROM unprivileged
 ENTRYPOINT ["/compose-controller"]
 COPY --from=build /go/src/github.com/docker/compose-on-kubernetes/bin/compose-controller /compose-controller
