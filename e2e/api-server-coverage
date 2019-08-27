@@ -1,5 +1,5 @@
 #!/bin/sh -xe
 
-if /api-server.test -test.coverprofile=/coverage.txt; then
+if /api-server.test -test.coverprofile=coverage.txt; then
     sleep 3600
 fi
