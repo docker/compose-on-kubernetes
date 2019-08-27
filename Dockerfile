@@ -1,5 +1,6 @@
 ARG BUILD_BASE
 ARG RUN_BASE
+ARG KUBERNETES_VERSION
 
 FROM ${RUN_BASE} AS runbase
 RUN apk add ca-certificates --no-cache
@@ -26,11 +27,12 @@ ARG BUILDTIME
 ARG GITCOMMIT
 ARG VERSION
 ARG IMAGE_REPO_PREFIX
-ENV GITCOMMIT=$GITCOMMIT VERSION=$VERSION BUILDTIME=$BUILDTIME IMAGE_REPO_PREFIX=$IMAGE_REPO_PREFIX
+ARG KUBERNETES_VERSION
+ENV GITCOMMIT=$GITCOMMIT VERSION=$VERSION BUILDTIME=$BUILDTIME IMAGE_REPO_PREFIX=$IMAGE_REPO_PREFIX KUBERNETES_VERSION=$KUBERNETES_VERSION
 ENV CGO_ENABLED=0
 RUN make bin/compose-controller bin/compose-controller.test e2e-binary bin/installer bin/api-server bin/api-server.test bin/e2e_benchmark
 RUN go get github.com/onsi/ginkgo/ginkgo
-RUN curl -LO https://storage.googleapis.com/kubernetes-release/release/v1.12.4/bin/linux/amd64/kubectl && \
+RUN curl -fLO https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl && \
   chmod +x ./kubectl && \
   mv ./kubectl /bin/kubectl
 
