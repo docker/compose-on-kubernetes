@@ -8,11 +8,23 @@
 - Give it admin access to your cluster (note: you might want to reduce the scope of this): `kubectl -n kube-system create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount 
 kube-system:tiller`.
 - Run `helm init --service-account tiller` to initialize the helm component.
+- Run `kubectl get pods --namespace kube-system` and check that the tiller-deploy container was created and is in running state
+```
+NAME                            READY   STATUS    RESTARTS   AGE
+tiller-deploy-5d6cc99fc-qdv4q   1/1     Running   0          8s
+```
 
 ### Deploy etcd operator
 
 - Make sure the `compose` namespace exists on your cluster.
 - Run `helm install --name etcd-operator stable/etcd-operator --namespace compose` to install the etcd-operator chart.
+- Run `kubectl get pods --namespace compose` and check that etcd-operator containers were created and are in running state. 
+```
+NAME                                                              READY   STATUS    RESTARTS   AGE
+etcd-operator-etcd-operator-etcd-backup-operator-ddd46947d4twzb   1/1     Running   0          22m
+etcd-operator-etcd-operator-etcd-operator-5db4855dd8-8hh2t        1/1     Running   0          22m
+etcd-operator-etcd-operator-etcd-restore-operator-75d7744cl7chc   1/1     Running   0          22m
+```
 
 ### Option 1: Create an etcd cluster (for quick evaluation)
 
@@ -44,6 +56,13 @@ spec:
 ```
 - Run `kubectl apply -f compose-etcd.yaml`.
 - This should bring an etcd cluster in the `compose` namespace.
+- Run `kubectl get pods --namespace compose` and check that containers are in running state.
+```
+NAME                                                              READY   STATUS    RESTARTS   AGE
+compose-etcd-5gk95j4ms6                                           1/1     Running   0          21m
+compose-etcd-nqmcwk4gdf                                           1/1     Running   0          21m
+compose-etcd-sxplrdthp6                                           1/1     Running   0          20m
+```
 
 **Note: this cluster configuration is really naive and does does not use mutual TLS to authenticate application accessing the data. For enabling mutual TLS, please refer to https://github.com/coreos/etcd-operator** 
 
