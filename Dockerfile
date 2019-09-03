@@ -12,6 +12,8 @@ RUN apk add --no-cache \
   git \
   curl
 
+ARG GOPROXY
+
 WORKDIR /go/src/github.com/docker/compose-on-kubernetes
 COPY . .
 ARG BUILDTIME

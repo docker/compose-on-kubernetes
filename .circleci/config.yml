@@ -119,6 +119,7 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
     steps:
       - attach_workspace:
           at: /root
@@ -130,6 +131,7 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
     steps:
       - attach_workspace:
           at: /root
@@ -141,6 +143,7 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
     steps:
       - attach_workspace:
           at: /root
@@ -150,6 +153,7 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
     steps:
       - attach_workspace:
           at: /root
@@ -182,12 +186,14 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
     steps: *e2e-kind-steps
   e2e-kind-1_11:
     docker: *public-golang
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
       KUBERNETES_VERSION: *kube_1_11
       KIND_VERSION: *kind_version
     steps: *e2e-kind-steps
@@ -196,6 +202,7 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
       KUBERNETES_VERSION: *kube_1_13
       KIND_VERSION: *kind_version
     steps: *e2e-kind-steps
@@ -204,6 +211,7 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
       KUBERNETES_VERSION: *kube_1_14
       KIND_VERSION: *kind_version
     steps: *e2e-kind-steps
@@ -212,6 +220,7 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
       KUBERNETES_VERSION: *kube_1_15
       KIND_VERSION: *kind_version
     steps: *e2e-kind-steps
@@ -220,6 +229,7 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
       KUBERNETES_VERSION: *kube_1_13
       KIND_VERSION: *kind_version
     steps: *e2e-benchmark-kind-steps
@@ -228,6 +238,7 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
     steps:
       - attach_workspace:
           at: /root
@@ -245,6 +256,7 @@ jobs:
     working_directory: /root/src/github.com/docker/compose-on-kubernetes
     environment:
       GOPATH: "/root"
+      GOPROXY: "direct"
     steps:
       - attach_workspace:
           at: /root

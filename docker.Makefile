@@ -14,10 +14,11 @@ endif
 BUILD_ARGS = \
   --build-arg BUILD_BASE=${BUILD_BASE_IMAGE} \
   --build-arg RUN_BASE=${RUN_BASE_IMAGE} \
-  --build-arg BUILDTIME=${BUILDTIME} \
-  --build-arg GITCOMMIT=${GITCOMMIT} \
-  --build-arg VERSION=${VERSION} \
-  --build-arg IMAGE_REPO_PREFIX=${IMAGE_REPO_PREFIX}
+  --build-arg BUILDTIME \
+  --build-arg GITCOMMIT \
+  --build-arg VERSION \
+  --build-arg IMAGE_REPO_PREFIX \
+  --build-arg GOPROXY
 
 build-validate-image: ## create the image used for validation
 	@tar cf - ${DOCKERFILE} doc.go Makefile common.mk cmd install api internal vendor e2e dockerfiles scripts gometalinter.json Gopkg.toml Gopkg.lock .git | docker build --build-arg BUILD_BASE=${BUILD_BASE_IMAGE} -t kube-compose-validate -f ./dockerfiles/Dockerfile.dev --target lint -
