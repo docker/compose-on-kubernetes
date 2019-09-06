@@ -17,7 +17,7 @@ Compose on Kubernetes requires an etcd instance (in addition to the kube-system 
 
 ## Deploy Compose on Kubernetes
 
-Run `installer-[darwin|linux|windows.exe] -namespace=compose -etcd-servers=http://compose-etcd-client:2379 -tag=v0.4.18`.
+Run `installer-[darwin|linux|windows.exe] -namespace=compose -etcd-servers=http://compose-etcd-client:2379`.
 
 ## Deploy a stack in the cluster
 

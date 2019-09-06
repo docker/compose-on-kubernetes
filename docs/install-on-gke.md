@@ -29,6 +29,6 @@ clusterrolebinding.rbac.authorization.k8s.io "<ACCOUNT>-cluster-admin-binding" c
 
 ## Deploy Compose on Kubernetes
 
-Run `installer-[darwin|linux|windows.exe] -namespace=compose -etcd-servers=http://compose-etcd-client:2379 -tag=v0.4.18`.
+Run `installer-[darwin|linux|windows.exe] -namespace=compose -etcd-servers=http://compose-etcd-client:2379`.
 
 **Note: To setup Mutual TLS with the etcd instance, you can use `etcd-ca-file`, `etcd-key-file` and `etcd-cert-file` flags.**
