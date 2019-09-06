@@ -17,7 +17,7 @@ aliases:
     - image: dockereng/kube-compose-ci-golang
       auth: *docker-login
   public-golang: &public-golang
-    - image: circleci/golang:1.12.9
+    - image: circleci/golang:1.13.0
       user: root
 
   e2e-kind-steps: &e2e-kind-steps
