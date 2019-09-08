@@ -27,8 +27,6 @@ aliases:
     - run:
         name: "Prepare Kind and run e2e tests"
         command: |
-          curl -Lo /root/bin/kind --create-dirs https://github.com/kubernetes-sigs/kind/releases/download/v0.5.1/kind-$(uname)-amd64
-          chmod +x /root/bin/kind
           export PATH="$PATH:/root/bin"
           export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
           export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
@@ -54,8 +52,6 @@ aliases:
     - run:
         name: "Prepare Kind and run e2e benchmark"
         command: |
-          curl -Lo /root/bin/kind --create-dirs https://github.com/kubernetes-sigs/kind/releases/download/v0.5.1/kind-$(uname)-amd64
-          chmod +x /root/bin/kind
           export PATH="$PATH:/root/bin"
           export IMAGE_REPOSITORY=${CIRCLE_TAG:+docker}
           export IMAGE_REPOSITORY=${IMAGE_REPOSITORY:-dockereng}
