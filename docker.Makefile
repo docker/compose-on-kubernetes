@@ -4,6 +4,7 @@ BUILD_BASE_IMAGE = golang:1.13.0-alpine3.10
 TEST_BASE_IMAGE = golang:1.13.0
 RUN_BASE_IMAGE = alpine:3.10.2
 KUBERNETES_VERSION ?= 1.14.6
+KIND_VERSION ?= 0.5.1
 IMAGES = ${IMAGE_REPO_PREFIX}controller ${IMAGE_REPO_PREFIX}controller-coverage ${IMAGE_REPO_PREFIX}e2e-tests ${IMAGE_REPO_PREFIX}e2e-benchmark ${IMAGE_REPO_PREFIX}api-server ${IMAGE_REPO_PREFIX}api-server-coverage ${IMAGE_REPO_PREFIX}installer
 PUSH_IMAGES = push/${IMAGE_REPO_PREFIX}controller push/${IMAGE_REPO_PREFIX}api-server push/${IMAGE_REPO_PREFIX}installer
 DOCKERFILE = Dockerfile
@@ -86,7 +87,13 @@ save-coverage-images:
 	@mkdir -p pre-loaded-images
 	@docker save -o pre-loaded-images/coverage-enabled-images.tar ${IMAGE_REPO_PREFIX}api-server-coverage:$(TAG) ${IMAGE_REPO_PREFIX}controller-coverage:$(TAG)
 
-create-kind-cluster:
+install-kind:
+ifeq (,$(wildcard ./~/bin/kind))
+	curl -Lo ~/bin/kind --create-dirs https://github.com/kubernetes-sigs/kind/releases/download/v$(KIND_VERSION)/kind-$$(uname)-amd64
+	chmod +x ~/bin/kind
+endif
+
+create-kind-cluster: install-kind
 	@echo "🌟 Create kind cluster"
 	@kind create cluster --name compose-on-kube --image kindest/node:v$(KUBERNETES_VERSION)
 
