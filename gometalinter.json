@@ -1,6 +1,6 @@
 {
   "Vendor": true,
-  "Deadline": "4m",
+  "Deadline": "10m",
   "Sort": ["linter", "severity", "path", "line"],
   "Exclude": [
     "internal/kube",
