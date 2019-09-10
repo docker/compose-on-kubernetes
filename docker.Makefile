@@ -1,8 +1,8 @@
 include common.mk
 
-export BUILD_BASE_IMAGE = golang:1.12.9-alpine3.10
-export TEST_BASE_IMAGE = golang:1.12.9
-export RUN_BASE_IMAGE = alpine:3.10.0
+export BUILD_BASE_IMAGE = golang:1.13.0-alpine3.10
+export TEST_BASE_IMAGE = golang:1.13.0
+export RUN_BASE_IMAGE = alpine:3.10.2
 export KUBERNETES_VERSION ?= 1.14.6
 KIND_VERSION ?= 0.5.1
 IMAGES = ${IMAGE_REPO_PREFIX}controller ${IMAGE_REPO_PREFIX}controller-coverage ${IMAGE_REPO_PREFIX}e2e-tests ${IMAGE_REPO_PREFIX}e2e-benchmark ${IMAGE_REPO_PREFIX}api-server ${IMAGE_REPO_PREFIX}api-server-coverage ${IMAGE_REPO_PREFIX}installer
