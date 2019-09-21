@@ -82,28 +82,35 @@
   revision = "004b46473808b3e7a4a3049c20e4376c91eb966d"
 
 [[projects]]
-  digest = "1:272e1c861ec1c8f9799f40b9a3fab037a927475b8c9771f738e6cedca6ca9f28"
+  digest = "1:30821eecc9766a188cf921cf6d864c249f097f7a36e049ed14c25b12a5c2c135"
   name = "github.com/coreos/etcd"
   packages = [
-    "auth/authpb",
     "clientv3",
     "etcdserver/api/v3rpc/rpctypes",
-    "etcdserver/etcdserverpb",
     "mvcc/mvccpb",
-    "pkg/tlsutil",
     "pkg/transport",
-    "pkg/types",
   ]
   pruneopts = "NUT"
-  revision = "v3.3.9"
+  revision = "v3.4.1"
 
 [[projects]]
-  digest = "1:1da3a221f0bc090792d3a2a080ff09008427c0e0f0533a4ed6abd8994421da73"
+  digest = "1:c7ef450ce524bfedf786e327f484d4d63aaead33931d1cfafa550715d3e7c2dc"
   name = "github.com/coreos/go-systemd"
-  packages = ["daemon"]
+  packages = [
+    "daemon",
+    "journal",
+  ]
   pruneopts = "NUT"
   revision = "9002847aa1425fb6ac49077c0a630b3b67e0fbfd"
   version = "v18"
+
+[[projects]]
+  digest = "1:22332f13485f13511589dc1f59eb97594e8636d3606b69d172a9a85421ad465d"
+  name = "github.com/coreos/pkg"
+  packages = ["capnslog"]
+  pruneopts = "NUT"
+  revision = "97fdf19511ea361ae1c100dd393cc47f8dcfa1e1"
+  version = "v4"
 
 [[projects]]
   digest = "1:ffe9824d294da03b391f44e1ae8281281b4afc1bdaa9588c9097785e3af10cec"
@@ -624,6 +631,64 @@
   revision = "93e72a773fade158921402d6a24c819b48aba29d"
 
 [[projects]]
+  digest = "1:f00f82637b167aed9389bf6b672862fd4521928a27074ce274eedf1b4ad36f2e"
+  name = "go.etcd.io/etcd"
+  packages = [
+    "auth/authpb",
+    "clientv3/balancer",
+    "clientv3/balancer/connectivity",
+    "clientv3/balancer/picker",
+    "clientv3/balancer/resolver/endpoint",
+    "clientv3/credentials",
+    "etcdserver/api/v3rpc/rpctypes",
+    "etcdserver/etcdserverpb",
+    "mvcc/mvccpb",
+    "pkg/logutil",
+    "pkg/systemd",
+    "pkg/tlsutil",
+    "pkg/types",
+    "raft",
+    "raft/confchange",
+    "raft/quorum",
+    "raft/raftpb",
+    "raft/tracker",
+  ]
+  pruneopts = "NUT"
+  revision = "a14579fbfb1a000439a40abf71862df51b0a2136"
+  version = "v3.4.1"
+
+[[projects]]
+  digest = "1:cc9d86ec4e6e3bdf87e3a421273bfeed003cf8e21351c0302fe8b0eb7b10efe6"
+  name = "go.uber.org/atomic"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "df976f2515e274675050de7b3f42545de80594fd"
+  version = "v1.4.0"
+
+[[projects]]
+  digest = "1:58ca93bdf81bac106ded02226b5395a0595d5346cdc4caa8d9c1f3a5f8f9976e"
+  name = "go.uber.org/multierr"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "3c4937480c32f4c13a875a1829af76c98ca3d40a"
+  version = "v1.1.0"
+
+[[projects]]
+  digest = "1:4af5a022f8c5c97734c3c6fad58fdce078e2322ddc98d3102b225a729f03916e"
+  name = "go.uber.org/zap"
+  packages = [
+    ".",
+    "buffer",
+    "internal/bufferpool",
+    "internal/color",
+    "internal/exit",
+    "zapcore",
+  ]
+  pruneopts = "NUT"
+  revision = "27376062155ad36be76b0f12cf1572a221d3a48c"
+  version = "v1.10.0"
+
+[[projects]]
   branch = "master"
   digest = "1:3f3a05ae0b95893d90b9b3b5afdb79a9b3d96e4e36e099d841ae602e4aca0da8"
   name = "golang.org/x/crypto"
@@ -757,7 +822,7 @@
   revision = "ff3583edef7de132f219f0efc00e097cabcc0ec0"
 
 [[projects]]
-  digest = "1:7cd8d3d0020bbbe235958c87a2c042c4a8505e401b6e0496880990228fc34f4b"
+  digest = "1:df926c6c32e6f74b07fc27dac8dfdd52209d83f793f18b43971e6ef77d7b5662"
   name = "google.golang.org/grpc"
   packages = [
     ".",
@@ -772,7 +837,6 @@
     "encoding/proto",
     "grpclb/grpc_lb_v1/messages",
     "grpclog",
-    "health/grpc_health_v1",
     "internal",
     "keepalive",
     "metadata",
