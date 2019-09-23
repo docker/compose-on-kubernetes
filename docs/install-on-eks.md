@@ -35,3 +35,19 @@ words           ClusterIP      None             <none>                          
 
 To access our example web application, open a browser and go to `<LoadBalancer external-ip>:33000`.
 
+## Optional: use kubernetes service proxy
+** This step is required to run e2e tests against EKS **
+
+Kubernetes API allows accessing a service from client over an authenticated channel by proxying communication. End-2-end
+tests do rely 
+
+```
++----------+    +---------------+                   +-----------------------+     +---------------+    +----------+
+|   curl   | -> | kubectl proxy | ====[tunnel]====> | kubernetes API server | --> |  kube proxy   | -> | service  |  
+| (client) |    |               |  (authenticated)  |    (control plane)    | (*) | (worker node) |    | (tcp:80) |
++----------+    +---------------+                   +-----------------------+     +---------------+    +----------+
+```
+With default setup, EKS cluster is created with network security group to block communication (*) between Kubernetes control 
+plane and worker nodes on privileged ports (<1024)). For e2e tests to run, or rely on API server proxy for other use
+ cases, you'll need to lower EKS network security (details [here](https://docs.aws.amazon.com/eks/latest/userguide/sec-group-reqs.html)).
+ 
