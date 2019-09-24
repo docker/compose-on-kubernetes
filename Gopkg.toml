@@ -121,7 +121,7 @@
 
 [[override]]
   name = "github.com/evanphx/json-patch"
-  revision = "5858425f75500d40c52783dce87d085a483ce135"
+  version = "^4.5.0"
 
 [prune]
   non-go = true
