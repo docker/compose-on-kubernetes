@@ -318,6 +318,20 @@
   revision = "0fb14efe8c47ae851c0034ed7a448854d3d34cf3"
 
 [[projects]]
+  digest = "1:41933d387bfa3eaa6a82647914ed7044f7b8355764c24fb920892bc8c03ef0c3"
+  name = "github.com/hpcloud/tail"
+  packages = [
+    ".",
+    "ratelimiter",
+    "util",
+    "watch",
+    "winfile",
+  ]
+  pruneopts = "NUT"
+  revision = "a30252cb686a21eb2d0b98132633053ec2f7f1e5"
+  version = "v1.0.0"
+
+[[projects]]
   digest = "1:9a52adf44086cead3b384e5d0dbf7a1c1cce65e67552ee3383a8561c42a18cd3"
   name = "github.com/imdario/mergo"
   packages = ["."]
@@ -427,7 +441,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:eba188b392e27eec3191e7d49ede2b7d00e82f1954de205b0893f04db7da550a"
+  digest = "1:f9418b378acd871eb0308708f29590b4c1b1f8f4272557a8368a40359572ab0e"
   name = "github.com/onsi/ginkgo"
   packages = [
     ".",
@@ -450,7 +464,7 @@
     "types",
   ]
   pruneopts = "NUT"
-  revision = "e51bee6c2dd1df84f9cdde1e21f62f6d5a825a90"
+  revision = "5049dc5a7d91641cbdd9b4363e0718d9dcd638a5"
 
 [[projects]]
   branch = "master"
@@ -791,6 +805,15 @@
   version = "v1.12.2"
 
 [[projects]]
+  digest = "1:1b91ae0dc69a41d4c2ed23ea5cffb721ea63f5037ca4b81e6d6771fbb8f45129"
+  name = "gopkg.in/fsnotify.v1"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "c2828203cd70a50dcccfb2761f8b1f8ceef9a8e9"
+  source = "gopkg.in/fsnotify/fsnotify.v1"
+  version = "v1.4.7"
+
+[[projects]]
   digest = "1:2d1fbdc6777e5408cabeb02bf336305e724b925ff4546ded0fa8715a7267922a"
   name = "gopkg.in/inf.v0"
   packages = ["."]
@@ -805,6 +828,14 @@
   pruneopts = "NUT"
   revision = "a96e63847dc3c67d17befa69c303767e2f84e54f"
   version = "v2.1"
+
+[[projects]]
+  branch = "v1"
+  digest = "1:8fb1ccb16a6cfecbfdfeb84d8ea1cc7afa8f9ef16526bc2326f72d993e32cef1"
+  name = "gopkg.in/tomb.v1"
+  packages = ["."]
+  pruneopts = "NUT"
+  revision = "dd632973f1e7218eb1089048e0798ec9ae7dceb8"
 
 [[projects]]
   digest = "1:62a00229c3bc24945de91bc7050e8bc8d19fce15e6fdc29760c8d2fff4790d74"
