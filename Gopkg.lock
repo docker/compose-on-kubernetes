@@ -379,11 +379,11 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:9db29b604bd78452d167abed82386ddd2f93973df3841896fb6ab8aff936f1d6"
+  digest = "1:f9f72e583aaacf1d1ac5d6121abd4afd3c690baa9e14e1d009df26bf831ba347"
   name = "github.com/mitchellh/go-homedir"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "3864e76763d94a6df2f9960b16a20a33da9f9a66"
+  revision = "af06845cf3004701891bf4fdb884bfe4920b3727"
 
 [[projects]]
   branch = "master"
