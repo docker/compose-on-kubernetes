@@ -454,7 +454,7 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:d227e921df8a9d8f322de105210b1d8dde1dc4959856478c602a16ddb290dd73"
+  digest = "1:2892fb9c0ff1df871c8eb4fea05a37920cc3c2c74d7f9dd7177583da3054f38a"
   name = "github.com/onsi/gomega"
   packages = [
     ".",
@@ -471,7 +471,7 @@
     "types",
   ]
   pruneopts = "NUT"
-  revision = "9be84105672ba4433a3b61f1b4d7f9ff8b022293"
+  revision = "bdebf9e0ece900259084cfa4121b97ce1a540939"
 
 [[projects]]
   digest = "1:e0cc8395ea893c898ff5eb0850f4d9851c1f57c78c232304a026379a47a552d0"
