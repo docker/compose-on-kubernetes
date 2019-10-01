@@ -93,7 +93,7 @@
 
 [[override]]
   name = "google.golang.org/grpc"
-  version = "~v1.12.2"
+  version = "~v1.24.0"
 
 [[override]]
   name = "github.com/ugorji/go"
@@ -101,7 +101,7 @@
 
 [[override]]
   name = "github.com/coreos/etcd"
-  revision = "v3.3.9"
+  revision = "v3.3.15"
 
 [[override]]
   name = "k8s.io/api"

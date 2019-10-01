@@ -101,7 +101,7 @@ e2e-benchmark-kind-circleci:
 
 e2e-kind-pods-info:
 	kubectl --kubeconfig=$(shell kind get kubeconfig-path --name="compose-on-kube") get pods --all-namespaces
-	
+
 e2e-no-provisioning: e2e-binary ## run the e2e tests on an already provisionned cluster
 	ginkgo -v -p e2e/e2e.test -- --skip-provisioning $(TEST_ARGS) 2>&1 | tee e2e-test-output.txt
 	grep SUCCESS e2e-test-output.txt | grep -q "$(E2E_EXPECTED_SKIP) Skipped"
