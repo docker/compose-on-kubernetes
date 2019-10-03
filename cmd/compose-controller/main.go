@@ -9,6 +9,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"sync"
 	"syscall"
 	"time"
 
@@ -38,6 +39,11 @@ const (
 	// deletionChannelSize is the size of the chan in which delete events are queued.
 	// this means that the stackInformer won't block until we get more than 50 deletions messages in queue
 	deletionChannelSize = 50
+)
+
+var (
+	// healthzOnce is used to ensure that health checking is only setup once.
+	healthzOnce = sync.Once{}
 )
 
 type controllerOptions struct {
@@ -153,7 +159,9 @@ func start(opts *controllerOptions) error {
 	log.Infof("Controller ready")
 
 	if opts.healthzCheckPort > 0 {
-		healthz.DefaultHealthz()
+		healthzOnce.Do(func() {
+			healthz.InstallHandler(http.DefaultServeMux)
+		})
 		go http.ListenAndServe(fmt.Sprintf(":%d", opts.healthzCheckPort), nil)
 	}
 	<-stop
