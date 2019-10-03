@@ -23,7 +23,7 @@ import (
 	v1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/client-go/kubernetes"
-	appsv1beta2 "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	"k8s.io/client-go/rest"
 )
@@ -218,7 +218,7 @@ func Restore(baseConfig *rest.Config, impersonate bool) (map[string]error, error
 	return stackErrs, nil
 }
 
-func dryRunStacks(source stacks.StackList, res map[string]error, coreClient corev1.ServicesGetter, appsClient appsv1beta2.AppsV1beta2Interface) error {
+func dryRunStacks(source stacks.StackList, res map[string]error, coreClient corev1.ServicesGetter, appsClient appsv1.AppsV1Interface) error {
 	for _, stack := range source.Items {
 		fullname := fmt.Sprintf("%s/%s", stack.Namespace, stack.Name)
 		composeConfig, err := parsing.LoadStackData([]byte(stack.Spec.ComposeFile), nil)
@@ -267,7 +267,7 @@ func DryRun(config *rest.Config) (map[string]error, error) {
 		if err != nil {
 			return nil, err
 		}
-		if err = dryRunStacks(source, res, kubeClient.CoreV1(), kubeClient.AppsV1beta2()); err != nil {
+		if err = dryRunStacks(source, res, kubeClient.CoreV1(), kubeClient.AppsV1()); err != nil {
 			return nil, err
 		}
 		if source.Continue == "" {
@@ -364,7 +364,7 @@ func UninstallComposeCRD(config *rest.Config, namespace string) error {
 func UninstallComposeAPIServer(config *rest.Config, namespace string) error {
 	// First, shoot the controller
 	log.Info("Removing controller")
-	apps, err := appsv1beta2.NewForConfig(config)
+	apps, err := appsv1.NewForConfig(config)
 	if err != nil {
 		return err
 	}

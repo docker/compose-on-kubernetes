@@ -2,14 +2,14 @@ package convert
 
 import (
 	"github.com/docker/compose-on-kubernetes/api/compose/latest"
-	appsv1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/intstr"
 )
 
 // toDeployment converts a Compose Service to a Kube Deployment if its replica mode is NOT `global`.
-func toDeployment(s latest.ServiceConfig, objectMeta metav1.ObjectMeta, podTemplate apiv1.PodTemplateSpec, labelSelector map[string]string, original appsv1beta2.Deployment) *appsv1beta2.Deployment {
+func toDeployment(s latest.ServiceConfig, objectMeta metav1.ObjectMeta, podTemplate apiv1.PodTemplateSpec, labelSelector map[string]string, original appsv1.Deployment) *appsv1.Deployment {
 	revisionHistoryLimit := int32(3)
 	dep := original.DeepCopy()
 	dep.ObjectMeta = objectMeta
@@ -27,7 +27,7 @@ func isGlobal(srv latest.ServiceConfig) bool {
 	return srv.Deploy.Mode == "global"
 }
 
-func toDeploymentStrategy(s latest.ServiceConfig, original appsv1beta2.DeploymentStrategy) appsv1beta2.DeploymentStrategy {
+func toDeploymentStrategy(s latest.ServiceConfig, original appsv1.DeploymentStrategy) appsv1.DeploymentStrategy {
 	config := s.Deploy.UpdateConfig
 	if config == nil {
 		return original
@@ -37,9 +37,9 @@ func toDeploymentStrategy(s latest.ServiceConfig, original appsv1beta2.Deploymen
 		return original
 	}
 
-	return appsv1beta2.DeploymentStrategy{
-		Type: appsv1beta2.RollingUpdateDeploymentStrategyType,
-		RollingUpdate: &appsv1beta2.RollingUpdateDeployment{
+	return appsv1.DeploymentStrategy{
+		Type: appsv1.RollingUpdateDeploymentStrategyType,
+		RollingUpdate: &appsv1.RollingUpdateDeployment{
 			MaxUnavailable: &intstr.IntOrString{
 				Type:   intstr.Int,
 				IntVal: int32(*config.Parallelism),

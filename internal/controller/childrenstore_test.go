@@ -7,7 +7,7 @@ import (
 
 	"github.com/docker/compose-on-kubernetes/api/labels"
 	"github.com/stretchr/testify/assert"
-	appstypes "k8s.io/api/apps/v1beta2"
+	appstypes "k8s.io/api/apps/v1"
 	coretypes "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/client-go/tools/cache"

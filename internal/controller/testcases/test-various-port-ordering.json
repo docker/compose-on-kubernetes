@@ -111,7 +111,7 @@
                 "metadata": {
                     "name": "by-port",
                     "namespace": "default",
-                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/by-port",
+                    "selfLink": "/apis/apps/v1/namespaces/default/deployments/by-port",
                     "uid": "e98bb345-bc4b-11e8-a6d8-00155d0027c4",
                     "resourceVersion": "26759",
                     "generation": 42,
@@ -247,7 +247,7 @@
                 "metadata": {
                     "name": "by-target",
                     "namespace": "default",
-                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/by-target",
+                    "selfLink": "/apis/apps/v1/namespaces/default/deployments/by-target",
                     "uid": "e99b0f24-bc4b-11e8-a6d8-00155d0027c4",
                     "resourceVersion": "26762",
                     "generation": 42,
@@ -383,7 +383,7 @@
                 "metadata": {
                     "name": "reverse",
                     "namespace": "default",
-                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/reverse",
+                    "selfLink": "/apis/apps/v1/namespaces/default/deployments/reverse",
                     "uid": "e9acf5c2-bc4b-11e8-a6d8-00155d0027c4",
                     "resourceVersion": "26765",
                     "generation": 42,
@@ -519,7 +519,7 @@
                 "metadata": {
                     "name": "sorted",
                     "namespace": "default",
-                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/sorted",
+                    "selfLink": "/apis/apps/v1/namespaces/default/deployments/sorted",
                     "uid": "e9d778a0-bc4b-11e8-a6d8-00155d0027c4",
                     "resourceVersion": "26768",
                     "generation": 42,

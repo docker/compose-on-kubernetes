@@ -71,7 +71,7 @@
                 "metadata": {
                     "name": "notag",
                     "namespace": "default",
-                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/notag",
+                    "selfLink": "/apis/apps/v1/namespaces/default/deployments/notag",
                     "uid": "f453f300-bb15-11e8-a33a-0242ac11000e",
                     "resourceVersion": "95129",
                     "generation": 3,
@@ -209,7 +209,7 @@
                 "metadata": {
                     "name": "with-randomport",
                     "namespace": "default",
-                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/with-randomport",
+                    "selfLink": "/apis/apps/v1/namespaces/default/deployments/with-randomport",
                     "uid": "f464d63a-bb15-11e8-a33a-0242ac11000e",
                     "resourceVersion": "95132",
                     "generation": 3,
@@ -350,7 +350,7 @@
                 "metadata": {
                     "name": "with-tag",
                     "namespace": "default",
-                    "selfLink": "/apis/apps/v1beta2/namespaces/default/daemonsets/with-tag",
+                    "selfLink": "/apis/apps/v1/namespaces/default/daemonsets/with-tag",
                     "uid": "f473875f-bb15-11e8-a33a-0242ac11000e",
                     "resourceVersion": "95115",
                     "generation": 1,

@@ -10,7 +10,7 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apimachinery/pkg/util/validation/field"
 	"k8s.io/apiserver/pkg/storage/names"
-	appsv1beta2 "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
@@ -28,11 +28,11 @@ type stackStrategy struct {
 	runtime.ObjectTyper
 	names.NameGenerator
 	coreClient corev1.CoreV1Interface
-	appsClient appsv1beta2.AppsV1beta2Interface
+	appsClient appsv1.AppsV1Interface
 	version    APIVersion
 }
 
-func newStackStrategy(apiVersion APIVersion, typer runtime.ObjectTyper, coreClient corev1.CoreV1Interface, appsClient appsv1beta2.AppsV1beta2Interface) *stackStrategy {
+func newStackStrategy(apiVersion APIVersion, typer runtime.ObjectTyper, coreClient corev1.CoreV1Interface, appsClient appsv1.AppsV1Interface) *stackStrategy {
 	return &stackStrategy{ObjectTyper: typer, NameGenerator: names.SimpleNameGenerator, coreClient: coreClient, appsClient: appsClient, version: apiVersion}
 }
 

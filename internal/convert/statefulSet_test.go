@@ -7,7 +7,7 @@ import (
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	. "github.com/docker/compose-on-kubernetes/internal/test/builders"
 	"github.com/stretchr/testify/assert"
-	appsv1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/resource"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -33,13 +33,13 @@ func TestStatefulSet(t *testing.T) {
 
 	statefulSet := s.Statefulsets["nginx"]
 
-	expectedStatefulSet := appsv1beta2.StatefulSet{
+	expectedStatefulSet := appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        "nginx",
 			Labels:      expectedLabels,
 			Annotations: expectedAnnotationsOnCreate,
 		},
-		Spec: appsv1beta2.StatefulSetSpec{
+		Spec: appsv1.StatefulSetSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: expectedLabels,
 			},
@@ -151,7 +151,7 @@ func TestStatefulSetWithReplicas(t *testing.T) {
 		"com.docker.service.id":      "demo-redis",
 	}
 
-	expectedStatefulSetSpec := appsv1beta2.StatefulSetSpec{
+	expectedStatefulSetSpec := appsv1.StatefulSetSpec{
 		Selector: &metav1.LabelSelector{
 			MatchLabels: expectedLabels,
 		},

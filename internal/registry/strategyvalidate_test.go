@@ -7,7 +7,7 @@ import (
 	iv "github.com/docker/compose-on-kubernetes/internal/internalversion"
 	. "github.com/docker/compose-on-kubernetes/internal/test/builders"
 	"github.com/stretchr/testify/assert"
-	appsv1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	kubefake "k8s.io/client-go/kubernetes/fake"
@@ -37,7 +37,7 @@ func TestValidateCollisionsExistingServiceHeadlessOnly(t *testing.T) {
 		},
 	}
 
-	err := validateCollisions(fake.CoreV1(), fake.AppsV1beta2())(nil, &stack)
+	err := validateCollisions(fake.CoreV1(), fake.AppsV1())(nil, &stack)
 	assert.Len(t, err, 1)
 }
 
@@ -66,7 +66,7 @@ func TestValidateCollisionsExistingServicePublished(t *testing.T) {
 		},
 	}
 
-	err := validateCollisions(fake.CoreV1(), fake.AppsV1beta2())(nil, &stack)
+	err := validateCollisions(fake.CoreV1(), fake.AppsV1())(nil, &stack)
 	assert.Len(t, err, 2)
 }
 func TestValidateCollisionsExistingServicePublishedAndRandom(t *testing.T) {
@@ -95,7 +95,7 @@ func TestValidateCollisionsExistingServicePublishedAndRandom(t *testing.T) {
 		},
 	}
 
-	err := validateCollisions(fake.CoreV1(), fake.AppsV1beta2())(nil, &stack)
+	err := validateCollisions(fake.CoreV1(), fake.AppsV1())(nil, &stack)
 	assert.Len(t, err, 3)
 }
 
@@ -135,7 +135,7 @@ func TestValidateCollisionsExistingServicesCorrectLabels(t *testing.T) {
 		},
 	}
 
-	err := validateCollisions(fake.CoreV1(), fake.AppsV1beta2())(nil, &stack)
+	err := validateCollisions(fake.CoreV1(), fake.AppsV1())(nil, &stack)
 	assert.Len(t, err, 0)
 }
 
@@ -175,7 +175,7 @@ func TestValidateCollisionsExistingServicesIncorrectLabels(t *testing.T) {
 		},
 	}
 
-	err := validateCollisions(fake.CoreV1(), fake.AppsV1beta2())(nil, &stack)
+	err := validateCollisions(fake.CoreV1(), fake.AppsV1())(nil, &stack)
 	assert.Len(t, err, 3)
 }
 
@@ -184,7 +184,7 @@ func TestValidateCollisionsExistingDeployment(t *testing.T) {
 		WithService("redis",
 			Image("redis:alpine")))
 
-	fake := kubefake.NewSimpleClientset(&appsv1beta2.Deployment{
+	fake := kubefake.NewSimpleClientset(&appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "redis",
 		},
@@ -195,7 +195,7 @@ func TestValidateCollisionsExistingDeployment(t *testing.T) {
 		},
 	}
 
-	err := validateCollisions(fake.CoreV1(), fake.AppsV1beta2())(nil, &stack)
+	err := validateCollisions(fake.CoreV1(), fake.AppsV1())(nil, &stack)
 	assert.Len(t, err, 1)
 }
 
@@ -209,7 +209,7 @@ func TestValidateCollisionsExistingStatefulset(t *testing.T) {
 				Volume,
 			)))
 
-	fake := kubefake.NewSimpleClientset(&appsv1beta2.StatefulSet{
+	fake := kubefake.NewSimpleClientset(&appsv1.StatefulSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "redis",
 		},
@@ -220,7 +220,7 @@ func TestValidateCollisionsExistingStatefulset(t *testing.T) {
 		},
 	}
 
-	err := validateCollisions(fake.CoreV1(), fake.AppsV1beta2())(nil, &stack)
+	err := validateCollisions(fake.CoreV1(), fake.AppsV1())(nil, &stack)
 	assert.Len(t, err, 1)
 }
 
@@ -230,7 +230,7 @@ func TestValidateCollisionsExistingDaemonset(t *testing.T) {
 			Image("redis:alpine"),
 			Deploy(ModeGlobal)))
 
-	fake := kubefake.NewSimpleClientset(&appsv1beta2.DaemonSet{
+	fake := kubefake.NewSimpleClientset(&appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name: "redis",
 		},
@@ -241,7 +241,7 @@ func TestValidateCollisionsExistingDaemonset(t *testing.T) {
 		},
 	}
 
-	err := validateCollisions(fake.CoreV1(), fake.AppsV1beta2())(nil, &stack)
+	err := validateCollisions(fake.CoreV1(), fake.AppsV1())(nil, &stack)
 	assert.Len(t, err, 1)
 }
 

@@ -3,7 +3,7 @@ package builders
 import (
 	"github.com/docker/compose-on-kubernetes/api/compose/latest"
 	"github.com/docker/compose-on-kubernetes/api/labels"
-	appstypes "k8s.io/api/apps/v1beta2"
+	appstypes "k8s.io/api/apps/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 

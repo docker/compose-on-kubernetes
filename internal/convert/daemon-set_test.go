@@ -6,7 +6,7 @@ import (
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	. "github.com/docker/compose-on-kubernetes/internal/test/builders"
 	"github.com/stretchr/testify/assert"
-	appsv1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -28,14 +28,14 @@ func TestToDaemonSet(t *testing.T) {
 		"com.docker.service.id":      "demo-redis",
 	}
 
-	expectedDaemonSet := appsv1beta2.DaemonSet{
+	expectedDaemonSet := appsv1.DaemonSet{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        "redis",
 			Labels:      expectedLabels,
 			Namespace:   "test",
 			Annotations: expectedAnnotationsOnCreate,
 		},
-		Spec: appsv1beta2.DaemonSetSpec{
+		Spec: appsv1.DaemonSetSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: expectedLabels,
 			},

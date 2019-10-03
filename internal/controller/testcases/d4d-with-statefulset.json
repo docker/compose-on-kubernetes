@@ -63,7 +63,7 @@
                 "metadata": {
                     "name": "web",
                     "namespace": "default",
-                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/web",
+                    "selfLink": "/apis/apps/v1/namespaces/default/deployments/web",
                     "uid": "4a5d59bb-bbf2-11e8-bf31-00155d0027c4",
                     "resourceVersion": "737",
                     "generation": 5,
@@ -195,7 +195,7 @@
                 "metadata": {
                     "name": "words",
                     "namespace": "default",
-                    "selfLink": "/apis/apps/v1beta2/namespaces/default/deployments/words",
+                    "selfLink": "/apis/apps/v1/namespaces/default/deployments/words",
                     "uid": "4a791af2-bbf2-11e8-bf31-00155d0027c4",
                     "resourceVersion": "740",
                     "generation": 5,
@@ -323,7 +323,7 @@
                 "metadata": {
                     "name": "db",
                     "namespace": "default",
-                    "selfLink": "/apis/apps/v1beta2/namespaces/default/statefulsets/db",
+                    "selfLink": "/apis/apps/v1/namespaces/default/statefulsets/db",
                     "uid": "4a461a0d-bbf2-11e8-bf31-00155d0027c4",
                     "resourceVersion": "721",
                     "generation": 1,

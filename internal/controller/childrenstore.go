@@ -8,7 +8,7 @@ import (
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	log "github.com/sirupsen/logrus"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	appsinformers "k8s.io/client-go/informers/apps/v1beta2"
+	appsinformers "k8s.io/client-go/informers/apps/v1"
 	coreinformers "k8s.io/client-go/informers/core/v1"
 	k8sclientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/tools/cache"

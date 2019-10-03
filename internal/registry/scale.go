@@ -15,7 +15,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/apiserver/pkg/registry/rest"
-	appsv1beta2 "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	restclient "k8s.io/client-go/rest"
 )
 
@@ -58,7 +58,7 @@ func (r *stackScaleRest) Get(ctx context.Context, name string, options *metav1.G
 		res.Spec[s.Name] = count
 	}
 
-	apps, err := appsv1beta2.NewForConfig(r.config)
+	apps, err := appsv1.NewForConfig(r.config)
 	if err != nil {
 		log.Errorf("Failed to get apps: %s", err)
 		return nil, err
