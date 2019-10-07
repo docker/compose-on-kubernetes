@@ -62,11 +62,6 @@
   name = "github.com/Masterminds/semver"
   version = "v1.3.1"
 
-[[override]]
-  name = "gopkg.in/yaml.v2"
-  source = "https://github.com/simonferquel/yaml"
-  revision = "c86e64ed9581b7588e736f0c3e6ecc02cc22996e"
-
 # Use GitHub mirror to not require Mercurial
 [[override]]
   name = "bitbucket.org/ww/goautoneg"

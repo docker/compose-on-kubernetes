@@ -135,7 +135,7 @@
 
 [[projects]]
   branch = "19.03"
-  digest = "1:420ab627461ceb5bdf306478598e433bab5691fefaef28b424a9d43fb590c325"
+  digest = "1:ffdfc0835147c093fbd6b6da4045bb2be1e9c3eef11ab72a8b8c556a2a4bf4e3"
   name = "github.com/docker/cli"
   packages = [
     "cli/compose/interpolation",
@@ -146,7 +146,7 @@
     "opts",
   ]
   pruneopts = "NUT"
-  revision = "ba9934d4041e37c32160316aad863d7d2dbebded"
+  revision = "2355349d8b99ea2c15bbdd7f1f203fa078e9bb4e"
 
 [[projects]]
   digest = "1:de4a141036d93a75ae89ed0868ab7759c1f1b74131cd3a6a7ce4071bce006fd6"
@@ -870,12 +870,12 @@
   version = "v2.1"
 
 [[projects]]
-  digest = "1:62a00229c3bc24945de91bc7050e8bc8d19fce15e6fdc29760c8d2fff4790d74"
+  digest = "1:c0ce856ee6874fc944d5ee7ceb6c374321e027287c73a33b4c5fad666aedb3ea"
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   pruneopts = "NUT"
-  revision = "c86e64ed9581b7588e736f0c3e6ecc02cc22996e"
-  source = "https://github.com/simonferquel/yaml"
+  revision = "bb4e33bf68bf89cad44d386192cbed201f35b241"
+  version = "v2.2.3"
 
 [[projects]]
   digest = "1:c604898594eeee32aaa4a835f5aace4784759efab0158253afc76bd8d5f58dd0"
@@ -1402,7 +1402,6 @@
     "github.com/spf13/pflag",
     "github.com/stretchr/testify/assert",
     "golang.org/x/sync/errgroup",
-    "gopkg.in/yaml.v2",
     "k8s.io/api/apps/v1beta2",
     "k8s.io/api/core/v1",
     "k8s.io/api/rbac/v1",
