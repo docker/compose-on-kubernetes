@@ -3,9 +3,9 @@ version: 2
 aliases:
   kube_versions:
     - kube_1_11: &kube_1_11 "1.11.10"
-    - kube_1_13: &kube_1_13 "1.13.11"
-    - kube_1_14: &kube_1_14 "1.14.7"
-    - kube_1_15: &kube_1_15 "1.15.4"
+    - kube_1_13: &kube_1_13 "1.13.10"
+    - kube_1_14: &kube_1_14 "1.14.6"
+    - kube_1_15: &kube_1_15 "1.15.3"
     - kube_1_16: &kube_1_16 "1.16.1"
   docker-login: &docker-login
     username: $DOCKER_USER
