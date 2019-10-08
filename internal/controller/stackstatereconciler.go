@@ -6,7 +6,7 @@ import (
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	"github.com/pkg/errors"
 	log "github.com/sirupsen/logrus"
-	appstypes "k8s.io/api/apps/v1beta2"
+	appstypes "k8s.io/api/apps/v1"
 	coretypes "k8s.io/api/core/v1"
 	"k8s.io/apimachinery/pkg/api/meta"
 )

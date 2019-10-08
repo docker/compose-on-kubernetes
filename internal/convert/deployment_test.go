@@ -7,7 +7,7 @@ import (
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	. "github.com/docker/compose-on-kubernetes/internal/test/builders"
 	"github.com/stretchr/testify/assert"
-	appsv1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
@@ -31,13 +31,13 @@ func TestToDeployment(t *testing.T) {
 		"com.docker.service.id":      "demo-nginx",
 	}
 
-	expectedDeployment := appsv1beta2.Deployment{
+	expectedDeployment := appsv1.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:        "nginx",
 			Labels:      expectedLabels,
 			Annotations: expectedAnnotationsOnCreate,
 		},
-		Spec: appsv1beta2.DeploymentSpec{
+		Spec: appsv1.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: expectedLabels,
 			},
@@ -163,7 +163,7 @@ func TestToDeploymentWithReplicas(t *testing.T) {
 		"com.docker.service.id":      "demo-redis",
 	}
 
-	expectedDeploymentSpec := appsv1beta2.DeploymentSpec{
+	expectedDeploymentSpec := appsv1.DeploymentSpec{
 		Selector: &metav1.LabelSelector{
 			MatchLabels: expectedLabels,
 		},

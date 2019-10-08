@@ -14,7 +14,7 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/runtime"
 	"k8s.io/client-go/discovery"
-	appsv1beta2 "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	rbacv1 "k8s.io/client-go/kubernetes/typed/rbac/v1"
 	"k8s.io/client-go/rest"
@@ -24,7 +24,7 @@ import (
 type installer struct {
 	coreClient              corev1.CoreV1Interface
 	rbacClient              rbacv1.RbacV1Interface
-	appsClient              appsv1beta2.AppsV1beta2Interface
+	appsClient              appsv1.AppsV1Interface
 	aggregatorClient        kubeaggreagatorv1beta1.ApiregistrationV1beta1Interface
 	commonOptions           OptionsCommon
 	etcdOptions             *EtcdOptions
@@ -194,7 +194,7 @@ func newInstaller(config *rest.Config, options ...InstallerOption) (*installer, 
 	}
 	i.rbacClient = rbacClient
 
-	appsClient, err := appsv1beta2.NewForConfig(config)
+	appsClient, err := appsv1.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}

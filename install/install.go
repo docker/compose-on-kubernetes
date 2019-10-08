@@ -13,7 +13,7 @@ import (
 	apiv1beta2 "github.com/docker/compose-on-kubernetes/api/compose/v1beta2"
 	"github.com/docker/compose-on-kubernetes/internal/e2e/wait"
 	log "github.com/sirupsen/logrus"
-	appsv1beta2types "k8s.io/api/apps/v1beta2"
+	appsv1types "k8s.io/api/apps/v1"
 	corev1types "k8s.io/api/core/v1"
 	v1 "k8s.io/api/core/v1"
 	rbacv1types "k8s.io/api/rbac/v1"
@@ -596,7 +596,7 @@ func (c *installer) createClusterRoleBindings(ctx *installerContext) error {
 	return c.createSARoleBindings(ctx)
 }
 
-func applyCustomTLSHash(hash string, deploy *appsv1beta2types.Deployment) {
+func applyCustomTLSHash(hash string, deploy *appsv1types.Deployment) {
 	if hash == "" {
 		return
 	}
@@ -660,13 +660,13 @@ func (c *installer) createAPIServer(ctx *installerContext) error {
 
 	log.Infof("Api server: image: %q, pullPolicy: %q", image, pullPolicy)
 
-	deploy := &appsv1beta2types.Deployment{
+	deploy := &appsv1types.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "compose-api",
 			Namespace: c.commonOptions.Namespace,
 			Labels:    c.apiLabels,
 		},
-		Spec: appsv1beta2types.DeploymentSpec{
+		Spec: appsv1types.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: c.apiLabels,
 			},
@@ -828,13 +828,13 @@ func (c *installer) createController(ctx *installerContext) error {
 		affinity = linuxAmd64NodeAffinity
 	}
 	log.Infof("Controller: image: %q, pullPolicy: %q", image, pullPolicy)
-	deploy := &appsv1beta2types.Deployment{
+	deploy := &appsv1types.Deployment{
 		ObjectMeta: metav1.ObjectMeta{
 			Name:      "compose",
 			Namespace: c.commonOptions.Namespace,
 			Labels:    c.labels,
 		},
-		Spec: appsv1beta2types.DeploymentSpec{
+		Spec: appsv1types.DeploymentSpec{
 			Selector: &metav1.LabelSelector{
 				MatchLabels: c.labels,
 			},

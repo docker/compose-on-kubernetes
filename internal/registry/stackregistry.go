@@ -13,7 +13,7 @@ import (
 	genericregistry "k8s.io/apiserver/pkg/registry/generic/registry"
 	"k8s.io/apiserver/pkg/registry/rest"
 	"k8s.io/apiserver/pkg/storage"
-	appsv1beta2 "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	restclient "k8s.io/client-go/rest"
 )
@@ -100,7 +100,7 @@ func NewStackREST(version APIVersion, scheme rest.RESTDeleteStrategy, optsGetter
 	if err != nil {
 		return nil, err
 	}
-	appsClient, err := appsv1beta2.NewForConfig(config)
+	appsClient, err := appsv1.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}

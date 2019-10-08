@@ -9,7 +9,7 @@ import (
 	apiextensionsclient "k8s.io/apiextensions-apiserver/pkg/client/clientset/clientset"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	appsv1beta2 "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	rbacv1 "k8s.io/client-go/kubernetes/typed/rbac/v1"
 	"k8s.io/client-go/rest"
@@ -59,7 +59,7 @@ func uninstallCore(config *rest.Config, namespace string) error {
 }
 
 func uninstallApps(config *rest.Config, namespace string) error {
-	apps, err := appsv1beta2.NewForConfig(config)
+	apps, err := appsv1.NewForConfig(config)
 	if uninstallErrorFilter(err) != nil {
 		return err
 	}
@@ -242,7 +242,7 @@ func waitForNoCrd(ctx context.Context, config *rest.Config, namespace string) er
 }
 
 func waitForNoApps(ctx context.Context, config *rest.Config, namespace string) error {
-	apps, err := appsv1beta2.NewForConfig(config)
+	apps, err := appsv1.NewForConfig(config)
 	if err != nil {
 		return err
 	}

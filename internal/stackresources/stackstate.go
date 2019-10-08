@@ -3,7 +3,7 @@ package stackresources
 import (
 	"fmt"
 
-	appstypes "k8s.io/api/apps/v1beta2"
+	appstypes "k8s.io/api/apps/v1"
 	coretypes "k8s.io/api/core/v1"
 )
 

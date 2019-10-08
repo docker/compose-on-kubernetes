@@ -17,15 +17,15 @@ import (
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	"k8s.io/apimachinery/pkg/util/validation"
 	"k8s.io/apimachinery/pkg/util/validation/field"
-	appsv1beta2 "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	appsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 )
 
 // ValidateCollisions against existing objects
-func ValidateCollisions(coreClient corev1.ServicesGetter, appsClient appsv1beta2.AppsV1beta2Interface, stack *iv.Stack) field.ErrorList {
+func ValidateCollisions(coreClient corev1.ServicesGetter, appsClient appsv1.AppsV1Interface, stack *iv.Stack) field.ErrorList {
 	return validateCollisions(coreClient, appsClient)(nil, stack)
 }
-func validateCollisions(coreClient corev1.ServicesGetter, appsClient appsv1beta2.AppsV1beta2Interface) validateStep {
+func validateCollisions(coreClient corev1.ServicesGetter, appsClient appsv1.AppsV1Interface) validateStep {
 	return func(_ context.Context, stack *iv.Stack) field.ErrorList {
 		if stack.Spec.Stack == nil {
 			return field.ErrorList{}

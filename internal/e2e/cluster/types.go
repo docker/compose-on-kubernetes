@@ -16,14 +16,14 @@ import (
 	"github.com/docker/compose-on-kubernetes/internal/parsing"
 	"github.com/docker/compose-on-kubernetes/internal/patch"
 	"github.com/pkg/errors"
-	appsv1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 	apiv1 "k8s.io/api/core/v1"
 	storagetypes "k8s.io/api/storage/v1"
 	kerrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	apitypes "k8s.io/apimachinery/pkg/types"
 	"k8s.io/apimachinery/pkg/util/wait"
-	typesappsv1beta2 "k8s.io/client-go/kubernetes/typed/apps/v1beta2"
+	typesappsv1 "k8s.io/client-go/kubernetes/typed/apps/v1"
 	corev1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	storagev1 "k8s.io/client-go/kubernetes/typed/storage/v1"
 	"k8s.io/client-go/rest"
@@ -38,7 +38,7 @@ type Namespace struct {
 	stacksv1alpha3    composev1alpha3.StackInterface
 	stacks1           composev1beta1.StackInterface
 	pods              corev1.PodInterface
-	deployments       typesappsv1beta2.DeploymentInterface
+	deployments       typesappsv1.DeploymentInterface
 	services          corev1.ServiceInterface
 	nodes             corev1.NodeInterface
 	servicesSupplier  func() *rest.Request
@@ -88,7 +88,7 @@ func newNamespace(config *rest.Config, namespace string) (*Namespace, error) {
 	if err != nil {
 		return nil, err
 	}
-	appsClientSet, err := typesappsv1beta2.NewForConfig(config)
+	appsClientSet, err := typesappsv1.NewForConfig(config)
 	if err != nil {
 		return nil, err
 	}
@@ -152,7 +152,7 @@ func (ns *Namespace) Name() string {
 }
 
 // Deployments returns a DeploymentInterface
-func (ns *Namespace) Deployments() typesappsv1beta2.DeploymentInterface {
+func (ns *Namespace) Deployments() typesappsv1.DeploymentInterface {
 	return ns.deployments
 }
 
@@ -617,7 +617,7 @@ func (ns *Namespace) ListAllPods() ([]apiv1.Pod, error) {
 }
 
 // ListDeployments lists the deployments that match a given selector.
-func (ns *Namespace) ListDeployments(labelSelector string) ([]appsv1beta2.Deployment, error) {
+func (ns *Namespace) ListDeployments(labelSelector string) ([]appsv1.Deployment, error) {
 	deployments, err := ns.deployments.List(metav1.ListOptions{
 		LabelSelector: labelSelector,
 	})

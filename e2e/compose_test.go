@@ -16,7 +16,7 @@ import (
 	"github.com/docker/compose-on-kubernetes/internal/e2e/cluster"
 	. "github.com/onsi/ginkgo" // Import ginkgo to simplify test code
 	. "github.com/onsi/gomega" // Import gomega to simplify test code
-	appsv1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 	corev1 "k8s.io/api/core/v1"
 	apierrors "k8s.io/apimachinery/pkg/api/errors"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
@@ -615,12 +615,12 @@ services:
     image: nginx:1.12.1-alpine`)
 		Expect(err).To(HaveOccurred())
 
-		_, err = ns.Deployments().Create(&appsv1beta2.Deployment{
+		_, err = ns.Deployments().Create(&appsv1.Deployment{
 			ObjectMeta: metav1.ObjectMeta{
 				Name:      "front3",
 				Namespace: ns.Name(),
 			},
-			Spec: appsv1beta2.DeploymentSpec{
+			Spec: appsv1.DeploymentSpec{
 				Selector: &metav1.LabelSelector{
 					MatchLabels: map[string]string{"app": "front3"},
 				},

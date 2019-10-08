@@ -88,15 +88,15 @@ func processStack(stacks clientset.Interface, k8sclient k8sclientset.Interface, 
 	if err != nil {
 		return err
 	}
-	deployments, err := k8sclient.AppsV1beta2().Deployments(namespace).List(metav1.ListOptions{LabelSelector: labels.SelectorForStack(name)})
+	deployments, err := k8sclient.AppsV1().Deployments(namespace).List(metav1.ListOptions{LabelSelector: labels.SelectorForStack(name)})
 	if err != nil {
 		return err
 	}
-	daemonsets, err := k8sclient.AppsV1beta2().DaemonSets(namespace).List(metav1.ListOptions{LabelSelector: labels.SelectorForStack(name)})
+	daemonsets, err := k8sclient.AppsV1().DaemonSets(namespace).List(metav1.ListOptions{LabelSelector: labels.SelectorForStack(name)})
 	if err != nil {
 		return err
 	}
-	statefulsets, err := k8sclient.AppsV1beta2().StatefulSets(namespace).List(metav1.ListOptions{LabelSelector: labels.SelectorForStack(name)})
+	statefulsets, err := k8sclient.AppsV1().StatefulSets(namespace).List(metav1.ListOptions{LabelSelector: labels.SelectorForStack(name)})
 	if err != nil {
 		return err
 	}

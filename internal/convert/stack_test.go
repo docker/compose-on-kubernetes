@@ -6,7 +6,7 @@ import (
 	"github.com/docker/compose-on-kubernetes/internal/stackresources"
 	. "github.com/docker/compose-on-kubernetes/internal/test/builders"
 	"github.com/stretchr/testify/assert"
-	appsv1beta2 "k8s.io/api/apps/v1beta2"
+	appsv1 "k8s.io/api/apps/v1"
 )
 
 var expectedAnnotationsOnCreate = map[string]string{
@@ -68,7 +68,7 @@ func TestSample(t *testing.T) {
 	assertImage(t, "dockerdemos/lab-words-java", s.Deployments["words"])
 }
 
-func assertImage(t *testing.T, expected string, deployment appsv1beta2.Deployment) {
+func assertImage(t *testing.T, expected string, deployment appsv1.Deployment) {
 	assert.Equal(t, expected, deployment.Spec.Template.Spec.Containers[0].Image)
 }
 
