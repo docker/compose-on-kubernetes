@@ -6,6 +6,7 @@ aliases:
     - kube_1_13: &kube_1_13 "1.13.11"
     - kube_1_14: &kube_1_14 "1.14.7"
     - kube_1_15: &kube_1_15 "1.15.4"
+    - kube_1_16: &kube_1_16 "1.16.1"
   docker-login: &docker-login
     username: $DOCKER_USER
     password: $DOCKER_PASS
@@ -206,6 +207,14 @@ jobs:
       GOPATH: "/root"
       GOPROXY: "direct"
       KUBERNETES_VERSION: *kube_1_15
+    steps: *e2e-kind-steps
+  e2e-kind-1_16:
+    docker: *public-golang
+    working_directory: /root/src/github.com/docker/compose-on-kubernetes
+    environment:
+      GOPATH: "/root"
+      GOPROXY: "direct"
+      KUBERNETES_VERSION: *kube_1_16
     steps: *e2e-kind-steps
   e2e-benchmark-kind:
     docker: *public-golang
@@ -446,6 +455,14 @@ workflows:
               only: /v.*/
             branches:
               only: /^(?!pull\/).*$/
+      - e2e-kind-1_16:
+          requires:
+            - images
+          filters:
+            tags:
+              only: /v.*/
+            branches:
+              only: /^(?!pull\/).*$/
       # - e2e-benchmark-kind:
       #     requires:
       #       - images
@@ -461,6 +478,7 @@ workflows:
             - e2e-kind-1_13
             - e2e-kind-1_14
             - e2e-kind-1_15
+            - e2e-kind-1_16
             # - e2e-benchmark-kind
           filters:
             tags:
@@ -473,6 +491,7 @@ workflows:
             - e2e-kind-1_13
             - e2e-kind-1_14
             - e2e-kind-1_15
+            - e2e-kind-1_16
             # - e2e-benchmark-kind
           filters:
             branches:
@@ -485,6 +504,7 @@ workflows:
             - e2e-kind-1_13
             - e2e-kind-1_14
             - e2e-kind-1_15
+            - e2e-kind-1_16
             # - e2e-benchmark-kind
           filters:
             branches:
