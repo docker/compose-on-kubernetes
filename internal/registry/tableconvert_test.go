@@ -81,7 +81,7 @@ func TestConvertTable(t *testing.T) {
 		{
 			name:          "not a stack",
 			object:        &metav1beta1.Table{},
-			expectedError: "unexpected object type *v1beta1.Table",
+			expectedError: "unexpected object type *v1.Table",
 		},
 		{
 			name:         "single-nospec-nostatus",

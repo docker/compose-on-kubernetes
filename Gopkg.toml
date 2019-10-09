@@ -24,23 +24,23 @@
 
 [[constraint]]
   name = "k8s.io/apiextensions-apiserver"
-  version = "kubernetes-1.14.7"
+  version = "kubernetes-1.16.2"
 
 [[constraint]]
   name = "k8s.io/apimachinery"
-  version = "kubernetes-1.14.7"
+  version = "kubernetes-1.16.2"
 
 [[constraint]]
   name = "k8s.io/client-go"
-  version = "kubernetes-1.14.7"
+  version = "kubernetes-1.16.2"
 
 [[constraint]]
   name = "k8s.io/apiserver"
-  version = "kubernetes-1.14.7"
+  version = "kubernetes-1.16.2"
 
 [[constraint]]
   name = "k8s.io/component-base"
-  version = "kubernetes-1.14.7"
+  version = "kubernetes-1.16.2"
 
 [[constraint]]
   name = "github.com/mitchellh/go-homedir"
@@ -62,12 +62,6 @@
   name = "github.com/Masterminds/semver"
   version = "v1.3.1"
 
-# Use GitHub mirror to not require Mercurial
-[[override]]
-  name = "bitbucket.org/ww/goautoneg"
-  source = "https://github.com/adjust/goautoneg"
-  revision = "d788f35a0315672bc90f50a6145d1252a230ee0d"
-
 # Transitive dependencies that cannot use tip version.
 [[override]]
   name = "github.com/xeipuuv/gojsonschema"
@@ -88,7 +82,7 @@
 
 [[override]]
   name = "google.golang.org/grpc"
-  version = "~v1.24.0"
+  version = "v1.23.1"
 
 [[override]]
   name = "github.com/ugorji/go"
@@ -100,19 +94,19 @@
 
 [[override]]
   name = "k8s.io/api"
-  version = "kubernetes-1.14.7"
+  version = "kubernetes-1.16.2"
 
 [[override]]
   name = "k8s.io/kubernetes"
-  version = "v1.14.7"
+  version = "v1.16.2"
 
 [[override]]
   name = "k8s.io/kube-aggregator"
-  version = "kubernetes-1.14.7"
+  version = "kubernetes-1.16.2"
 
 [[override]]
   name = "k8s.io/kube-openapi"
-  revision = "c59034cc13d587f5ef4e85ca0ade0c1866ae8e1d"
+  revision = "0270cf2f1c1d995d34b36019a6f65d58e6e33ad4"
 
 [[override]]
   name = "github.com/evanphx/json-patch"
