@@ -2,6 +2,8 @@ package apiserver
 
 import (
 	"net/http"
+	"reflect"
+	"unsafe"
 
 	"github.com/docker/compose-on-kubernetes/api/compose/v1alpha3"
 	"github.com/docker/compose-on-kubernetes/api/compose/v1beta1"
@@ -52,6 +54,25 @@ func init() {
 	}
 	if err := conversions.RegisterV1beta2Conversions(Scheme); err != nil {
 		panic(err)
+	}
+	// We do not support protobuf serialization as the `Stack` struct has
+	// fields with unsupported types (e.g.: map[string]*string). This causes
+	// issues like https://github.com/docker/compose-on-kubernetes/issues/150.
+	// The workaround is to remove protobuf from the advertised supported codecs.
+	removeProtobufMediaType(&Codecs)
+}
+
+// removeProtobufMediaType removes protobuf from the list of accepted media
+// types for the given CodecFactory.
+func removeProtobufMediaType(c *serializer.CodecFactory) {
+	codecsPtr := reflect.Indirect(reflect.ValueOf(c))
+	accepts := codecsPtr.FieldByName("accepts")
+	acceptsPtr := (*[]runtime.SerializerInfo)(unsafe.Pointer(accepts.UnsafeAddr()))
+	for i, v := range *acceptsPtr {
+		if v.MediaType == runtime.ContentTypeProtobuf {
+			*acceptsPtr = append((*acceptsPtr)[0:i], (*acceptsPtr)[i+1:]...)
+			break
+		}
 	}
 }
 
