@@ -99,7 +99,7 @@ func applyEtcdOptions(pod *corev1types.PodSpec, opts *EtcdOptions) {
 		pod.Containers[0].Args = append(pod.Containers[0].Args, "--etcd-servers=http://127.0.0.1:2379")
 		pod.Containers = append(pod.Containers, corev1types.Container{
 			Name:            "etcd",
-			Image:           "quay.io/coreos/etcd:v3.2.9",
+			Image:           "quay.io/coreos/etcd:v3.3.15",
 			ImagePullPolicy: corev1types.PullAlways,
 			Args: []string{
 				"/usr/local/bin/etcd",
