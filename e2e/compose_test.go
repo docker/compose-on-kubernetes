@@ -874,29 +874,29 @@ services
 		Expect(err.Error()).To(ContainSubstring("line 3: could not find expected ':'"))
 	})
 
-	It("Should support bind volumes", func() {
-		_, err := ns.CreateStack(defaultStrategy, "app", `version: "3.4"
-services:
-  test:
-    image: busybox:latest
-    command:
-    - /bin/sh
-    - -c
-    - "ls /tmp/hostetc/ ; sleep 3600"
-    volumes:
-      - type: bind
-        source: /etc
-        target: /tmp/hostetc`)
-		expectNoError(err)
-		waitUntil(ns.IsStackAvailable("app"))
-		s, err := ns.RESTClientV1alpha3().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
-		expectNoError(err)
-		defer s.Close()
-		data, err := ioutil.ReadAll(s)
-		expectNoError(err)
-		sdata := string(data)
-		Expect(strings.Contains(sdata, "hosts")).To(BeTrue())
-	})
+	// 	It("Should support bind volumes", func() {
+	// 		_, err := ns.CreateStack(defaultStrategy, "app", `version: "3.4"
+	// services:
+	//   test:
+	//     image: busybox:latest
+	//     command:
+	//     - /bin/sh
+	//     - -c
+	//     - "ls /tmp/hostetc/ ; sleep 3600"
+	//     volumes:
+	//       - type: bind
+	//         source: /etc
+	//         target: /tmp/hostetc`)
+	// 		expectNoError(err)
+	// 		waitUntil(ns.IsStackAvailable("app"))
+	// 		s, err := ns.RESTClientV1alpha3().Get().Namespace(ns.Name()).Name("app").Resource("stacks").SubResource("log").Stream()
+	// 		expectNoError(err)
+	// 		defer s.Close()
+	// 		data, err := ioutil.ReadAll(s)
+	// 		expectNoError(err)
+	// 		sdata := string(data)
+	// 		Expect(strings.Contains(sdata, "hosts")).To(BeTrue())
+	// 	})
 
 	It("Should support volumes", func() {
 		skipIfNoStorageClass(ns)
