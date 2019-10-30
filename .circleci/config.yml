@@ -39,7 +39,7 @@ aliases:
           make -f docker.Makefile IMAGE_ARCHIVE=/root/kube-compose-controller-coverage.tar load-kind-image-archive
           docker load -i /root/kube-compose-e2e-tests.tar
           make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-kind-circleci
-        no_output_timeout: 15m
+        no_output_timeout: 30m
     - persist_to_workspace:
         root: /root/
         paths:
@@ -64,7 +64,7 @@ aliases:
           make -f docker.Makefile IMAGE_ARCHIVE=/root/kube-compose-controller-coverage.tar load-kind-image-archive
           docker load -i /root/kube-compose-e2e-benchmark.tar
           make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-benchmark-kind-circleci
-        no_output_timeout: 15m
+        no_output_timeout: 30m
     - run:
         name: Get cluster info (on failure)
         command: |
