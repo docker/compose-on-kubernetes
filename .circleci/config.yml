@@ -280,7 +280,8 @@ jobs:
               docker load -i /root/${IMAGE_PREFIX}$image.tar
               docker tag ${IMAGE_REPO_PREFIX}$image:$TAG ${IMAGE_REPO_PREFIX}$image:latest
               docker push ${IMAGE_REPO_PREFIX}$image:$TAG
-              if echo "${CIRCLE_TAG}" | grep -q -v "rc"; then
+              # Don't push on latest tag if it's not a stable release
+              if echo "${CIRCLE_TAG}" | grep -Eq "^v[0-9]+\.[0-9]+\.[0-9]+$"; then
                 docker push ${IMAGE_REPO_PREFIX}$image:latest
               fi
             done
@@ -314,7 +315,11 @@ jobs:
             git checkout v0.12.0
             go install
             cd /root/src/github.com/docker/compose-on-kubernetes
-            ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${TAG} ./bin/
+            # Mark all unstable releases as draft
+            if echo "${CIRCLE_TAG}" | grep -v -Eq "^v[0-9]+\.[0-9]+\.[0-9]+$"; then
+                OPTIONS="-draft"
+            fi
+            ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${TAG} ${OPTIONS} ./bin/
 
 workflows:
   version: 2
