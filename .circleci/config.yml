@@ -24,7 +24,7 @@ aliases:
     - attach_workspace:
         at: /root
     - setup_remote_docker:
-        version: 18.06.0-ce
+        version: 18.09.3
     - run:
         name: "Prepare Kind and run e2e tests"
         command: |
@@ -49,7 +49,7 @@ aliases:
     - attach_workspace:
         at: /root
     - setup_remote_docker:
-        version: 18.06.0-ce
+        version: 18.09.3
     - run:
         name: "Prepare Kind and run e2e benchmark"
         command: |
@@ -82,7 +82,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 17.07.0-ce
+          version: 18.09.3
       - run:
           name: Login to docker hub
           command: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
@@ -112,7 +112,7 @@ jobs:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 18.06.0-ce
+          version: 18.09.3
       - run: make -f docker.Makefile validate
   validate-vendor:
     docker: *public-golang
@@ -146,7 +146,7 @@ jobs:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 18.06.0-ce
+          version: 18.09.3
       - run:
           name: Build images
           command: |
@@ -234,7 +234,7 @@ jobs:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 18.06.0-ce
+          version: 18.09.3
       - run:
           name: Run unit tests
           command: make -f docker.Makefile test-unit
@@ -261,7 +261,7 @@ jobs:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 17.07.0-ce
+          version: 18.09.3
       - deploy:
           name: push-to-hub
           command: |
@@ -280,7 +280,8 @@ jobs:
               docker load -i /root/${IMAGE_PREFIX}$image.tar
               docker tag ${IMAGE_REPO_PREFIX}$image:$TAG ${IMAGE_REPO_PREFIX}$image:latest
               docker push ${IMAGE_REPO_PREFIX}$image:$TAG
-              if echo "${CIRCLE_TAG}" | grep -q -v "rc"; then
+              # Don't push on latest tag if it's not a stable release
+              if echo "${CIRCLE_TAG}" | grep -Eq "^v[0-9]+\.[0-9]+\.[0-9]+$"; then
                 docker push ${IMAGE_REPO_PREFIX}$image:latest
               fi
             done
@@ -291,7 +292,7 @@ jobs:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 17.07.0-ce
+          version: 18.09.3
       - deploy:
           name: push-to-hub
           command: |
@@ -314,7 +315,11 @@ jobs:
             git checkout v0.12.0
             go install
             cd /root/src/github.com/docker/compose-on-kubernetes
-            ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${TAG} ./bin/
+            # Mark all unstable releases as draft
+            if echo "${CIRCLE_TAG}" | grep -v -Eq "^v[0-9]+\.[0-9]+\.[0-9]+$"; then
+                OPTIONS="-draft"
+            fi
+            ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${TAG} ${OPTIONS} ./bin/
 
 workflows:
   version: 2
