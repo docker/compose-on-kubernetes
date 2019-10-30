@@ -40,10 +40,10 @@ aliases:
           docker load -i /root/kube-compose-e2e-tests.tar
           make TAG=${CIRCLE_TAG:-${CIRCLE_SHA1}} e2e-kind-circleci
         no_output_timeout: 30m
-    - persist_to_workspace:
-        root: /root/
-        paths:
-          - 'src/github.com/docker/compose-on-kubernetes/e2e-coverage/compose-*/coverage.txt'
+    #- persist_to_workspace:
+        #root: /root/
+        #paths:
+          #- 'src/github.com/docker/compose-on-kubernetes/e2e-coverage/compose-*/coverage.txt'
 
   e2e-benchmark-kind-steps: &e2e-benchmark-kind-steps
     - attach_workspace:

@@ -2,16 +2,12 @@ package compose
 
 import (
 	"context"
-	"io"
-	"os"
-	"os/exec"
 	"time"
 
 	"github.com/docker/compose-on-kubernetes/api/constants"
 	"github.com/docker/compose-on-kubernetes/install"
 	"github.com/docker/compose-on-kubernetes/internal/e2e/cluster"
 	"github.com/docker/compose-on-kubernetes/internal/e2e/wait"
-	log "github.com/sirupsen/logrus"
 	"k8s.io/client-go/rest"
 )
 
@@ -58,25 +54,25 @@ func Install(config *rest.Config, ns, tag, pullSecret string) (func(), error) {
 	}
 
 	cleanup := func() {
-		{
-			cmd := exec.Command("./retrieve-coverage")
-			stdout, err := cmd.StdoutPipe()
-			if err != nil {
-				log.Errorf("Unable to retrieve stdout: %s", err)
-			} else {
-				go io.Copy(os.Stdout, stdout)
-			}
-			stderr, err := cmd.StderrPipe()
-			if err != nil {
-				log.Errorf("Unable to retrieve stderr: %s", err)
-			} else {
-				go io.Copy(os.Stderr, stderr)
-			}
-			err = cmd.Run()
-			if err != nil {
-				log.Errorf("Unable to retrieve coverage: %s", err)
-			}
-		}
+		// {
+		// 	cmd := exec.Command("./retrieve-coverage")
+		// 	stdout, err := cmd.StdoutPipe()
+		// 	if err != nil {
+		// 		log.Errorf("Unable to retrieve stdout: %s", err)
+		// 	} else {
+		// 		go io.Copy(os.Stdout, stdout)
+		// 	}
+		// 	stderr, err := cmd.StderrPipe()
+		// 	if err != nil {
+		// 		log.Errorf("Unable to retrieve stderr: %s", err)
+		// 	} else {
+		// 		go io.Copy(os.Stderr, stderr)
+		// 	}
+		// 	err = cmd.Run()
+		// 	if err != nil {
+		// 		log.Errorf("Unable to retrieve coverage: %s", err)
+		// 	}
+		// }
 		install.Uninstall(config, ns, false)
 		deleteNs()
 	}

@@ -91,7 +91,7 @@ e2e-kind-circleci:
 	docker create --name compose-on-kube-e2e -e IMAGE_REPO_PREFIX=$(IMAGE_REPO_PREFIX) -e KUBECONFIG=/kind-config --network=host ${IMAGE_REPO_PREFIX}e2e-tests:${TAG} -ginkgo.v -tag "$(TAG)"
 	docker cp $(shell kind get kubeconfig-path --name="compose-on-kube") compose-on-kube-e2e:/kind-config
 	docker start -a -i compose-on-kube-e2e
-	docker cp compose-on-kube-e2e:/e2e ./e2e-coverage
+	#docker cp compose-on-kube-e2e:/e2e ./e2e-coverage
 
 e2e-benchmark-kind-circleci:
 	docker rm compose-on-kube-e2e-benchmark || echo "no existing compose-on-kube e2e benchmark container"
