@@ -27,7 +27,7 @@ func start(init func(*cobra.Command) error) error {
 	go func() {
 		sig := <-sigs
 		log.Infof("Received signal: %v", sig)
-		stop <- struct{}{}
+		close(stop)
 	}()
 	cmd := cli.NewCommandStartComposeServer(stop)
 	cmd.Flags().AddFlagSet(pflag.CommandLine)
