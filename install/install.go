@@ -871,7 +871,11 @@ func (c *installer) createController(ctx *installerContext) error {
 		},
 	}
 	if c.enableCoverage {
-		deploy.Spec.Template.Spec.Containers[0].Env = []corev1types.EnvVar{{Name: "TEST_COMPOSE_CONTROLLER", Value: "1"}}
+		envList := []corev1types.EnvVar{{Name: "TEST_COMPOSE_CONTROLLER", Value: "1"}}
+		if c.commonOptions.HealthzCheckPort > 0 {
+			envList = append(envList, corev1types.EnvVar{Name: "TEST_COMPOSE_HEALTHZ_PORT", Value: strconv.Itoa(c.commonOptions.HealthzCheckPort)})
+		}
+		deploy.Spec.Template.Spec.Containers[0].Env = envList
 	}
 
 	if c.commonOptions.HealthzCheckPort == 0 {

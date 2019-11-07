@@ -2,6 +2,7 @@ package main
 
 import (
 	"os"
+	"strconv"
 	"testing"
 
 	"github.com/docker/compose-on-kubernetes/api/constants"
@@ -18,6 +19,15 @@ func TestImageServer(t *testing.T) {
 		options.reconciliationInterval = opts.PositiveDurationOpt{DurationOpt: *opts.NewDurationOpt(&interval)}
 		options.logLevel = "debug"
 		options.defaultServiceType = "LoadBalancer"
+		healthzPort := os.Getenv("TEST_COMPOSE_HEALTHZ_PORT")
+		if healthzPort != "" {
+			port, err := strconv.Atoi(healthzPort)
+			if err != nil {
+				log.Errorf("invalid healthz port: %s", err)
+				t.Fail()
+			}
+			options.healthzCheckPort = port
+		}
 		err := start(&options)
 		if err != nil {
 			log.Errorf("compose-controller fatal error: %s", err)
