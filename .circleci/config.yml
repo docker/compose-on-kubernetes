@@ -319,7 +319,7 @@ jobs:
             if echo "${CIRCLE_TAG}" | grep -v -Eq "^v[0-9]+\.[0-9]+\.[0-9]+$"; then
                 OPTIONS="-draft"
             fi
-            ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${TAG} ${OPTIONS} ./bin/
+            ghr -t ${GITHUB_RELEASE_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${OPTIONS} ${TAG} ./bin/
 
 workflows:
   version: 2
