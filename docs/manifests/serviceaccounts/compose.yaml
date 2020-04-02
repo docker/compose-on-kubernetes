@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  labels:
+    com.docker.default-service-type: ""
+    com.docker.deploy-namespace: "${namespace}"
+    com.docker.fry: compose
+    com.docker.image-tag: latest
+  name: compose
+  namespace: "${namespace}"

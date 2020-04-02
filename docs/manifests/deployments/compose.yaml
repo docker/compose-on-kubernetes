@@ -1,0 +1,77 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    com.docker.default-service-type: ""
+    com.docker.deploy-namespace: docker
+    com.docker.fry: compose
+    com.docker.image-tag: latest
+  name: compose
+  namespace: "${namespace}"
+spec:
+  progressDeadlineSeconds: 600
+  replicas: 1
+  revisionHistoryLimit: 10
+  selector:
+    matchLabels:
+      com.docker.default-service-type: ""
+      com.docker.deploy-namespace: "${namespace}"
+      com.docker.fry: compose
+      com.docker.image-tag: latest
+  strategy:
+    rollingUpdate:
+      maxSurge: 25%
+      maxUnavailable: 25%
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        com.docker.default-service-type: ""
+        com.docker.deploy-namespace: "${namespace}"
+        com.docker.fry: compose
+        com.docker.image-tag: latest
+    spec:
+      affinity:
+        nodeAffinity:
+          requiredDuringSchedulingIgnoredDuringExecution:
+            nodeSelectorTerms:
+            - matchExpressions:
+              - key: beta.kubernetes.io/os
+                operator: In
+                values:
+                - linux
+              - key: beta.kubernetes.io/arch
+                operator: In
+                values:
+                - amd64
+      containers:
+      - args:
+        - --kubeconfig
+        - ""
+        - --reconciliation-interval
+        - 12h0m0s
+        - --healthz-check-port
+        - "8080"
+        image: docker/kube-compose-controller:latest
+        imagePullPolicy: Always
+        livenessProbe:
+          failureThreshold: 8
+          httpGet:
+            path: /healthz
+            port: 8080
+            scheme: HTTP
+          initialDelaySeconds: 15
+          periodSeconds: 10
+          successThreshold: 1
+          timeoutSeconds: 15
+        name: compose
+        resources: {}
+        terminationMessagePath: /dev/termination-log
+        terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      serviceAccount: compose
+      serviceAccountName: compose
+      terminationGracePeriodSeconds: 30
