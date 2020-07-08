@@ -1,22 +1,10 @@
 ## Deploy etcd
 
-### Install Helm server side component
-
-`etcd` is deployed using Helm so we must first install the Helm server:
-
-- Create the tiller service account: `kubectl -n kube-system create serviceaccount tiller`.
-- Give it admin access to your cluster (note: you might want to reduce the scope of this): `kubectl -n kube-system create clusterrolebinding tiller --clusterrole cluster-admin --serviceaccount kube-system:tiller`.
-- Run `helm init --service-account tiller` to initialize the helm component.
-- Run `kubectl get pods --namespace kube-system` and check that the tiller-deploy container was created and is in running state
-```
-NAME                            READY   STATUS    RESTARTS   AGE
-tiller-deploy-5d6cc99fc-qdv4q   1/1     Running   0          8s
-```
-
 ### Deploy etcd operator
 
 - Make sure the `compose` namespace exists on your cluster.
-- Run `helm install --name etcd-operator stable/etcd-operator --namespace compose` to install the etcd-operator chart.
+- Run `helm repo add stable https://kubernetes-charts.storage.googleapis.com/` to add the repository where the etcd-operator is stored.
+- Run `helm install etcd-operator stable/etcd-operator --namespace compose` to install the etcd-operator chart.
 - Run `kubectl get pods --namespace compose` and check that etcd-operator containers were created and are in running state.
 ```
 NAME                                                              READY   STATUS    RESTARTS   AGE
