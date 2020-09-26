@@ -11,26 +11,27 @@ import (
 	"testing"
 	"time"
 
+	kubernetes "github.com/docker/compose-on-kubernetes/api"
 	"github.com/docker/compose-on-kubernetes/internal/e2e/compose"
-	homedir "github.com/mitchellh/go-homedir"
+
 	// Import ginkgo to simplify test code
 	. "github.com/onsi/ginkgo"
 	ginkgocfg "github.com/onsi/ginkgo/config"
 	"github.com/onsi/ginkgo/reporters"
+
 	// Import gomega to simplify test code
 	. "github.com/onsi/gomega"
 	apiv1 "k8s.io/api/core/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
-	"k8s.io/client-go/kubernetes/typed/core/v1"
+	v1 "k8s.io/client-go/kubernetes/typed/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 var config *rest.Config
 
 var (
-	kubeconfig           = envString{defaultValue: "~/.kube/config", envVarName: "KUBECONFIG"}
+	kubeconfig           = flag.String("kubeconfig", "", "Path to a kube config.")
 	outputDir            = flag.String("outputDir", os.Getenv("PWD"), "Test result output directory")
 	fryNamespace         = flag.String("namespace", "e2e", "Namespace to use for the test")
 	tag                  = flag.String("tag", "latest", "Image tag to use for the test")
@@ -40,7 +41,6 @@ var (
 )
 
 func TestE2E(t *testing.T) {
-	flag.Var(&kubeconfig, "kubeconfig", "Path to a kube config. Only required if out-of-cluster. (default is ~/.kube/config, and can be overridden with ${KUBECONFIG})")
 	flag.Parse()
 	junitReporter := reporters.NewJUnitReporter(fmt.Sprintf(path.Join(*outputDir, "junit_%d.xml"), ginkgocfg.GinkgoConfig.ParallelNode))
 	RegisterFailHandler(Fail)
@@ -73,9 +73,8 @@ var _ = SynchronizedBeforeSuite(func() []byte {
 })
 
 func setupConfig() {
-	configFile, err := homedir.Expand(kubeconfig.String())
-	Expect(err).NotTo(HaveOccurred())
-	config, err = clientcmd.BuildConfigFromFlags("", configFile)
+	var err error
+	config, err = kubernetes.NewKubernetesConfig(*kubeconfig).ClientConfig()
 	Expect(err).NotTo(HaveOccurred())
 }
 
@@ -113,26 +112,3 @@ var _ = SynchronizedAfterSuite(func() {},
 			tillerCleanup()
 		}
 	})
-
-type envString struct {
-	isSet         bool
-	defaultValue  string
-	explicitValue string
-	envVarName    string
-}
-
-func (v *envString) String() string {
-	if v.isSet {
-		return v.explicitValue
-	}
-	if envValue, ok := os.LookupEnv(v.envVarName); ok {
-		return envValue
-	}
-	return v.defaultValue
-}
-
-func (v *envString) Set(value string) error {
-	v.isSet = true
-	v.explicitValue = value
-	return nil
-}

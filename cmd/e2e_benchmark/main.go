@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/containerd/console"
+	kubernetes "github.com/docker/compose-on-kubernetes/api"
 	clientset "github.com/docker/compose-on-kubernetes/api/client/clientset/typed/compose/v1beta2"
 	"github.com/docker/compose-on-kubernetes/api/constants"
 	"github.com/docker/compose-on-kubernetes/install"
@@ -25,7 +26,6 @@ import (
 	"k8s.io/apimachinery/pkg/runtime"
 	k8sclientset "k8s.io/client-go/kubernetes"
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 func (s *workerState) getPhaseTimings(start time.Time) map[string]time.Duration {
@@ -246,14 +246,7 @@ func configureOutput(format string) (io.Writer, string, error) {
 }
 
 func configureRest(kubeconfig string) (*rest.Config, error) {
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	loadingRules.ExplicitPath = kubeconfig
-	cmdConfig, err := loadingRules.Load()
-	if err != nil {
-		return nil, err
-	}
-	clientCfg := clientcmd.NewDefaultClientConfig(*cmdConfig, &clientcmd.ConfigOverrides{})
-	return clientCfg.ClientConfig()
+	return kubernetes.NewKubernetesConfig(kubeconfig).ClientConfig()
 }
 
 func collectLogsToStderr(cfg *rest.Config, ns string) {

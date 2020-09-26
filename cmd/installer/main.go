@@ -8,15 +8,13 @@ import (
 	"io/ioutil"
 	"os"
 
+	kubernetes "github.com/docker/compose-on-kubernetes/api"
 	"github.com/docker/compose-on-kubernetes/api/constants"
 	"github.com/docker/compose-on-kubernetes/install"
-	customflags "github.com/docker/compose-on-kubernetes/internal/flags"
-	homedir "github.com/mitchellh/go-homedir"
 	log "github.com/sirupsen/logrus"
 	corev1types "k8s.io/api/core/v1"
 	_ "k8s.io/client-go/plugin/pkg/client/auth/gcp" // For Google Kubernetes Engine authentication
 	"k8s.io/client-go/rest"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 func main() {
@@ -71,11 +69,7 @@ func parseOptions() (installerConfig, error) {
 	if err != nil {
 		return installerConfig{}, err
 	}
-	configFile, err := homedir.Expand(flags.kubeconfig)
-	if err != nil {
-		return installerConfig{}, err
-	}
-	config, err := clientcmd.BuildConfigFromFlags("", configFile)
+	config, err := kubernetes.NewKubernetesConfig(flags.kubeconfig).ClientConfig()
 	if err != nil {
 		return installerConfig{}, err
 	}
@@ -134,9 +128,8 @@ func parseFlags(customFlags *additionalFlags, options *install.SafeOptions) {
 	flag.BoolVar(&customFlags.uninstall, "uninstall", false, "Uninstall")
 	flag.StringVar(&customFlags.logLevel, "log-level", "info", `Set the log level ("debug"|"info"|"warn"|"error"|"fatal")`)
 	flag.IntVar(&customFlags.apiServerReplicas, "apiserver-replicas", 1, "Number of replicas for the API Server")
-	kubeconfigFlag := customflags.EnvString("kubeconfig", "~/.kube/config", "KUBECONFIG", "Path to a kubeconfig file (set to \"\" to use incluster config)")
+	flag.StringVar(&customFlags.kubeconfig, "kubeconfig", "", "Path to a kubeconfig file")
 	flag.Parse()
-	customFlags.kubeconfig = kubeconfigFlag.String()
 }
 
 type certBundleSource struct {

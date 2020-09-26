@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 
+	kubernetes "github.com/docker/compose-on-kubernetes/api"
 	"github.com/docker/compose-on-kubernetes/api/client/clientset"
 	"github.com/docker/compose-on-kubernetes/api/labels"
 	"github.com/docker/compose-on-kubernetes/internal/controller"
@@ -13,7 +14,6 @@ import (
 	"github.com/spf13/cobra"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 	k8sclientset "k8s.io/client-go/kubernetes"
-	"k8s.io/client-go/tools/clientcmd"
 )
 
 type options struct {
@@ -43,13 +43,7 @@ func run(stacksToProceed []string, opts *options) error {
 	if err := os.MkdirAll(opts.outdir, 0755); err != nil {
 		return err
 	}
-	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
-	loadingRules.ExplicitPath = opts.kubeconfig
-	cmdConfig, err := loadingRules.Load()
-	if err != nil {
-		return err
-	}
-	clientCfg := clientcmd.NewDefaultClientConfig(*cmdConfig, &clientcmd.ConfigOverrides{})
+	clientCfg := kubernetes.NewKubernetesConfig(opts.kubeconfig)
 	restCfg, err := clientCfg.ClientConfig()
 	if err != nil {
 		return err
