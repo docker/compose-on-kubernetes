@@ -1,26 +1,15 @@
 package apis
 
 import (
-	"os"
-	"path/filepath"
-
-	"github.com/docker/docker/pkg/homedir"
 	"k8s.io/client-go/tools/clientcmd"
 )
 
-// NewKubernetesConfig resolves the path to the desired Kubernetes configuration file based on
-// the KUBECONFIG environment variable and command line flags.
+// NewKubernetesConfig creates a ClientConfig from the specified Kubernetes configuration file,
+// or if empty, the KUBECONFIG environment variable per Kubernetes default CLI processing.
 func NewKubernetesConfig(configPath string) clientcmd.ClientConfig {
-	kubeConfig := configPath
-	if kubeConfig == "" {
-		if config := os.Getenv("KUBECONFIG"); config != "" {
-			kubeConfig = config
-		} else {
-			kubeConfig = filepath.Join(homedir.Get(), ".kube/config")
-		}
-	}
-
+	loadingRules := clientcmd.NewDefaultClientConfigLoadingRules()
+	// Ignored if an empty string.
+	loadingRules.ExplicitPath = configPath
 	return clientcmd.NewNonInteractiveDeferredLoadingClientConfig(
-		&clientcmd.ClientConfigLoadingRules{ExplicitPath: kubeConfig},
-		&clientcmd.ConfigOverrides{})
+		loadingRules, &clientcmd.ConfigOverrides{})
 }

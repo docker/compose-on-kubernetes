@@ -18,14 +18,6 @@
   version = "v1.4.2"
 
 [[projects]]
-  digest = "1:2be791e7b333ff7c06f8fb3dc18a7d70580e9399dbdffd352621d067ff260b6e"
-  name = "github.com/Microsoft/go-winio"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "97e4973ce50b2ff5f09635a57e2b88a037aae829"
-  version = "v0.4.11"
-
-[[projects]]
   digest = "1:76939b72b6b2012e9aca613f33d947099178c9f0d3be5522485701031ebf3e49"
   name = "github.com/NYTimes/gziphandler"
   packages = ["."]
@@ -74,15 +66,7 @@
   revision = "c12b1e7919c14469339a5d38f2f8ed9b64a9de23"
 
 [[projects]]
-  branch = "master"
-  digest = "1:e48c63e818c67fbf3d7afe20bba33134ab1a5bf384847385384fd027652a5a96"
-  name = "github.com/containerd/continuity"
-  packages = ["pathdriver"]
-  pruneopts = "NUT"
-  revision = "004b46473808b3e7a4a3049c20e4376c91eb966d"
-
-[[projects]]
-  digest = "1:e87602d4a71d421d0b49dfd4d8078d012f01ef8cf1bd28c842b9a321e8ac9100"
+  digest = "1:f739db37f4db5a484bce224049f371d2fcc6e822785545d8bdcbdf8d2fc60fac"
   name = "github.com/coreos/etcd"
   packages = [
     "auth/authpb",
@@ -157,7 +141,7 @@
 
 [[projects]]
   branch = "19.03"
-  digest = "1:3f2c381c5401736d9dbc1f9bc73dd83953ecc150689eddddec15bc6b2284b1e3"
+  digest = "1:6ab02b152686a83e2fef0294ea6e3ce055be406b69e2939ff2869f1a59a3a40f"
   name = "github.com/docker/docker"
   packages = [
     "api/types",
@@ -172,10 +156,6 @@
     "api/types/swarm/runtime",
     "api/types/versions",
     "errdefs",
-    "pkg/homedir",
-    "pkg/idtools",
-    "pkg/mount",
-    "pkg/system",
   ]
   pruneopts = "NUT"
   revision = "dbe4a30928d418e0570891a09703bcbc0e4997a1"
@@ -526,14 +506,6 @@
   pruneopts = "NUT"
   revision = "d60099175f88c47cd379c4738d158884749ed235"
   version = "v1.0.1"
-
-[[projects]]
-  digest = "1:918dbd46ad099418ce9760291bb156ebf23d441aad4cb682dd9bf09e2d3c0c7b"
-  name = "github.com/opencontainers/runc"
-  packages = ["libcontainer/user"]
-  pruneopts = "NUT"
-  revision = "baf6536d6259209c3edfa2b22237af82942d3dfa"
-  version = "v0.1.1"
 
 [[projects]]
   digest = "1:93b1d84c5fa6d1ea52f4114c37714cddd84d5b78f151b62bb101128dd51399bf"
@@ -1440,7 +1412,6 @@
     "github.com/docker/cli/cli/compose/types",
     "github.com/docker/cli/opts",
     "github.com/docker/docker/api/types/swarm",
-    "github.com/docker/docker/pkg/homedir",
     "github.com/go-openapi/spec",
     "github.com/golang/glog",
     "github.com/mitchellh/go-homedir",
