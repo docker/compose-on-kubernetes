@@ -16,14 +16,43 @@ import (
 // RegisterV1alpha3Conversions adds conversion functions to the given scheme.
 // Public to allow building arbitrary schemes.
 func RegisterV1alpha3Conversions(scheme *runtime.Scheme) error {
-	return scheme.AddConversionFuncs(
-		ownerToInternalV1alpha3,
-		ownerFromInternalV1alpha3,
-		stackToInternalV1alpha3,
-		stackFromInternalV1alpha3,
-		stackListToInternalV1alpha3,
-		stackListFromInternalV1alpha3,
-	)
+	if err := scheme.AddConversionFunc((*v1alpha3.Owner)(nil), (*internalversion.Owner)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return ownerToInternalV1alpha3(a.(*v1alpha3.Owner), b.(*internalversion.Owner), scope)
+	}); err != nil {
+		return err
+	}
+
+	if err := scheme.AddConversionFunc((*internalversion.Owner)(nil), (*v1alpha3.Owner)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return ownerFromInternalV1alpha3(a.(*internalversion.Owner), b.(*v1alpha3.Owner), scope)
+	}); err != nil {
+		return err
+	}
+
+	if err := scheme.AddConversionFunc((*v1alpha3.Stack)(nil), (*internalversion.Stack)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return stackToInternalV1alpha3(a.(*v1alpha3.Stack), b.(*internalversion.Stack), scope)
+	}); err != nil {
+		return err
+	}
+
+	if err := scheme.AddConversionFunc((*internalversion.Stack)(nil), (*v1alpha3.Stack)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return stackFromInternalV1alpha3(a.(*internalversion.Stack), b.(*v1alpha3.Stack), scope)
+	}); err != nil {
+		return err
+	}
+
+	if err := scheme.AddConversionFunc((*v1alpha3.StackList)(nil), (*internalversion.StackList)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return stackListToInternalV1alpha3(a.(*v1alpha3.StackList), b.(*internalversion.StackList), scope)
+	}); err != nil {
+		return err
+	}
+
+	if err := scheme.AddConversionFunc((*internalversion.StackList)(nil), (*v1alpha3.StackList)(nil), func(a, b interface{}, scope conversion.Scope) error {
+		return stackListFromInternalV1alpha3(a.(*internalversion.StackList), b.(*v1alpha3.StackList), scope)
+	}); err != nil {
+		return err
+	}
+
+	return nil
 }
 
 func ownerToInternalV1alpha3(in *v1alpha3.Owner, out *internalversion.Owner, _ conversion.Scope) error {
