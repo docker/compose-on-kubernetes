@@ -4,11 +4,11 @@ blacklist:
 
 whitelist:
   - Apache-2.0
-  - FreeBSD
+  - BSD-2-Clause
+  - BSD-3-Clause
   - LGPL-3.0
   - MIT
   - MPL-2.0
-  - NewBSD
 
 exceptions:
   - bitbucket.org/ww/goautoneg # Unknown
