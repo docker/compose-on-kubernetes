@@ -6,15 +6,12 @@ whitelist:
   - Apache-2.0
   - BSD-2-Clause
   - BSD-3-Clause
+  - ISC
   - LGPL-3.0
   - MIT
   - MPL-2.0
 
 exceptions:
   - bitbucket.org/ww/goautoneg # Unknown
-  - github.com/davecgh/go-spew/spew # ISC
   - github.com/munnerz/goautoneg # Unknown
   - github.com/opencontainers/go-digest # Apache-2.0
-  - github.com/xeipuuv/gojsonpointer # Apache-2.0
-  - github.com/xeipuuv/gojsonreference # Apache-2.0
-  - github.com/xeipuuv/gojsonschema # Apache-2.0
