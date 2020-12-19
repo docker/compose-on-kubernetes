@@ -14,4 +14,4 @@ whitelist:
 exceptions:
   - bitbucket.org/ww/goautoneg # BSD-3-Clause, license is in the source, misdetected as Apache-2.0
   - github.com/munnerz/goautoneg # BSD-3-Clause, license is in the source
-  - github.com/opencontainers/go-digest # Apache-2.0
+  - github.com/opencontainers/go-digest # Apache-2.0, misdetected as CC-BY-SA-4.0
