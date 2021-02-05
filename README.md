@@ -1,3 +1,5 @@
+> :warning: **This project is no longer maintained** :warning:
+
 # Compose on Kubernetes
 
 [![CircleCI](https://circleci.com/gh/docker/compose-on-kubernetes/tree/master.svg?style=svg)](https://circleci.com/gh/docker/compose-on-kubernetes/tree/master)
