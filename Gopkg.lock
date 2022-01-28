@@ -262,14 +262,6 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:e2b86e41f3d669fc36b50d31d32d22c8ac656c75aa5ea89717ce7177e134ff2a"
-  name = "github.com/golang/glog"
-  packages = ["."]
-  pruneopts = "NUT"
-  revision = "23def4e6c14b4da8ac2ed8007337bc5eb5007998"
-
-[[projects]]
-  branch = "master"
   digest = "1:b7cb6054d3dff43b38ad2e92492f220f57ae6087ee797dca298139776749ace8"
   name = "github.com/golang/groupcache"
   packages = ["lru"]
@@ -1442,7 +1434,6 @@
     "github.com/docker/docker/api/types/swarm",
     "github.com/docker/docker/pkg/homedir",
     "github.com/go-openapi/spec",
-    "github.com/golang/glog",
     "github.com/mitchellh/go-homedir",
     "github.com/morikuni/aec",
     "github.com/onsi/ginkgo",
