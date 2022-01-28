@@ -75,7 +75,7 @@ check-licenses: ## Check the licenses for our dependencies
 	$(GOPATH)/bin/wwhrd check
 
 install-ginkgo:
-	go get -u github.com/onsi/ginkgo/ginkgo
+	GO111MODULE=on go install github.com/onsi/ginkgo/ginkgo@v1.16.5
 	go get -u github.com/onsi/gomega/...
 
 e2e: ## Run the e2e tests

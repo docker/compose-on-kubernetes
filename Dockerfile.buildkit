@@ -32,7 +32,7 @@ ARG KUBERNETES_VERSION
 ENV GITCOMMIT=$GITCOMMIT VERSION=$VERSION BUILDTIME=$BUILDTIME IMAGE_REPO_PREFIX=$IMAGE_REPO_PREFIX KUBERNETES_VERSION=$KUBERNETES_VERSION
 ENV CGO_ENABLED=0
 RUN --mount=target=/root/.cache,type=cache make bin/compose-controller bin/compose-controller.test e2e-binary bin/installer bin/api-server bin/api-server.test bin/e2e_benchmark
-RUN go get github.com/onsi/ginkgo/ginkgo
+RUN GO111MODULE=on go install github.com/onsi/ginkgo/ginkgo@v1.16.5
 RUN curl -fLO https://storage.googleapis.com/kubernetes-release/release/v${KUBERNETES_VERSION}/bin/linux/amd64/kubectl && \
   chmod +x ./kubectl && \
   mv ./kubectl /bin/kubectl
