@@ -17,14 +17,14 @@ aliases:
     - image: dockereng/kube-compose-ci-golang
       auth: *docker-login
   public-golang: &public-golang
-    - image: circleci/golang:1.13.0
+    - image: circleci/golang:1.16
       user: root
 
   e2e-kind-steps: &e2e-kind-steps
     - attach_workspace:
         at: /root
     - setup_remote_docker:
-        version: 18.09.3
+        version: 20.10.11
     - run:
         name: "Prepare Kind and run e2e tests"
         command: |
@@ -49,7 +49,7 @@ aliases:
     - attach_workspace:
         at: /root
     - setup_remote_docker:
-        version: 18.09.3
+        version: 20.10.11
     - run:
         name: "Prepare Kind and run e2e benchmark"
         command: |
@@ -82,7 +82,7 @@ jobs:
     steps:
       - checkout
       - setup_remote_docker:
-          version: 18.09.3
+          version: 20.10.11
       - run:
           name: Login to docker hub
           command: echo "$DOCKER_PASS" | docker login -u "$DOCKER_USER" --password-stdin
@@ -112,7 +112,7 @@ jobs:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 18.09.3
+          version: 20.10.11
       - run: make -f docker.Makefile validate
   validate-vendor:
     docker: *public-golang
@@ -146,7 +146,7 @@ jobs:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 18.09.3
+          version: 20.10.11
       - run:
           name: Build images
           command: |
@@ -234,7 +234,7 @@ jobs:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 18.09.3
+          version: 20.10.11
       - run:
           name: Run unit tests
           command: make -f docker.Makefile test-unit
@@ -261,7 +261,7 @@ jobs:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 18.09.3
+          version: 20.10.11
       - deploy:
           name: push-to-hub
           command: |
@@ -292,7 +292,7 @@ jobs:
       - attach_workspace:
           at: /root
       - setup_remote_docker:
-          version: 18.09.3
+          version: 20.10.11
       - deploy:
           name: push-to-hub
           command: |
