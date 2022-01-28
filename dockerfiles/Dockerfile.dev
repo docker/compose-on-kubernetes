@@ -1,6 +1,7 @@
 ARG     BUILD_BASE
 
 FROM    ${BUILD_BASE} as dev
+ENV     GO111MODULE=off
 
 RUN     apk add --no-cache \
         bash \

@@ -12,6 +12,7 @@ WORKDIR /home/compose
 
 
 FROM ${BUILD_BASE} AS build
+ENV GO111MODULE=off
 
 RUN apk add --no-cache \
   coreutils \
